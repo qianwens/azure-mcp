@@ -163,38 +163,6 @@ Parameters File (main.parameters.json):
 
     }
 
-
-    private static ServiceConfig ParseService(JsonNode? serviceNode)
-    {
-        if (serviceNode == null)
-            return new ServiceConfig();
-
-        return new ServiceConfig
-        {
-            Name = serviceNode["name"]?.GetValue<string>() ?? "",
-            Path = serviceNode["path"]?.GetValue<string>() ?? "",
-            Language = serviceNode["language"]?.GetValue<string>() ?? "",
-            Port = serviceNode["port"]?.GetValue<string>() ?? "80",
-            AzureComputeHost = serviceNode["azureComputeHost"]?.GetValue<string>() ?? "",
-            Dependencies = serviceNode["dependencies"]?.AsArray()?.Select(ParseDependency).ToArray() ?? [],
-            Settings = serviceNode["settings"]?.AsArray()?.Select(s => s?.GetValue<string>() ?? "").ToArray() ?? []
-        };
-    }
-
-    private static DependencyConfig ParseDependency(JsonNode? depNode)
-    {
-        if (depNode == null)
-            return new DependencyConfig();
-
-        return new DependencyConfig
-        {
-            Name = depNode["name"]?.GetValue<string>() ?? "",
-            ServiceType = depNode["serviceType"]?.GetValue<string>() ?? "",
-            ConnectionType = depNode["connectionType"]?.GetValue<string>() ?? "",
-            EnvironmentVariables = depNode["environmentVariables"]?.AsArray()?.Select(e => e?.GetValue<string>() ?? "").ToArray() ?? []
-        };
-    }
-
     private static void PopulateContainerAppIaCPrompts(List<string> responses)
     {
         responses.Add("""
@@ -292,13 +260,13 @@ azure.yaml details: Create azure.yaml file at root folder {parameters.WorkspaceF
     {
 
         var workspaceFolder = args?.GetValueOrDefault("workspaceFolder").GetStringSafe();
-        var ProjectName = args?.GetValueOrDefault("projectName").GetStringSafe();
+        var projectName = args?.GetValueOrDefault("projectName").GetStringSafe();
         
         if (string.IsNullOrEmpty(workspaceFolder))
         {
             return ("Error: workspaceFolder is required in input", null!);
         }
-        if (string.IsNullOrEmpty(ProjectName))
+        if (string.IsNullOrEmpty(projectName))
         {
             return ("Error: projectName is required in input", null!);
         }
@@ -319,6 +287,7 @@ azure.yaml details: Create azure.yaml file at root folder {parameters.WorkspaceF
         var parameters = new RecommendConfigsParameters
         {
             WorkspaceFolder = workspaceFolder,
+            ProjectName = projectName,
             Services = servicesList.ToArray(),
             CreateIaC = true
         };
