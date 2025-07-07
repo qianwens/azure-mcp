@@ -22,10 +22,23 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
 
     public override string Title => "Generate Architecture Diagram";
 
+    protected override void RegisterOptions(Command command)
+    {
+        base.RegisterOptions(command);
+        command.AddOption(_commandOption);
+    }
+
+    protected override AppTopologyOptions BindOptions(ParseResult parseResult)
+    {
+        var options = base.BindOptions(parseResult);
+        options.Command = parseResult.GetValueForOption(_commandOption);
+        return options;
+    }
+
     [McpServerTool(Destructive = false, ReadOnly = true, Title = CommandTitle)]
     public override Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        
+        var options = BindOptions(parseResult);
         return Task.FromResult(context.Response);
     }
 }
