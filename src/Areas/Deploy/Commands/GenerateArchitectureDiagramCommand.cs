@@ -20,9 +20,9 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
     private readonly Option<string> _rawMcpToolInputOption = DeployOptionDefinitions.RawMcpToolInput.RawMcpToolInputOption;
 
     public override string Description =>
-        "Returns best practices for secure, production-grade Azure SDK usage. " +
-        "Call this command and follow its guidance before generating or suggesting any Azure SDK code. " +
-        "This command returns the content of the markdown file as a string array.";
+        "Generates an architecture diagram for the application based on the provided app topology."
+        + "Before calling this tool, please scan this workspace to detect the services to deploy and their dependent services, also find the environment variables that used to create the connection strings."
+        + "If it's a .NET Aspire application, check aspireManifest.json file if there is. Try your best to fulfill the input schema with your analyze result.";
 
     public override string Title => "Generate Architecture Diagram";
 

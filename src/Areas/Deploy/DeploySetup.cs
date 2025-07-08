@@ -3,7 +3,7 @@ using AzureMcp.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Areas.Extension;
+namespace AzureMcp.Areas.Deploy;
 
 internal sealed class DeploySetup : IAreaSetup
 {
