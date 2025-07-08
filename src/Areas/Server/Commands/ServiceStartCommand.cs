@@ -168,6 +168,11 @@ public sealed class ServiceStartCommand : BaseCommand
         else
         {
             services.AddSingleton<McpServerTool, DeployPlanGenerateTool>();
+            services.AddSingleton<McpServerTool, DeployBicepGenerateFromPlanTool>();
+            services.AddSingleton<McpServerTool, DeployAzdUpTool>();
+            services.AddSingleton<McpServerTool, DeployPrecheckTool>();
+            services.AddSingleton<McpServerTool, DeployPipelineGenerateTool>();
+            services.AddSingleton<McpServerTool, DeploySummaryTool>();
             mcpServerOptionsBuilder.Configure<ToolOperations>((mcpServerOptions, toolOperations) =>
             {
                 toolOperations.ReadOnly = options.ReadOnly ?? false;
