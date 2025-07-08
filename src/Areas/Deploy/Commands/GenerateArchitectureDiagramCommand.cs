@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Reflection;
+using System.Text.Json;
 using AzureMcp.Commands;
 using AzureMcp.Helpers;
 using Microsoft.Extensions.Logging;
@@ -60,8 +61,16 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
             throw new ArgumentException($"Invalid JSON format: {ex.Message}", nameof(rawMcpToolInput), ex);
         }
 
-        // TODO: Use the appTopology object to generate architecture diagram
         _logger.LogInformation("Successfully parsed app topology with {ServiceCount} services", appTopology.Services.Length);
+
+        var encodedDiagram = EncodeMermaid.GetEncodedMermaidChart(GenerateMermaidChart.GenerateChart(appTopology.WorkspaceFolder ?? "", appTopology));
+        
+        var mermaidUrl = $"https://mermaid.live/view#pako:{encodedDiagram}";
+        
+        context.Response.Message = $"Architecture diagram generated successfully. View it at: {mermaidUrl}";
+        
+        // Also include the raw diagram in the response content
+        //var diagramContent = GenerateMermaidChart.GenerateChart(workspaceFolder, appTopology);
 
         return Task.FromResult(context.Response);
     }

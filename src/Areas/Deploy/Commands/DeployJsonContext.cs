@@ -15,6 +15,8 @@ namespace AzureMcp.Areas.Deploy.Commands;
 [JsonSerializable(typeof(ServiceConfig))]
 [JsonSerializable(typeof(DockerSettings))]
 [JsonSerializable(typeof(DependencyConfig))]
+[JsonSerializable(typeof(MermaidData))]
+[JsonSerializable(typeof(MermaidConfig))]
 internal sealed partial class DeployJsonContext : JsonSerializerContext
 {
 }
