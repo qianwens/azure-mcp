@@ -1,0 +1,179 @@
+using Azure.Core;
+using Azure.ResourceManager;
+using AzureMcp.Services.Azure.Authentication;
+using System.Net.Http.Headers;
+using System.Text.Json;
+
+namespace AzureMcp.Areas.Server.Commands.Tools.DeployTools.Util;
+
+// For simplicity, we currently apply a single rule for all Azure resource providers:
+//   - Any resource provider not listed in the enum is treated as having no quota limitations.
+// Ideally, we'd differentiate between the following cases:
+//   1. The resource provider has no quota limitations.
+//   2. The resource provider has quota limitations but does not expose a quota API.
+//   3. The resource provider exposes a quota API, but it's not yet supported by the checker.
+
+public enum ResourceProvider
+{
+    CognitiveServices,
+    Compute,
+    Storage,
+    ContainerApp,
+    Network,
+    MachineLearning,
+    PostgreSQL,
+    HDInsight,
+    Search,
+    ContainerInstance
+}
+
+public record QuotaInfo(
+    string Name,
+    double Limit,
+    double Used,
+    string? Unit = null
+);
+
+public interface IQuotaChecker
+{
+    Task<List<QuotaInfo>> GetQuotaForLocationAsync(string location);
+}
+
+// Abstract base class for checking Azure quotas
+public abstract class AzureQuotaChecker : IQuotaChecker
+{
+    protected readonly string SubscriptionId;
+    protected readonly ArmClient ResourceClient;
+    private static readonly HttpClient HttpClient = new();
+
+    protected AzureQuotaChecker(string subscriptionId)
+    {
+        SubscriptionId = subscriptionId;
+        var credential = new CustomChainedCredential();
+        ResourceClient = new ArmClient(credential, subscriptionId);
+    }
+
+    public abstract Task<List<QuotaInfo>> GetQuotaForLocationAsync(string location);
+
+    protected async Task<JsonDocument?> GetQuotaByUrlAsync(string requestUrl)
+    {
+        try
+        {
+            var credential = new CustomChainedCredential();
+            var token = await credential.GetTokenAsync(new TokenRequestContext(["https://management.azure.com/.default"]), CancellationToken.None);
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await HttpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException($"HTTP error! status: {response.StatusCode}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonDocument.Parse(content);
+        }
+        catch (Exception error)
+        {
+            Console.WriteLine($"Error fetching quotas directly: {error.Message}");
+            return null;
+        }
+    }
+}
+
+// Factory function to create quota checkers
+public static class QuotaCheckerFactory
+{
+    private static readonly Dictionary<string, ResourceProvider> ProviderMapping = new()
+    {
+        { "Microsoft.CognitiveServices", ResourceProvider.CognitiveServices },
+        { "Microsoft.Compute", ResourceProvider.Compute },
+        { "Microsoft.Storage", ResourceProvider.Storage },
+        { "Microsoft.App", ResourceProvider.ContainerApp },
+        { "Microsoft.Network", ResourceProvider.Network },
+        { "Microsoft.MachineLearningServices", ResourceProvider.MachineLearning },
+        { "Microsoft.DBforPostgreSQL", ResourceProvider.PostgreSQL },
+        { "Microsoft.HDInsight", ResourceProvider.HDInsight },
+        { "Microsoft.Search", ResourceProvider.Search },
+        { "Microsoft.ContainerInstance", ResourceProvider.ContainerInstance }
+    };
+
+    public static IQuotaChecker CreateQuotaChecker(string provider, string subscriptionId)
+    {
+        if (!ProviderMapping.TryGetValue(provider, out var resourceProvider))
+        {
+            throw new ArgumentException($"Unsupported resource provider: {provider}");
+        }
+
+        return resourceProvider switch
+        {
+            ResourceProvider.Compute => new ComputeQuotaChecker(subscriptionId),
+            ResourceProvider.CognitiveServices => new CognitiveServicesQuotaChecker(subscriptionId),
+            ResourceProvider.Storage => new StorageQuotaChecker(subscriptionId),
+            ResourceProvider.ContainerApp => new ContainerAppQuotaChecker(subscriptionId),
+            ResourceProvider.Network => new NetworkQuotaChecker(subscriptionId),
+            ResourceProvider.MachineLearning => new MachineLearningQuotaChecker(subscriptionId),
+            ResourceProvider.PostgreSQL => new PostgreSQLQuotaChecker(subscriptionId),
+            ResourceProvider.HDInsight => new HDInsightQuotaChecker(subscriptionId),
+            ResourceProvider.Search => new SearchQuotaChecker(subscriptionId),
+            ResourceProvider.ContainerInstance => new ContainerInstanceQuotaChecker(subscriptionId),
+            _ => throw new ArgumentException($"No implementation for provider: {provider}")
+        };
+    }
+}
+
+// Service to get Azure quota for a list of resource types
+public static class AzureQuotaService
+{
+    public static async Task<Dictionary<string, List<QuotaInfo>>> GetAzureQuotaAsync(
+        List<string> resourceTypes,
+        string subscriptionId,
+        string location)
+    {
+        var result = new Dictionary<string, List<QuotaInfo>>();
+        var processedProviders = new HashSet<string>();
+        var quotaTasks = new List<Task>();
+
+        foreach (var resourceType in resourceTypes)
+        {
+            var provider = resourceType.Split('/')[0];
+
+            // Skip if we've already processed this provider
+            if (processedProviders.Contains(provider))
+            {
+                continue;
+            }
+
+            quotaTasks.Add(Task.Run(async () =>
+            {
+                try
+                {
+                    var quotaChecker = QuotaCheckerFactory.CreateQuotaChecker(provider, subscriptionId);
+                    var quotaInfo = await quotaChecker.GetQuotaForLocationAsync(location);
+                    Console.WriteLine($"Quota info for {resourceType}: {quotaInfo.Count} items");
+
+                    lock (result)
+                    {
+                        result[resourceType] = quotaInfo;
+                        processedProviders.Add(provider);
+                    }
+                }
+                catch (Exception error)
+                {
+                    Console.WriteLine($"Error fetching quota for {resourceType}: {error.Message}");
+
+                    lock (result)
+                    {
+                        result[resourceType] = [];
+                    }
+                }
+            }));
+        }
+
+        await Task.WhenAll(quotaTasks);
+        return result;
+    }
+}

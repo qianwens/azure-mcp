@@ -9,13 +9,13 @@ using ModelContextProtocol.Protocol;
 namespace AzureMcp.Areas.Server.Commands.Tools;
 
 [McpServerToolType]
-public sealed class DeployRegionCheckTool(ILogger<DeployRegionCheckTool> logger) : McpServerTool
+public sealed class DeployQuotaCheckTool(ILogger<DeployQuotaCheckTool> logger) : McpServerTool
 {
-    private readonly ILogger<DeployRegionCheckTool> _logger = logger;
+    private readonly ILogger<DeployQuotaCheckTool> _logger = logger;
 
-    static readonly string ToolName = "deploy_region_check";
+    static readonly string ToolName = "azure_quota_check";
 
-    static readonly string ToolDescription = "Given a list of Azure resource types, this tool will return a list of regions where the resource types are available. Always get the user's subscription ID before calling this tool.";
+    static readonly string ToolDescription = "Given a subscription ID, region, and list of Azure resource types, this tool will check if there is sufficient quota available in the specified region for the resource types. Always verify the region is valid for the resource types before calling this tool.";
 
     /// <summary>
     /// Define the tool schema and metadata
@@ -59,18 +59,29 @@ public sealed class DeployRegionCheckTool(ILogger<DeployRegionCheckTool> logger)
             }
 
             var parameters = ParseRequestParameters(args);
-            var availableRegions = await AzureRegionService.GetAvailableRegionsForResourceTypesAsync(parameters.ResourceTypes, parameters.SubscriptionId, parameters.CognitiveServiceProperties);
-            var allRegions = availableRegions.Values
-                .Where(regions => regions.Count > 0)
-                .SelectMany(regions => regions)
-                .Distinct()
-                .ToList();
-            var toolResult = $"If you are deploying an app, you MUST choose a region which exists in the following available region list for all resource types (because regions not listed are not available). DO NOT only choose a common region by yourself! Call the tool `azure_quota_check` to check if the selected region REALLY has enough quota for all resources.\n\n";
 
-            var commonValidRegions = availableRegions.Values
-                .Aggregate((current, next) => current.Intersect(next).ToList());
-            string regionList = commonValidRegions.Count > 0 ? string.Join(", ", commonValidRegions) : "None";
-            toolResult += $"Regions available for all resource types: {regionList}";
+            var quotaByResourceTypes = await AzureQuotaService.GetAzureQuotaAsync(
+                parameters.ResourceTypes,
+                parameters.SubscriptionId,
+                parameters.Region);
+
+            var toolResult = $"The quota info for the specified resource types in subscription: {parameters.SubscriptionId} and location: {parameters.Region} are:\n\n" +
+                string.Join("\n", quotaByResourceTypes.Select(kvp =>
+                {
+                    var resourceType = kvp.Key;
+                    var quotas = kvp.Value;
+
+                    if (quotas.Count == 0)
+                    {
+                        return $"- {resourceType}: this resource type has no quota limitation";
+                    }
+
+                    return string.Join("\n", quotas.Select(quota =>
+                        $"- {resourceType}: {quota.Name}\n" +
+                        $"  - Current: {quota.Used}, Limit: {quota.Limit}{(string.IsNullOrEmpty(quota.Unit) ? "" : $" {quota.Unit}")}"));
+                }));
+
+            _logger.LogInformation("Quota check result: {ToolResult}", toolResult);
 
             return new CallToolResult
             {
@@ -84,7 +95,7 @@ public sealed class DeployRegionCheckTool(ILogger<DeployRegionCheckTool> logger)
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in DeployRegionCheckTool");
+            _logger.LogError(ex, "Error in DeployQuotaCheckTool");
 
             return new CallToolResult
             {
@@ -101,32 +112,20 @@ public sealed class DeployRegionCheckTool(ILogger<DeployRegionCheckTool> logger)
 
     private static JsonElement GetInputSchema()
     {
-        return JsonSerializer.SerializeToElement(AzureRegionCheckParametersSchema.Schema, DeployToolSerializationContext.Default.JsonObject);
+        return JsonSerializer.SerializeToElement(AzureQuotaCheckParametersSchema.Schema, DeployToolSerializationContext.Default.JsonObject);
     }
 
-
-    private static AzureRegionCheckParameters ParseRequestParameters(IReadOnlyDictionary<string, JsonElement> args)
+    private static AzureQuotaCheckParameters ParseRequestParameters(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var parameters = new AzureRegionCheckParameters
+        var parameters = new AzureQuotaCheckParameters
         {
             SubscriptionId = args.GetValueOrDefault("subscriptionId").GetStringSafe(),
+            Region = args.GetValueOrDefault("region").GetStringSafe(),
             ResourceTypes = args.GetValueOrDefault("resourceTypes").EnumerateArray()
                 .Select(e => e.GetStringSafe())
                 .Where(s => !string.IsNullOrEmpty(s))
                 .ToList()
         };
-
-        // Parse cognitive service properties if provided
-        if (args.TryGetValue("cognitiveServiceProperties", out var cognitiveProps) &&
-            cognitiveProps.ValueKind == JsonValueKind.Object)
-        {
-            parameters.CognitiveServiceProperties = new CognitiveServiceProperties
-            {
-                ModelName = cognitiveProps.GetProperty("modelName").GetStringSafe(),
-                ModelVersion = cognitiveProps.GetProperty("modelVersion").GetStringSafe(),
-                DeploymentSkuName = cognitiveProps.GetProperty("deploymentSkuName").GetStringSafe()
-            };
-        }
 
         return parameters;
     }

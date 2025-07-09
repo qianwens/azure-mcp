@@ -147,6 +147,9 @@ public sealed class ServiceStartCommand : BaseCommand
             services.AddSingleton<McpServerTool, DeployPrecheckTool>();
             services.AddSingleton<McpServerTool, DeployPipelineGenerateTool>();
             services.AddSingleton<McpServerTool, DeploySummaryTool>();
+            services.AddSingleton<McpServerTool, DeployRegionCheckTool>();
+            services.AddSingleton<McpServerTool, DeployQuotaCheckTool>();
+            services.AddSingleton<McpServerTool, GetAzdAppLogTool>();
         }
         // The "proxy" mode exposes a single tool per service/namespace and performs internal tool discovery and proxying.
         else if (serviceArray != null && serviceArray.Length == 1 && serviceArray[0] == "proxy")

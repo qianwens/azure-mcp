@@ -1,20 +1,16 @@
+using Azure;
 using Azure.Core;
 using Azure.Identity;
 using Azure.ResourceManager;
 using Azure.ResourceManager.CognitiveServices;
 using Azure.ResourceManager.CognitiveServices.Models;
-using Azure.ResourceManager.Resources;
+using Azure.ResourceManager.PostgreSql.FlexibleServers;
+using Azure.ResourceManager.PostgreSql.FlexibleServers.Models;
+using AzureMcp.Areas.Server.Commands.Tools.Models;
 using AzureMcp.Services.Azure.Authentication;
 using System.Net.Http.Headers;
-using System.Text.Json;
 
 namespace AzureMcp.Areas.Server.Commands.Tools.DeployTools.Util;
-
-public record CognitiveServiceProperties(
-    string? DeploymentSkuName = null,
-    string? ModelVersion = null,
-    string? ModelName = null
-);
 
 public interface IRegionChecker
 {
@@ -25,8 +21,6 @@ public abstract class AzureRegionChecker : IRegionChecker
 {
     protected readonly string SubscriptionId;
     protected readonly ArmClient ResourceClient;
-    private static readonly HttpClient HttpClient = new();
-
     protected AzureRegionChecker(string subscriptionId)
     {
         SubscriptionId = subscriptionId;
@@ -34,36 +28,6 @@ public abstract class AzureRegionChecker : IRegionChecker
         ResourceClient = new ArmClient(credential, subscriptionId);
         Console.WriteLine($"AzureRegionChecker initialized for subscription: {subscriptionId}");
     }
-
-    protected async Task<JsonDocument?> GetAzureManagementResultByUrlAsync(string requestApi)
-    {
-        try
-        {
-            var credential = new CustomChainedCredential();
-            var token = await credential.GetTokenAsync(new TokenRequestContext(["https://management.azure.com/.default"]), CancellationToken.None);
-            var requestUrl = $"https://management.azure.com{requestApi}";
-
-            using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            var response = await HttpClient.SendAsync(request);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException($"HTTP error! status: {response.StatusCode}");
-            }
-
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonDocument.Parse(content);
-        }
-        catch (Exception error)
-        {
-            Console.WriteLine($"Error fetching region status directly: {error.Message}");
-            return null;
-        }
-    }
-
     public abstract Task<List<string>> GetAvailableRegionsAsync(string resourceType);
 }
 
@@ -144,7 +108,7 @@ public class CognitiveServicesRegionChecker : AzureRegionChecker
 
                 bool hasMatchingModel = false;
 
-                foreach(CognitiveServicesModel modelElement in quotas)
+                foreach (CognitiveServicesModel modelElement in quotas)
                 {
                     var nameMatch = string.IsNullOrEmpty(_modelName) ||
                         (modelElement.Model?.Name == _modelName);
@@ -195,22 +159,19 @@ public class PostgreSqlRegionChecker(string subscriptionId) : AzureRegionChecker
             .ToList() ?? [];
 
         var availableRegions = new List<string>();
-        const string apiVersion = "2024-11-01-preview";
 
         foreach (var region in regions)
         {
             try
             {
-                var url = $"/subscriptions/{SubscriptionId}/providers/Microsoft.DBforPostgreSQL/locations/{region}/capabilities?api-version={apiVersion}";
-                using var rawResponse = await GetAzureManagementResultByUrlAsync(url);
-
-                Console.WriteLine($"Checking region {region} for PostgreSQL capabilities: {rawResponse?.RootElement}");
-
-                if (rawResponse?.RootElement.TryGetProperty("value", out var valueElement) == true &&
-                    valueElement.EnumerateArray().Any() &&
-                    (!valueElement[0].TryGetProperty("reason", out _)))
+                Pageable<PostgreSqlFlexibleServerCapabilityProperties> result = subscription.ExecuteLocationBasedCapabilities(region);
+                foreach (var capability in result)
                 {
-                    availableRegions.Add(region);
+                    if (capability.SupportedServerEditions?.Any() == true)
+                    {
+                        availableRegions.Add(region);
+                        break; // No need to check further capabilities for this region
+                    }
                 }
             }
             catch (Exception error)

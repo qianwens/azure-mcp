@@ -5,7 +5,7 @@ namespace AzureMcp.Areas.Server.Commands.Tools.Models;
 public sealed class AzureRegionCheckParameters
 {
     public string SubscriptionId { get; set; } = string.Empty;
-    public string[] ResourceTypes { get; set; } = [];
+    public List<string> ResourceTypes { get; set; } = new List<string>();
     public CognitiveServiceProperties? CognitiveServiceProperties { get; set; }
 }
 
