@@ -21,7 +21,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
     private readonly Option<string> _rawMcpToolInputOption = DeployOptionDefinitions.RawMcpToolInput.RawMcpToolInputOption;
 
     public override string Description =>
-        "Generates an architecture diagram for the application based on the provided app topology."
+        "Generates a service architecture diagram for the application based on the provided app topology."
         + "Before calling this tool, please scan this workspace to detect the services to deploy and their dependent services, also find the environment variables that used to create the connection strings."
         + "If it's a .NET Aspire application, check aspireManifest.json file if there is. Try your best to fulfill the input schema with your analyze result.";
 
@@ -63,11 +63,17 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
 
         _logger.LogInformation("Successfully parsed app topology with {ServiceCount} services", appTopology.Services.Length);
 
-        var encodedDiagram = EncodeMermaid.GetEncodedMermaidChart(GenerateMermaidChart.GenerateChart(appTopology.WorkspaceFolder ?? "", appTopology));
-        
+        var chart = GenerateMermaidChart.GenerateChart(appTopology.WorkspaceFolder ?? "", appTopology);
+        if (string.IsNullOrWhiteSpace(chart))
+        {
+            throw new InvalidOperationException("Failed to generate architecture diagram. The chart content is empty.");
+        }
+        var encodedDiagram = EncodeMermaid.GetEncodedMermaidChart(chart);
+
         var mermaidUrl = $"https://mermaid.live/view#pako:{encodedDiagram}";
-        
-        context.Response.Message = $"Architecture diagram generated successfully. View it at: {mermaidUrl}";
+
+        context.Response.Message = $"Architecture diagram generated successfully. Help the user generate a architecture markdown file with mermaid diagram: {chart}.";
+       // + "Or open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl}";
         
         // Also include the raw diagram in the response content
         //var diagramContent = GenerateMermaidChart.GenerateChart(workspaceFolder, appTopology);
