@@ -15,12 +15,12 @@ public class MachineLearningQuotaChecker(string subscriptionId) : AzureQuotaChec
             var usages = subscription.GetMachineLearningUsagesAsync(location);
             var result = new List<QuotaInfo>();
 
-            await foreach (MachineLearningUsage item in usages)
+            await foreach (var item in usages)
             {
                 result.Add(new QuotaInfo(
                     Name: item.Name?.Value ?? string.Empty,
-                    Limit: (double)(item.Limit ?? 0),
-                    Used: (double)(item.CurrentValue ?? 0),
+                    Limit: (int)(item.Limit ?? 0),
+                    Used: (int)(item.CurrentValue ?? 0),
                     Unit: item.Unit.ToString()
                 ));
             }

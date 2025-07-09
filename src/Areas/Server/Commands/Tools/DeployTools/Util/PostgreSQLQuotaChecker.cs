@@ -23,8 +23,8 @@ public class PostgreSQLQuotaChecker(string subscriptionId) : AzureQuotaChecker(s
             foreach (var item in valueElement.EnumerateArray())
             {
                 var name = string.Empty;
-                var limit = 0.0;
-                var used = 0.0;
+                var limit = 0;
+                var used = 0;
                 var unit = string.Empty;
 
                 if (item.TryGetProperty("name", out var nameElement) && nameElement.TryGetProperty("value", out var nameValue))
@@ -34,12 +34,12 @@ public class PostgreSQLQuotaChecker(string subscriptionId) : AzureQuotaChecker(s
 
                 if (item.TryGetProperty("limit", out var limitElement))
                 {
-                    limit = limitElement.GetDouble();
+                    limit = limitElement.GetInt32();
                 }
 
                 if (item.TryGetProperty("currentValue", out var usedElement))
                 {
-                    used = usedElement.GetDouble();
+                    used = usedElement.GetInt32();
                 }
 
                 if (item.TryGetProperty("unit", out var unitElement))

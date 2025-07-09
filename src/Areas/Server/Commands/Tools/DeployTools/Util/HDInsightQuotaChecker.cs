@@ -1,5 +1,8 @@
 using System.Text.Json;
 using Areas.Server.Commands.Tools.DeployTools.Util;
+using Azure.Core;
+using Azure.ResourceManager.HDInsight;
+using Azure.ResourceManager.HDInsight.Models;
 
 namespace AzureMcp.Areas.Server.Commands.Tools.DeployTools.Util;
 
@@ -9,45 +12,19 @@ public class HDInsightQuotaChecker(string subscriptionId) : AzureQuotaChecker(su
     {
         try
         {
-            var requestUrl = $"https://management.azure.com/subscriptions/{SubscriptionId}/providers/Microsoft.HDInsight/locations/{location}/usages?api-version=2018-06-01-preview";
-            using var rawResponse = await GetQuotaByUrlAsync(requestUrl);
-
-            if (rawResponse?.RootElement.TryGetProperty("value", out var valueElement) != true)
-            {
-                return [];
-            }
-
+            var subscription = ResourceClient.GetSubscriptionResource(new ResourceIdentifier($"/subscriptions/{SubscriptionId}"));
+            var usages = subscription.GetHDInsightUsagesAsync(location);
             var result = new List<QuotaInfo>();
-            foreach (var item in valueElement.EnumerateArray())
+
+            await foreach (HDInsightUsage item in usages)
             {
-                var name = string.Empty;
-                var limit = 0.0;
-                var used = 0.0;
-                var unit = string.Empty;
-
-                if (item.TryGetProperty("name", out var nameElement) && nameElement.TryGetProperty("value", out var nameValue))
-                {
-                    name = nameValue.GetStringSafe();
-                }
-
-                if (item.TryGetProperty("limit", out var limitElement))
-                {
-                    limit = limitElement.GetDouble();
-                }
-
-                if (item.TryGetProperty("currentValue", out var usedElement))
-                {
-                    used = usedElement.GetDouble();
-                }
-
-                if (item.TryGetProperty("unit", out var unitElement))
-                {
-                    unit = unitElement.GetStringSafe();
-                }
-
-                result.Add(new QuotaInfo(name, limit, used, unit));
+                result.Add(new QuotaInfo(
+                     Name: item.Name?.LocalizedValue ?? item.Name?.Value ?? string.Empty,
+                     Limit: (int)(item.Limit ?? 0),
+                     Used: (int)(item.CurrentValue ?? 0),
+                     Unit: item.Unit.ToString()
+                 ));
             }
-
             return result;
         }
         catch (Exception error)

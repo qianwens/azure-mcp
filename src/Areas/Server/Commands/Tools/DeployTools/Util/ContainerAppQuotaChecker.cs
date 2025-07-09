@@ -19,8 +19,8 @@ public class ContainerAppQuotaChecker(string subscriptionId) : AzureQuotaChecker
             {
                 result.Add(new QuotaInfo(
                     Name: item.Name?.Value ?? string.Empty,
-                    Limit: (double)(item.Limit ),
-                    Used: (double)(item.CurrentValue ),
+                    Limit: (int)(item.Limit),
+                    Used: (int)(item.CurrentValue),
                     Unit: item.Unit.ToString()
                 ));
             }

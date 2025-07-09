@@ -15,12 +15,12 @@ public class StorageQuotaChecker(string subscriptionId) : AzureQuotaChecker(subs
             var usages = subscription.GetUsagesByLocationAsync(location);
             var result = new List<QuotaInfo>();
 
-            await foreach (StorageUsage item in usages)
+            await foreach (var item in usages)
             {
                 result.Add(new QuotaInfo(
                     Name: item.Name?.Value ?? string.Empty,
-                    Limit: (double)(item.Limit ?? 0),
-                    Used: (double)(item.CurrentValue ?? 0),
+                    Limit: item.Limit ?? 0,
+                    Used: item.CurrentValue ?? 0,
                     Unit: item.Unit.ToString()
                 ));
             }

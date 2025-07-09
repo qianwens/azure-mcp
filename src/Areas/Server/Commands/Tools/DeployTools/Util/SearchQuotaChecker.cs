@@ -18,8 +18,8 @@ public class SearchQuotaChecker(string subscriptionId) : AzureQuotaChecker(subsc
             {
                 result.Add(new QuotaInfo(
                     Name: item.Name?.Value ?? string.Empty,
-                    Limit: (double)(item.Limit??0),
-                    Used: (double)(item.CurrentValue ?? 0),
+                    Limit: item.Limit ?? 0,
+                    Used: item.CurrentValue ?? 0,
                     Unit: item.Unit.ToString()
                 ));
             }

@@ -29,8 +29,8 @@ public enum ResourceProvider
 
 public record QuotaInfo(
     string Name,
-    double Limit,
-    double Used,
+    int Limit,
+    int Used,
     string? Unit = null
 );
 
