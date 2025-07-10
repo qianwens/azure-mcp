@@ -3,6 +3,7 @@
 
 using System.Text.Json.Serialization;
 using AzureMcp.Areas.Deploy.Options;
+using AzureMcp.Areas.Deploy.Models;
 
 namespace AzureMcp.Areas.Deploy.Commands;
 
@@ -12,11 +13,14 @@ namespace AzureMcp.Areas.Deploy.Commands;
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
 )]
 [JsonSerializable(typeof(AppTopology))]
-[JsonSerializable(typeof(ServiceConfig))]
-[JsonSerializable(typeof(DockerSettings))]
-[JsonSerializable(typeof(DependencyConfig))]
 [JsonSerializable(typeof(MermaidData))]
 [JsonSerializable(typeof(MermaidConfig))]
+[JsonSerializable(typeof(AzureRegionCheckParameters))]
+[JsonSerializable(typeof(CognitiveServiceProperties))]
+[JsonSerializable(typeof(AzureQuotaCheckParameters))]
+[JsonSerializable(typeof(GetAzdAppLogsParameters))]
+[JsonSerializable(typeof(PlanGetParameters))]
+[JsonSerializable(typeof(InfraCodeRulesParameters))]
 internal sealed partial class DeployJsonContext : JsonSerializerContext
 {
 }
