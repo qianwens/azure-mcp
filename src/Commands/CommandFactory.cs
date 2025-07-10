@@ -92,7 +92,7 @@ public class CommandFactory
             }
         }
 
-        if (commandsFromGroups.Count == 0 && !groupNames.Any(i => i =="codetocloud"))
+        if (commandsFromGroups.Count == 0)
         {
             throw new KeyNotFoundException($"No valid group in '[{string.Join(",", groupNames)}]' found in command groups.");
         }
