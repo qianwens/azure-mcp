@@ -1,0 +1,25 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System.Text.Json.Serialization;
+using AzureMcp.Options;
+
+namespace AzureMcp.Areas.Deploy.Options;
+
+public class DeployAppLogOptions : SubscriptionOptions
+{
+    [JsonPropertyName("workspaceFolder")]
+    public string WorkspaceFolder { get; set; } = string.Empty;
+
+    [JsonPropertyName("azdEnvName")]
+    public string AzdEnvName { get; set; } = string.Empty;
+
+    [JsonPropertyName("startTime")]
+    public string? StartTime { get; set; }
+
+    [JsonPropertyName("endTime")]
+    public string? EndTime { get; set; }
+
+    [JsonPropertyName("limit")]
+    public int? Limit { get; set; }
+}

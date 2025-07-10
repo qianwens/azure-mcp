@@ -20,6 +20,56 @@ public static class DeployOptionDefinitions
             IsRequired = true
         };
     }
+
+    public static class AppLog
+    {
+        public const string WorkspaceFolderName = "workspace-folder";
+        public const string AzdEnvNameName = "azd-env-name";
+        public const string StartTimeName = "start-time";
+        public const string EndTimeName = "end-time";
+        public const string LimitName = "limit";
+
+        public static readonly Option<string> WorkspaceFolder = new(
+            $"--{WorkspaceFolderName}",
+            "The full path of the workspace folder."
+        )
+        {
+            IsRequired = true
+        };
+
+        public static readonly Option<string> AzdEnvName = new(
+            $"--{AzdEnvNameName}",
+            "The name of the environment created by azd (AZURE_ENV_NAME) during `azd init` or `azd up`. If not provided in context, try to find it in the .azure directory in the workspace or use 'azd env list'."
+        )
+        {
+            IsRequired = true
+        };
+
+        public static readonly Option<string> StartTime = new(
+            $"--{StartTimeName}",
+            "The start time from which this tool will retrieve the logs. Use this when the logs of a specific time range needs checking. For example, older logs or only recent logs are required."
+        )
+        {
+            IsRequired = false
+        };
+
+        public static readonly Option<string> EndTime = new(
+            $"--{EndTimeName}",
+            "The end time to which this tool will retrieve the logs. Use this when the logs of a specific time range needs checking. For example, older logs or only recent logs are required."
+        )
+        {
+            IsRequired = false
+        };
+
+        public static readonly Option<int> Limit = new(
+            $"--{LimitName}",
+            () => 200,
+            "The maximum row number of logs to retrieve. Use this to get a specific number of logs or to avoid the retrieved logs from reaching token limit. Default is 200."
+        )
+        {
+            IsRequired = false
+        };
+    }
 }
 
 
