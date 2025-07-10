@@ -9,16 +9,16 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.Deploy.Commands;
 
-public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : SubscriptionCommand<DeployAppLogOptions>()
+public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : SubscriptionCommand<AzdAppLogOptions>()
 {
     private const string CommandTitle = "Get AZD deployed App Logs";
     private readonly ILogger<AzdAppLogGetCommand> _logger = logger;
 
-    private readonly Option<string> _workspaceFolderOption = DeployOptionDefinitions.AppLog.WorkspaceFolder;
-    private readonly Option<string> _azdEnvNameOption = DeployOptionDefinitions.AppLog.AzdEnvName;
-    private readonly Option<string> _startTimeOption = DeployOptionDefinitions.AppLog.StartTime;
-    private readonly Option<string> _endTimeOption = DeployOptionDefinitions.AppLog.EndTime;
-    private readonly Option<int> _limitOption = DeployOptionDefinitions.AppLog.Limit;
+    private readonly Option<string> _workspaceFolderOption = DeployOptionDefinitions.AzdAppLogOptions.WorkspaceFolder;
+    private readonly Option<string> _azdEnvNameOption = DeployOptionDefinitions.AzdAppLogOptions.AzdEnvName;
+    private readonly Option<string> _startTimeOption = DeployOptionDefinitions.AzdAppLogOptions.StartTime;
+    private readonly Option<string> _endTimeOption = DeployOptionDefinitions.AzdAppLogOptions.EndTime;
+    private readonly Option<int> _limitOption = DeployOptionDefinitions.AzdAppLogOptions.Limit;
 
     public override string Name => "get";
 
@@ -39,7 +39,7 @@ public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : S
         command.AddOption(_limitOption);
     }
 
-    protected override DeployAppLogOptions BindOptions(ParseResult parseResult)
+    protected override AzdAppLogOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
         options.WorkspaceFolder = parseResult.GetValueForOption(_workspaceFolderOption)!;

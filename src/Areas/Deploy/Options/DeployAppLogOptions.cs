@@ -6,7 +6,7 @@ using AzureMcp.Options;
 
 namespace AzureMcp.Areas.Deploy.Options;
 
-public class DeployAppLogOptions : SubscriptionOptions
+public class AzdAppLogOptions : SubscriptionOptions
 {
     [JsonPropertyName("workspaceFolder")]
     public string WorkspaceFolder { get; set; } = string.Empty;

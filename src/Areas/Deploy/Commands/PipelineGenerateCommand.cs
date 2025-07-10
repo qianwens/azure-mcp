@@ -1,28 +1,24 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Diagnostics.CodeAnalysis;
-
-using AzureMcp.Areas.Deploy.Models;
 using AzureMcp.Areas.Deploy.Options;
 using AzureMcp.Commands;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Services.Telemetry;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.Deploy.Commands;
 
 public sealed class PipelineGenerateCommand(ILogger<PipelineGenerateCommand> logger)
-    : BaseCommand()
+    : SubscriptionCommand<PipelineGenerateOptions>()
 {
     private const string CommandTitle = "Generate Azure Deployment Pipeline";
     private readonly ILogger<PipelineGenerateCommand> _logger = logger;
 
-    private readonly Option<string> _rawMcpToolInputOption = new(
-        $"--{DeployOptionDefinitions.RawMcpToolInput.RawMcpToolInputName}",
-        PipelineGenerateParametersSchema.Schema.ToJsonString()
-    )
-    {
-        IsRequired = true
-    };
+    private readonly Option<bool> _useAZDPipelineConfigOption = DeployOptionDefinitions.PipelineGenerateOptions.UseAZDPipelineConfig;
+    private readonly Option<string> _organizationNameOption = DeployOptionDefinitions.PipelineGenerateOptions.OrganizationName;
+    private readonly Option<string> _repositoryNameOption = DeployOptionDefinitions.PipelineGenerateOptions.RepositoryName;
+    private readonly Option<string> _githubEnvironmentNameOption = DeployOptionDefinitions.PipelineGenerateOptions.GithubEnvironmentName;
 
     public override string Name => "generate";
 
@@ -36,13 +32,19 @@ public sealed class PipelineGenerateCommand(ILogger<PipelineGenerateCommand> log
     protected override void RegisterOptions(Command command)
     {
         base.RegisterOptions(command);
-        command.AddOption(_rawMcpToolInputOption);
+        command.AddOption(_useAZDPipelineConfigOption);
+        command.AddOption(_organizationNameOption);
+        command.AddOption(_repositoryNameOption);
+        command.AddOption(_githubEnvironmentNameOption);
     }
 
-    private RawMcpToolInputOptions BindOptions(ParseResult parseResult)
+     protected override PipelineGenerateOptions BindOptions(ParseResult parseResult)
     {
-        var options = new RawMcpToolInputOptions();
-        options.RawMcpToolInput = parseResult.GetValueForOption(_rawMcpToolInputOption);
+        var options = base.BindOptions(parseResult);
+        options.UseAZDPipelineConfig = parseResult.GetValueForOption(_useAZDPipelineConfigOption);
+        options.OrganizationName = parseResult.GetValueForOption(_organizationNameOption);
+        options.RepositoryName = parseResult.GetValueForOption(_repositoryNameOption);
+        options.GithubEnvironmentName = parseResult.GetValueForOption(_githubEnvironmentNameOption);
         return options;
     }
 
@@ -53,33 +55,16 @@ public sealed class PipelineGenerateCommand(ILogger<PipelineGenerateCommand> log
     public override Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var options = BindOptions(parseResult);
-        var rawMcpToolInput = options.RawMcpToolInput;
-        if (string.IsNullOrWhiteSpace(rawMcpToolInput))
-        {
-            throw new ArgumentException("Input cannot be null or empty.", nameof(options.RawMcpToolInput));
-        }
-
-        PipelineGenerateParameters? parameters;
-        try
-        {
-            parameters = JsonSerializer.Deserialize<PipelineGenerateParameters>(
-                          rawMcpToolInput, DeployJsonContext.Default.PipelineGenerateParameters)
-                          ?? throw new ArgumentException("Failed to deserialize input.", nameof(rawMcpToolInput));
-        }
-        catch (JsonException ex)
-        {
-            throw new ArgumentException($"Invalid JSON format: {ex.Message}", nameof(rawMcpToolInput), ex);
-        }
-
-        _logger.LogInformation("Successfully parsed PipelineGenerateParameters");
-        if (parameters == null)
-        {
-            throw new ArgumentException("Parsed parameters cannot be null.", nameof(rawMcpToolInput));
-        }
 
         try
         {
-            var result = GeneratePipelineGuidelines(parameters);
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
+            {
+                return Task.FromResult(context.Response);
+            }
+
+            context.Activity?.WithSubscriptionTag(options);
+            var result = GeneratePipelineGuidelines(options);
 
             context.Response.Message = result;
             context.Response.Status = 200;
@@ -94,37 +79,37 @@ public sealed class PipelineGenerateCommand(ILogger<PipelineGenerateCommand> log
         }
     }
 
-    private static string GeneratePipelineGuidelines(PipelineGenerateParameters parameters)
+    private static string GeneratePipelineGuidelines(PipelineGenerateOptions options)
     {
-        if (parameters.UseAZDPipelineConfig)
+        if (options.UseAZDPipelineConfig)
         {
             return AZDPipelinePrompt;
         }
         else
         {
-            return AZCLIPipelinePrompt(parameters);
+            return AZCLIPipelinePrompt(options);
         }
     }
 
     private static readonly string AZDPipelinePrompt = "Run \"azd pipeline config\" to help the user create a deployment pipeline.\n";
 
-    private static string AZCLIPipelinePrompt(PipelineGenerateParameters parameters)
+    private static string AZCLIPipelinePrompt(PipelineGenerateOptions options)
     {
         const string defaultEnvironment = "dev";
-        var environmentNamePrompt = !string.IsNullOrEmpty(parameters.GithubEnvironmentName)
-            ? $"Use {parameters.GithubEnvironmentName} for environment name of the deployment job."
+        var environmentNamePrompt = !string.IsNullOrEmpty(options.GithubEnvironmentName)
+            ? $"Use {options.GithubEnvironmentName} for environment name of the deployment job."
             : $"Use '{defaultEnvironment}' for the $environment for the deployment job.";
 
-        var subscriptionIdPrompt = !string.IsNullOrEmpty(parameters.SubscriptionId) && CheckGUIDFormat(parameters.SubscriptionId)
-            ? $"User is deploying to subscription {parameters.SubscriptionId}"
+        var subscriptionIdPrompt = !string.IsNullOrEmpty(options.Subscription) && CheckGUIDFormat(options.Subscription)
+            ? $"User is deploying to subscription {options.Subscription}"
             : "Use \"az account show --query id -o tsv\" as default subscription ID.";
 
-        var organizationName = !string.IsNullOrEmpty(parameters.OrganizationName) ? parameters.OrganizationName : "{$organization-of-repo}";
-        var repositoryName = !string.IsNullOrEmpty(parameters.RepositoryName) ? parameters.RepositoryName : "{$repository-name}";
-        var environmentName = !string.IsNullOrEmpty(parameters.GithubEnvironmentName) ? parameters.GithubEnvironmentName : defaultEnvironment;
+        var organizationName = !string.IsNullOrEmpty(options.OrganizationName) ? options.OrganizationName : "{$organization-of-repo}";
+        var repositoryName = !string.IsNullOrEmpty(options.RepositoryName) ? options.RepositoryName : "{$repository-name}";
+        var environmentName = !string.IsNullOrEmpty(options.GithubEnvironmentName) ? options.GithubEnvironmentName : defaultEnvironment;
 
         var subjectConfig = $"repo:{organizationName}/{repositoryName}:environment:{environmentName}";
-        var environmentArg = !string.IsNullOrEmpty(parameters.GithubEnvironmentName) ? $"--env {parameters.GithubEnvironmentName}" : "--env dev";
+        var environmentArg = !string.IsNullOrEmpty(options.GithubEnvironmentName) ? $"--env {options.GithubEnvironmentName}" : "--env dev";
         var environmentCreateCommand = $"gh api --method PUT -H \"Accept: application/vnd.github+json\" repos/{organizationName}/{repositoryName}/environments/{environmentName}";
         var jsonParameters = $"{{\"name\":\"github-federated\",\"issuer\":\"https://token.actions.githubusercontent.com\",\"subject\":\"{subjectConfig}\",\"audiences\":[\"api://AzureADTokenExchange\"]}}";
         return $"""

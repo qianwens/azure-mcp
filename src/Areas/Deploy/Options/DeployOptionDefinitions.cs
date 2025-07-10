@@ -3,6 +3,7 @@
 
 using System.Text.Json.Nodes;
 using AzureMcp.Areas.Server.Commands;
+using AzureMcp.Options;
 
 namespace AzureMcp.Areas.Deploy.Options;
 
@@ -21,7 +22,7 @@ public static class DeployOptionDefinitions
         };
     }
 
-    public static class AppLog
+    public class AzdAppLogOptions: SubscriptionOptions
     {
         public const string WorkspaceFolderName = "workspace-folder";
         public const string AzdEnvNameName = "azd-env-name";
@@ -70,135 +71,177 @@ public static class DeployOptionDefinitions
             IsRequired = false
         };
     }
-}
 
-
-public static class AppTopologySchema
-{
-    public static readonly JsonObject Schema = new JsonObject
+    public class PipelineGenerateOptions: SubscriptionOptions
     {
-        ["type"] = "object",
-        ["properties"] = new JsonObject
+        public const string UseAZDPipelineConfigName = "use-azd-pipeline-config";
+        public const string OrganizationNameName = "organization-name";
+        public const string RepositoryNameName = "repository-name";
+        public const string GithubEnvironmentNameName = "github-environment-name";
+        public const string SubscriptionIdName = "subscription-id";
+
+        public static readonly Option<bool> UseAZDPipelineConfig = new(
+            $"--{UseAZDPipelineConfigName}",
+            () => false,
+            "Whether to use azd tool to set up the deployment pipeline. Set to true ONLY if azure.yaml is provided or the context suggests AZD tools."
+        )
         {
-            ["workspaceFolder"] = new JsonObject
+            IsRequired = false
+        };
+
+        public static readonly Option<string> OrganizationName = new(
+            $"--{OrganizationNameName}",
+            "The name of the organization or the user account name of the current Github repository. DO NOT fill this in if you're not sure."
+        )
+        {
+            IsRequired = false
+        };
+
+        public static readonly Option<string> RepositoryName = new(
+            $"--{RepositoryNameName}",
+            "The name of the current Github repository. DO NOT fill this in if you're not sure."
+        )
+        {
+            IsRequired = false
+        };
+
+        public static readonly Option<string> GithubEnvironmentName = new(
+            $"--{GithubEnvironmentNameName}",
+            "The name of the environment to which the deployment pipeline will be deployed. DO NOT fill this in if you're not sure."
+        )
+        {
+            IsRequired = false
+        };
+
+    }
+
+    public static class AppTopologySchema
+    {
+        public static readonly JsonObject Schema = new JsonObject
+        {
+            ["type"] = "object",
+            ["properties"] = new JsonObject
             {
-                ["type"] = "string",
-                ["description"] = "The full path of the workspace folder."
-            },
-            ["projectName"] = new JsonObject
-            {
-                ["type"] = "string",
-                ["description"] = "The name of the project. This is used to generate the resource names."
-            },
-            ["services"] = new JsonObject
-            {
-                ["type"] = "array",
-                ["description"] = "An array of service parameters.",
-                ["items"] = new JsonObject
+                ["workspaceFolder"] = new JsonObject
                 {
-                    ["type"] = "object",
-                    ["properties"] = new JsonObject
+                    ["type"] = "string",
+                    ["description"] = "The full path of the workspace folder."
+                },
+                ["projectName"] = new JsonObject
+                {
+                    ["type"] = "string",
+                    ["description"] = "The name of the project. This is used to generate the resource names."
+                },
+                ["services"] = new JsonObject
+                {
+                    ["type"] = "array",
+                    ["description"] = "An array of service parameters.",
+                    ["items"] = new JsonObject
                     {
-                        ["name"] = new JsonObject
+                        ["type"] = "object",
+                        ["properties"] = new JsonObject
                         {
-                            ["type"] = "string",
-                            ["description"] = "The name of the service."
-                        },
-                        ["path"] = new JsonObject
-                        {
-                            ["type"] = "string",
-                            ["description"] = "The relative path of the service main project folder"
-                        },
-                        ["language"] = new JsonObject
-                        {
-                            ["type"] = "string",
-                            ["description"] = "The programming language of the service.",
-                            ["enum"] = new JsonArray("dotnet", "python", "ts", "js", "java")
-                        },
-                        ["port"] = new JsonObject
-                        {
-                            ["type"] = "string",
-                            ["description"] = "The port number the service uses. Get this from Dockerfile for container apps. If not available, default to '80'."
-                        },
-                        ["azureComputeHost"] = new JsonObject
-                        {
-                            ["type"] = "string",
-                            ["description"] = "The appropriate azure service that should be used to host this service. Use containerapp if the service is containerized and has a Dockerfile.",
-                            ["enum"] = new JsonArray("appservice", "containerapp", "function", "staticwebapp")
-                        },
-                        ["dockerSettings"] = new JsonObject
-                        {
-                            ["type"] = "object",
-                            ["description"] = "Docker settings for the service. This is only needed if the service's azureComputeHost is containerapp.",
-                            ["properties"] = new JsonObject
+                            ["name"] = new JsonObject
                             {
-                                ["dockerFilePath"] = new JsonObject
-                                {
-                                    ["type"] = "string",
-                                    ["description"] = "The absolute path to the Dockerfile for the service. If the service's azureComputeHost is not containerapp, leave blank."
-                                },
-                                ["dockerContext"] = new JsonObject
-                                {
-                                    ["type"] = "string",
-                                    ["description"] = "The absolute path to the Docker build context for the service. If the service's azureComputeHost is not containerapp, leave blank."
-                                }
+                                ["type"] = "string",
+                                ["description"] = "The name of the service."
                             },
-                            ["required"] = new JsonArray("dockerFilePath", "dockerContext")
-                        },
-                        ["dependencies"] = new JsonObject
-                        {
-                            ["type"] = "array",
-                            ["description"] = "An array of dependent services. A compute service may have a dependency on another compute service.",
-                            ["items"] = new JsonObject
+                            ["path"] = new JsonObject
+                            {
+                                ["type"] = "string",
+                                ["description"] = "The relative path of the service main project folder"
+                            },
+                            ["language"] = new JsonObject
+                            {
+                                ["type"] = "string",
+                                ["description"] = "The programming language of the service.",
+                                ["enum"] = new JsonArray("dotnet", "python", "ts", "js", "java")
+                            },
+                            ["port"] = new JsonObject
+                            {
+                                ["type"] = "string",
+                                ["description"] = "The port number the service uses. Get this from Dockerfile for container apps. If not available, default to '80'."
+                            },
+                            ["azureComputeHost"] = new JsonObject
+                            {
+                                ["type"] = "string",
+                                ["description"] = "The appropriate azure service that should be used to host this service. Use containerapp if the service is containerized and has a Dockerfile.",
+                                ["enum"] = new JsonArray("appservice", "containerapp", "function", "staticwebapp")
+                            },
+                            ["dockerSettings"] = new JsonObject
                             {
                                 ["type"] = "object",
+                                ["description"] = "Docker settings for the service. This is only needed if the service's azureComputeHost is containerapp.",
                                 ["properties"] = new JsonObject
                                 {
-                                    ["name"] = new JsonObject
+                                    ["dockerFilePath"] = new JsonObject
                                     {
                                         ["type"] = "string",
-                                        ["description"] = "The name of the dependent service. Can be arbitary, or must reference another service in the services array if referencing azureappservice, azurecontainerapp, azurestaticwebapps, or azurefunctions."
+                                        ["description"] = "The absolute path to the Dockerfile for the service. If the service's azureComputeHost is not containerapp, leave blank."
                                     },
-                                    ["serviceType"] = new JsonObject
+                                    ["dockerContext"] = new JsonObject
                                     {
                                         ["type"] = "string",
-                                        ["description"] = "The name of the azure service that can be used for this dependent service.",
-                                        ["enum"] = new JsonArray("azureaisearch", "azureaiservices", "appservice", "azureapplicationinsights", "azurebotservice", "containerapp", "azurecosmosdb", "function", "azurekeyvault", "azuredatabaseformysql", "azureopenai", "azuredatabaseforpostgresql", "azureprivateendpoint", "azurecacheforredis", "azuresqldatabase", "azurestorageaccount", "staticwebapp", "azureservicebus", "azuresignalrservice", "azurevirtualnetwork", "azurewebpubsub")
-                                    },
-                                    ["connectionType"] = new JsonObject
-                                    {
-                                        ["type"] = "string",
-                                        ["description"] = "The connection authentication type of the dependency.",
-                                        ["enum"] = new JsonArray("http", "secret", "system-identity", "user-identity", "bot-connection")
-                                    },
-                                    ["environmentVariables"] = new JsonObject
-                                    {
-                                        ["type"] = "array",
-                                        ["description"] = "An array of environment variables defined in source code to set up the connection.",
-                                        ["items"] = new JsonObject
-                                        {
-                                            ["type"] = "string"
-                                        }
+                                        ["description"] = "The absolute path to the Docker build context for the service. If the service's azureComputeHost is not containerapp, leave blank."
                                     }
                                 },
-                                ["required"] = new JsonArray("name", "serviceType", "connectionType", "environmentVariables")
+                                ["required"] = new JsonArray("dockerFilePath", "dockerContext")
+                            },
+                            ["dependencies"] = new JsonObject
+                            {
+                                ["type"] = "array",
+                                ["description"] = "An array of dependent services. A compute service may have a dependency on another compute service.",
+                                ["items"] = new JsonObject
+                                {
+                                    ["type"] = "object",
+                                    ["properties"] = new JsonObject
+                                    {
+                                        ["name"] = new JsonObject
+                                        {
+                                            ["type"] = "string",
+                                            ["description"] = "The name of the dependent service. Can be arbitary, or must reference another service in the services array if referencing azureappservice, azurecontainerapp, azurestaticwebapps, or azurefunctions."
+                                        },
+                                        ["serviceType"] = new JsonObject
+                                        {
+                                            ["type"] = "string",
+                                            ["description"] = "The name of the azure service that can be used for this dependent service.",
+                                            ["enum"] = new JsonArray("azureaisearch", "azureaiservices", "appservice", "azureapplicationinsights", "azurebotservice", "containerapp", "azurecosmosdb", "function", "azurekeyvault", "azuredatabaseformysql", "azureopenai", "azuredatabaseforpostgresql", "azureprivateendpoint", "azurecacheforredis", "azuresqldatabase", "azurestorageaccount", "staticwebapp", "azureservicebus", "azuresignalrservice", "azurevirtualnetwork", "azurewebpubsub")
+                                        },
+                                        ["connectionType"] = new JsonObject
+                                        {
+                                            ["type"] = "string",
+                                            ["description"] = "The connection authentication type of the dependency.",
+                                            ["enum"] = new JsonArray("http", "secret", "system-identity", "user-identity", "bot-connection")
+                                        },
+                                        ["environmentVariables"] = new JsonObject
+                                        {
+                                            ["type"] = "array",
+                                            ["description"] = "An array of environment variables defined in source code to set up the connection.",
+                                            ["items"] = new JsonObject
+                                            {
+                                                ["type"] = "string"
+                                            }
+                                        }
+                                    },
+                                    ["required"] = new JsonArray("name", "serviceType", "connectionType", "environmentVariables")
+                                }
+                            },
+                            ["settings"] = new JsonObject
+                            {
+                                ["type"] = "array",
+                                ["description"] = "An array of environment variables needed to run this service.  Please search the entire codebase to find environment variables.",
+                                ["items"] = new JsonObject
+                                {
+                                    ["type"] = "string"
+                                }
                             }
                         },
-                        ["settings"] = new JsonObject
-                        {
-                            ["type"] = "array",
-                            ["description"] = "An array of environment variables needed to run this service.  Please search the entire codebase to find environment variables.",
-                            ["items"] = new JsonObject
-                            {
-                                ["type"] = "string"
-                            }
-                        }
-                    },
-                    ["required"] = new JsonArray("name", "path", "azureComputeHost", "language", "port", "dependencies", "settings")
+                        ["required"] = new JsonArray("name", "path", "azureComputeHost", "language", "port", "dependencies", "settings")
+                    }
                 }
-            }
-        },
-        ["required"] = new JsonArray("workspaceFolder", "services")
-    };
+            },
+            ["required"] = new JsonArray("workspaceFolder", "services")
+        };
+    }
 }
 
