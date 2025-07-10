@@ -2,7 +2,7 @@ using System.Text.Json.Nodes;
 
 namespace AzureMcp.Areas.Deploy.Models;
 
-public sealed class GetAzdAppLogsParameters
+public sealed class AzdAppLogsGetParameters
 {
     public string WorkspaceFolder { get; set; } = string.Empty;
     public string AzdEnvName { get; set; } = string.Empty;
@@ -12,7 +12,7 @@ public sealed class GetAzdAppLogsParameters
     public int? Limit { get; set; }
 }
 
-public static class GetAzdAppLogsParametersSchema
+public static class AzdAppLogsGetParametersSchema
 {
     public static readonly JsonObject Schema = new()
     {

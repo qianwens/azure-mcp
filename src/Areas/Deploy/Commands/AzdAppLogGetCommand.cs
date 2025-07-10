@@ -22,7 +22,7 @@ public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger)
 
     private readonly Option<string> _rawMcpToolInputOption = new(
         $"--{DeployOptionDefinitions.RawMcpToolInput.RawMcpToolInputName}",
-        GetAzdAppLogsParametersSchema.Schema.ToJsonString()
+        AzdAppLogsGetParametersSchema.Schema.ToJsonString()
     )
     {
         IsRequired = true
@@ -63,11 +63,11 @@ public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger)
         {
             throw new ArgumentException("Input cannot be null or empty.", nameof(options.RawMcpToolInput));
         }
-        GetAzdAppLogsParameters? parameters;
+        AzdAppLogsGetParameters? parameters;
         try
         {
-            parameters = JsonSerializer.Deserialize<GetAzdAppLogsParameters>(
-                          rawMcpToolInput, DeployJsonContext.Default.GetAzdAppLogsParameters)
+            parameters = JsonSerializer.Deserialize<AzdAppLogsGetParameters>(
+                          rawMcpToolInput, DeployJsonContext.Default.AzdAppLogsGetParameters)
                           ?? throw new ArgumentException("Failed to deserialize input.", nameof(rawMcpToolInput));
         }
         catch (JsonException ex)

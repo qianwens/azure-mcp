@@ -50,7 +50,6 @@ public sealed class PlanGetCommand(ILogger<PlanGetCommand> logger)
         Destructive = false,
         ReadOnly = true,
         Title = CommandTitle)]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "")]
     public override Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var options = BindOptions(parseResult);

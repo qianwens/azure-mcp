@@ -10,6 +10,7 @@ using AzureMcp.Areas.Deploy.Commands.Region;
 using AzureMcp.Areas.Deploy.Commands.Plan;
 using AzureMcp.Areas.Deploy.Services;
 using AzureMcp.Areas.Deploy.Commands.Quota;
+using AzureMcp.Areas.Deploy.Commands.InfraCodeRules;
 
 namespace AzureMcp.Areas.Deploy;
 
@@ -17,7 +18,7 @@ internal sealed class DeploySetup : IAreaSetup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddTransient<IDeployService, DeployService>();
+        services.AddSingleton<IDeployService, DeployService>();
     }
 
     public void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFactory)
@@ -29,9 +30,13 @@ internal sealed class DeploySetup : IAreaSetup
 
         deploy.AddCommand("plan_get", new PlanGetCommand(loggerFactory.CreateLogger<PlanGetCommand>()));
 
+        deploy.AddCommand("infra_code_rules_get", new InfraCodeRulesGetCommand(loggerFactory.CreateLogger<InfraCodeRulesGetCommand>()));
+
         deploy.AddCommand("region_check", new RegionCheckCommand(loggerFactory.CreateLogger<RegionCheckCommand>()));
         deploy.AddCommand("quota_check", new QuotaCheckCommand(loggerFactory.CreateLogger<QuotaCheckCommand>()));
 
         deploy.AddCommand("azd_app_log_get", new AzdAppLogGetCommand(loggerFactory.CreateLogger<AzdAppLogGetCommand>()));
+
+        deploy.AddCommand("pipeline_generate", new PipelineGenerateCommand(loggerFactory.CreateLogger<PipelineGenerateCommand>()));
     }
 }
