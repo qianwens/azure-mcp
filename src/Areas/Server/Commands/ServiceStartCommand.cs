@@ -146,6 +146,18 @@ public sealed class ServiceStartCommand : BaseCommand
         {
             services.AddSingleton<McpServerTool, AzureProxyTool>();
         }
+        else if (serviceArray != null && serviceArray.Length == 1 && serviceArray[0] == "codetocloud")
+        {
+            services.AddSingleton<McpServerTool, DeployPlanGenerateTool>();
+            services.AddSingleton<McpServerTool, DeployBicepGenerateFromPlanTool>();
+            services.AddSingleton<McpServerTool, DeployAzdUpTool>();
+            services.AddSingleton<McpServerTool, DeployPrecheckTool>();
+            services.AddSingleton<McpServerTool, DeployPipelineGenerateTool>();
+            services.AddSingleton<McpServerTool, DeploySummaryTool>();
+            services.AddSingleton<McpServerTool, DeployRegionCheckTool>();
+            services.AddSingleton<McpServerTool, DeployQuotaCheckTool>();
+            services.AddSingleton<McpServerTool, GetAzdAppLogTool>();
+        }
         // The "proxy" mode exposes a single tool per service/namespace and performs internal tool discovery and proxying.
         else if (serviceArray != null && serviceArray.Length == 1 && serviceArray[0] == "proxy")
         {
@@ -168,6 +180,12 @@ public sealed class ServiceStartCommand : BaseCommand
         // The default mode loads all tools from the default ToolOperations service.
         else
         {
+            services.AddSingleton<McpServerTool, DeployPlanGenerateTool>();
+            services.AddSingleton<McpServerTool, DeployBicepGenerateFromPlanTool>();
+            services.AddSingleton<McpServerTool, DeployAzdUpTool>();
+            services.AddSingleton<McpServerTool, DeployPrecheckTool>();
+            services.AddSingleton<McpServerTool, DeployPipelineGenerateTool>();
+            services.AddSingleton<McpServerTool, DeploySummaryTool>();
             mcpServerOptionsBuilder.Configure<ToolOperations>((mcpServerOptions, toolOperations) =>
             {
                 toolOperations.ReadOnly = options.ReadOnly ?? false;
