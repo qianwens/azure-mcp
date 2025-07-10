@@ -62,8 +62,7 @@ public static class AppTopologySchema
                         ["language"] = new JsonObject
                         {
                             ["type"] = "string",
-                            ["description"] = "The programming language of the service.",
-                            ["enum"] = new JsonArray("dotnet", "python", "ts", "js", "java")
+                            ["description"] = "The programming language of the service."
                         },
                         ["port"] = new JsonObject
                         {
@@ -113,7 +112,7 @@ public static class AppTopologySchema
                                     {
                                         ["type"] = "string",
                                         ["description"] = "The name of the azure service that can be used for this dependent service.",
-                                        ["enum"] = new JsonArray("azureaisearch", "azureaiservices", "appservice", "azureapplicationinsights", "azurebotservice", "containerapp", "azurecosmosdb", "function", "azurekeyvault", "azuredatabaseformysql", "azureopenai", "azuredatabaseforpostgresql", "azureprivateendpoint", "azurecacheforredis", "azuresqldatabase", "azurestorageaccount", "staticwebapp", "azureservicebus", "azuresignalrservice", "azurevirtualnetwork", "azurewebpubsub")
+                                        ["enum"] = new JsonArray("azureaisearch", "azureaiservices", "appservice", "azureapplicationinsights", "azurebotservice", "containerapp", "azurecosmosdb", "functionapp", "azurekeyvault", "azuredatabaseformysql", "azureopenai", "azuredatabaseforpostgresql", "azureprivateendpoint", "azurecacheforredis", "azuresqldatabase", "azurestorageaccount", "staticwebapp", "azureservicebus", "azuresignalrservice", "azurevirtualnetwork", "azurewebpubsub")
                                     },
                                     ["connectionType"] = new JsonObject
                                     {

@@ -52,7 +52,7 @@ public static class GenerateMermaidChart
         {
             foreach (var dependency in service.Dependencies)
             {
-                var instanceInternalName = $"${{{FlattenServiceType(dependency.ServiceType)}.{dependency.Name}}}";
+                var instanceInternalName = $"{FlattenServiceType(dependency.ServiceType)}.{dependency.Name}";
                 var instanceName = $"{dependency.Name} ({dependency.ServiceType})";
 
                 if (IsComputeResourceType(dependency.ServiceType))
@@ -126,15 +126,7 @@ public static class GenerateMermaidChart
 
     private static bool IsComputeResourceType(string serviceType)
     {
-        var computeTypes = new[]
-        {
-            "azureappservice",
-            "azurecontainerapp", 
-            "azurefunctions",
-            "azurekubernetesservice"
-        };
-
-        return computeTypes.Contains(serviceType.ToLowerInvariant());
+        return Enum.GetNames<Consts.AzureComputeServiceType>().Contains(serviceType, StringComparer.OrdinalIgnoreCase);
     }
 }
 
