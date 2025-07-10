@@ -71,12 +71,29 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
         var encodedDiagram = EncodeMermaid.GetEncodedMermaidChart(chart);
 
         var mermaidUrl = $"https://mermaid.live/view#pako:{encodedDiagram}";
+        _logger.LogInformation("Generated architecture diagram successfully. Mermaid URL: {MermaidUrl}", mermaidUrl);
 
-        context.Response.Message = $"Architecture diagram generated successfully. Help the user generate a architecture markdown file with mermaid diagram: {chart}.";
-       // + "Or open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl}";
-        
-        // Also include the raw diagram in the response content
-        //var diagramContent = GenerateMermaidChart.GenerateChart(workspaceFolder, appTopology);
+        var usedServiceTypes = appTopology.Services
+            .SelectMany(service => service.Dependencies)
+            .Select(dep => dep.ServiceType)
+            .Where(serviceType => !string.IsNullOrWhiteSpace(serviceType))
+            .Where(serviceType => Enum.GetNames<Consts.AzureServiceType>().Contains(serviceType, StringComparer.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x)
+            .ToArray();
+
+        var usedServiceTypesString = usedServiceTypes.Length > 0 
+            ? string.Join(", ", usedServiceTypes)
+            : null;
+
+        context.Response.Message = $"Help the user open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl}. "
+            + "Ask user if the topology is expected, if not, you should call this tool with the user's updated instructions. "
+            + "Please inform the user that here are the supported hosting technologies: "
+            + $"{string.Join(", ", Enum.GetNames<Consts.AzureComputeServiceType>())}. ";
+        if (!string.IsNullOrWhiteSpace(usedServiceTypesString))
+        {
+            context.Response.Message += $"Here is the full list of supported component service types for the topology: {usedServiceTypesString}.";
+        }
 
         return Task.FromResult(context.Response);
     }
