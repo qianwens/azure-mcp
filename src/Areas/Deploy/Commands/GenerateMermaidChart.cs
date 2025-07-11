@@ -29,7 +29,7 @@ public static class GenerateMermaidChart
         {
             var serviceName = new List<string> { $"Name: {service.Name}" };
 
-            var projectRelativePath = Path.GetRelativePath(workspaceFolder, service.Path);
+            var projectRelativePath = Path.GetRelativePath(workspaceFolder, string.IsNullOrWhiteSpace(service.Path) ? workspaceFolder : service.Path);
             serviceName.Add($"Path: {projectRelativePath}");
             serviceName.Add($"Language: {service.Language}");
             serviceName.Add($"Port: {service.Port}");

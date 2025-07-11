@@ -16,7 +16,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
     private const string CommandTitle = "Generate Architecture Diagram";
     private readonly ILogger<GenerateArchitectureDiagramCommand> _logger = logger;
 
-    public override string Name => "generate_architecture_diagram";
+    public override string Name => "architecture-diagram-generate";
 
     private readonly Option<string> _rawMcpToolInputOption = DeployOptionDefinitions.RawMcpToolInput.RawMcpToolInputOption;
 
@@ -64,6 +64,14 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
 
         _logger.LogInformation("Successfully parsed app topology with {ServiceCount} services", appTopology.Services.Length);
 
+        if (appTopology.Services.Length == 0)
+        {
+            _logger.LogWarning("No services detected in the app topology.");
+            context.Response.Status = 200;
+            context.Response.Message = "No service detected.";
+            return Task.FromResult(context.Response);
+        }
+        
         var chart = GenerateMermaidChart.GenerateChart(appTopology.WorkspaceFolder ?? "", appTopology);
         if (string.IsNullOrWhiteSpace(chart))
         {
@@ -87,7 +95,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
             ? string.Join(", ", usedServiceTypes)
             : null;
 
-        context.Response.Message = $"Help the user open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl}. "
+        context.Response.Message = $"Help the user open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl} \n"
             + "Ask user if the topology is expected, if not, you should call this tool with the user's updated instructions. "
             + "Please inform the user that here are the supported hosting technologies: "
             + $"{string.Join(", ", Enum.GetNames<Consts.AzureComputeServiceType>())}. ";

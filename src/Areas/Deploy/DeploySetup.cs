@@ -21,6 +21,6 @@ internal sealed class DeploySetup : IAreaSetup
         var extension = new CommandGroup("deploy", "deploy commands for deploy application to Azure");
         rootGroup.AddSubGroup(extension);
 
-        extension.AddCommand("generate_architecture_diagram", new GenerateArchitectureDiagramCommand(loggerFactory.CreateLogger<GenerateArchitectureDiagramCommand>()));
+        extension.AddCommand("architecture-diagram-generate", new GenerateArchitectureDiagramCommand(loggerFactory.CreateLogger<GenerateArchitectureDiagramCommand>()));
     }
 }

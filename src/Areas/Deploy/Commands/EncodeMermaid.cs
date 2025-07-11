@@ -27,6 +27,19 @@ public static class EncodeMermaid
         return base64CompressedGraph;
     }
 
+    public static string GetDecodedMermaidChart(string encodedChart)
+    {
+        byte[] compressedData = Convert.FromBase64String(encodedChart);
+        
+        byte[] decompressedData = DecompressData(compressedData);
+        
+        string jsonString = Encoding.UTF8.GetString(decompressedData);
+        
+        MermaidData? data = JsonSerializer.Deserialize(jsonString, DeployJsonContext.Default.MermaidData);
+        
+        return data?.Code ?? string.Empty;
+    }
+
     private static byte[] CompressData(byte[] data)
     {
         using (var memoryStream = new MemoryStream())
@@ -36,6 +49,21 @@ public static class EncodeMermaid
                 deflateStream.Write(data, 0, data.Length);
             }
             return memoryStream.ToArray();
+        }
+    }
+
+    private static byte[] DecompressData(byte[] compressedData)
+    {
+        using (var memoryStream = new MemoryStream(compressedData))
+        {
+            using (var deflateStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+            {
+                using (var outputStream = new MemoryStream())
+                {
+                    deflateStream.CopyTo(outputStream);
+                    return outputStream.ToArray();
+                }
+            }
         }
     }
 }
