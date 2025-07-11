@@ -18,9 +18,7 @@ namespace AzureMcp.Areas.Deploy.Commands;
 [JsonSerializable(typeof(AzureRegionCheckParameters))]
 [JsonSerializable(typeof(CognitiveServiceProperties))]
 [JsonSerializable(typeof(AzureQuotaCheckParameters))]
-[JsonSerializable(typeof(AzdAppLogsGetParameters))]
 [JsonSerializable(typeof(PlanGetParameters))]
-[JsonSerializable(typeof(PipelineGenerateParameters))]
 [JsonSerializable(typeof(InfraCodeRulesParameters))]
 internal sealed partial class DeployJsonContext : JsonSerializerContext
 {
