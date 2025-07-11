@@ -265,5 +265,37 @@ public static class DeployOptionDefinitions
             IsRequired = true
         };
     }
+
+    public static class QuotaCheck
+    {
+        public const string SubscriptionIdName = "subscription-id";
+        public const string RegionName = "region";
+        public const string ResourceTypesName = "resource-types";
+
+        public static readonly Option<string> SubscriptionId = new(
+            $"--{SubscriptionIdName}",
+            "The Azure subscription ID where the resources will be deployed. Retrieve the subscription ID from the context, or by prompting the user to provide it."
+        )
+        {
+            IsRequired = true
+        };
+
+        public static readonly Option<string> Region = new(
+            $"--{RegionName}",
+            "The valid Azure region where the resources will be deployed. E.g. 'eastus', 'westus', 'westeurope', etc."
+        )
+        {
+            IsRequired = true
+        };
+
+        public static readonly Option<string> ResourceTypes = new(
+            $"--{ResourceTypesName}",
+            "The valid Azure resource types that are going to be deployed(comma-separated). E.g. 'Microsoft.App/containerApps,Microsoft.Web/sites,Microsoft.CognitiveServices/accounts', etc."
+        )
+        {
+            IsRequired = true,
+            AllowMultipleArgumentsPerToken = true
+        };
+    }
 }
 
