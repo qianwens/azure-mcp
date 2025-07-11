@@ -1,5 +1,4 @@
 using Azure.Core;
-using Azure.ResourceManager;
 using Azure.ResourceManager.Network;
 
 namespace Areas.Deploy.Services.Util;

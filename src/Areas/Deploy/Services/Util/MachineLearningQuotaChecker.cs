@@ -1,7 +1,5 @@
 using Azure.Core;
-using Azure.ResourceManager;
 using Azure.ResourceManager.MachineLearning;
-using Azure.ResourceManager.MachineLearning.Models;
 
 namespace Areas.Deploy.Services.Util;
 

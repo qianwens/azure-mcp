@@ -22,7 +22,7 @@ public static class DeployOptionDefinitions
         };
     }
 
-    public class AzdAppLogOptions: SubscriptionOptions
+    public class AzdAppLogOptions : SubscriptionOptions
     {
         public const string WorkspaceFolderName = "workspace-folder";
         public const string AzdEnvNameName = "azd-env-name";
@@ -72,7 +72,7 @@ public static class DeployOptionDefinitions
         };
     }
 
-    public class PipelineGenerateOptions: SubscriptionOptions
+    public class PipelineGenerateOptions : SubscriptionOptions
     {
         public const string UseAZDPipelineConfigName = "use-azd-pipeline-config";
         public const string OrganizationNameName = "organization-name";

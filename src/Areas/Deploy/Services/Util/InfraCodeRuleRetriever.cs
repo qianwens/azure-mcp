@@ -6,11 +6,13 @@ public static class InfraCodeRuleRetriever
 {
     public static List<string> PopulateAZDPrompts(InfraCodeRulesParameters parameters)
     {
-        var prompts = new List<string>();
-        prompts.Add("Ensure an User-Assigned Managed Identity (UAMI) is created for the deployment.");
-        prompts.Add("If the deployment infrastructure contains a resource group, it must have tag \"azd-env-name\" with the value of the environment name.");
-        prompts.Add($"Expected parameters in {parameters.IacType} parameters file: environmentName='${{AZURE_ENV_NAME}}', location='${{AZURE_LOCATION}}', resourceGroupName='rg-${{AZURE_ENV_NAME}}' (if scope is subscription).");
-        prompts.Add("All services (container app, app service, function app, static web app) must have tag \"azd-service-name\" matching the service name in azure.yaml.");
+        var prompts = new List<string>
+        {
+            "Ensure an User-Assigned Managed Identity (UAMI) is created for the deployment.",
+            "If the deployment infrastructure contains a resource group, it must have tag \"azd-env-name\" with the value of the environment name.",
+            $"Expected parameters in {parameters.IacType} parameters file: environmentName='${{AZURE_ENV_NAME}}', location='${{AZURE_LOCATION}}', resourceGroupName='rg-${{AZURE_ENV_NAME}}' (if scope is subscription).",
+            "All services (container app, app service, function app, static web app) must have tag \"azd-service-name\" matching the service name in azure.yaml."
+        };
 
         var outputsFileName = parameters.IacType == IacType.Bicep ? "main.bicep" : "outputs.tf";
         prompts.Add($"Outputs file {outputsFileName} must output RESOURCE_GROUP_ID.");

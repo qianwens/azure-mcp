@@ -1,5 +1,4 @@
 using Azure.Core;
-using Azure.ResourceManager;
 using Azure.ResourceManager.CognitiveServices;
 using Azure.ResourceManager.CognitiveServices.Models;
 

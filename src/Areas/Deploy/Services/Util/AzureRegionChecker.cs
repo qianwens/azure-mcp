@@ -1,14 +1,11 @@
 using Azure;
 using Azure.Core;
-using Azure.Identity;
 using Azure.ResourceManager;
 using Azure.ResourceManager.CognitiveServices;
 using Azure.ResourceManager.CognitiveServices.Models;
 using Azure.ResourceManager.PostgreSql.FlexibleServers;
 using Azure.ResourceManager.PostgreSql.FlexibleServers.Models;
 using AzureMcp.Areas.Deploy.Models;
-using AzureMcp.Services.Azure.Authentication;
-using System.Net.Http.Headers;
 
 namespace Areas.Deploy.Services.Util;
 

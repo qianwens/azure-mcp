@@ -38,7 +38,7 @@ public sealed class PipelineGenerateCommand(ILogger<PipelineGenerateCommand> log
         command.AddOption(_githubEnvironmentNameOption);
     }
 
-     protected override PipelineGenerateOptions BindOptions(ParseResult parseResult)
+    protected override PipelineGenerateOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
         options.UseAZDPipelineConfig = parseResult.GetValueForOption(_useAZDPipelineConfigOption);

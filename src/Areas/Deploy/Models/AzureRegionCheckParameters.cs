@@ -72,6 +72,6 @@ public static class AzureRegionCheckParametersSchema
                 }
             }
         },
-        ["required"] = new JsonArray ( "subscriptionId", "resourceTypes")
+        ["required"] = new JsonArray("subscriptionId", "resourceTypes")
     };
 }

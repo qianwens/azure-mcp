@@ -1,7 +1,5 @@
-using System.Text.Json;
 using Areas.Server.Commands.Tools.DeployTools.Util;
 using Azure.Core;
-using Azure.ResourceManager.PostgreSql.FlexibleServers;
 
 namespace Areas.Deploy.Services.Util;
 

@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
 using Azure.Core;
 using YamlDotNet.Serialization;
 

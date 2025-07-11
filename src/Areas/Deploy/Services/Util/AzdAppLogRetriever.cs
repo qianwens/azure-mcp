@@ -3,7 +3,6 @@ using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.AppContainers;
 using Azure.ResourceManager.AppService;
-using AzureMcp.Services.Azure.Authentication;
 using Azure.Monitor.Query.Models;
 using Azure.Core;
 

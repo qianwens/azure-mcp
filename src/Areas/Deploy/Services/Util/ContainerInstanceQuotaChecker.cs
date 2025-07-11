@@ -1,5 +1,3 @@
-using System.Text.Json;
-using Areas.Server.Commands.Tools.DeployTools.Util;
 using Azure.Core;
 using Azure.ResourceManager.ContainerInstance;
 using Azure.ResourceManager.ContainerInstance.Models;

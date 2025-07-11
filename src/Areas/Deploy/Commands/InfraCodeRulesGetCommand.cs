@@ -49,7 +49,7 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
         Destructive = false,
         ReadOnly = true,
         Title = CommandTitle)]
-    public override  Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
+    public override Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var options = BindOptions(parseResult);
         var rawMcpToolInput = options.RawMcpToolInput;

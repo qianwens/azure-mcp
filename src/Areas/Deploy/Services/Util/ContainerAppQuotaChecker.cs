@@ -1,5 +1,4 @@
 using Azure.Core;
-using Azure.ResourceManager;
 using Azure.ResourceManager.AppContainers;
 using Azure.ResourceManager.AppContainers.Models;
 
