@@ -137,6 +137,7 @@ public static class DeployOptionDefinitions
         };
     }
 }
+
 public static class AppTopologySchema
 {
     public static readonly JsonObject Schema = new JsonObject

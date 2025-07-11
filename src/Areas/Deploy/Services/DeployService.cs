@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.Deploy.Services;
 
-internal sealed class DeployService() : BaseAzureService, IDeployService
+public class DeployService() : BaseAzureService, IDeployService
 {
 
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
@@ -77,8 +77,8 @@ internal sealed class DeployService() : BaseAzureService, IDeployService
         string subscriptionId,
         CognitiveServiceProperties? cognitiveServiceProperties = null)
     {
-        TokenCredential credential = await GetCredential();
-        var availableRegions = await AzureRegionService.GetAvailableRegionsForResourceTypesAsync(credential, resourceTypes, subscriptionId, cognitiveServiceProperties);
+        ArmClient armClient = await CreateArmClientAsync();
+        var availableRegions = await AzureRegionService.GetAvailableRegionsForResourceTypesAsync(armClient, resourceTypes, subscriptionId, cognitiveServiceProperties);
         var allRegions = availableRegions.Values
             .Where(regions => regions.Count > 0)
             .SelectMany(regions => regions)

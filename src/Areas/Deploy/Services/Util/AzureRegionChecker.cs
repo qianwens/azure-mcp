@@ -18,16 +18,16 @@ public abstract class AzureRegionChecker : IRegionChecker
 {
     protected readonly string SubscriptionId;
     protected readonly ArmClient ResourceClient;
-    protected AzureRegionChecker(TokenCredential credential, string subscriptionId)
+    protected AzureRegionChecker(ArmClient armClient, string subscriptionId)
     {
         SubscriptionId = subscriptionId;
-        ResourceClient = new ArmClient(credential, subscriptionId);
+        ResourceClient = armClient;
         Console.WriteLine($"AzureRegionChecker initialized for subscription: {subscriptionId}");
     }
     public abstract Task<List<string>> GetAvailableRegionsAsync(string resourceType);
 }
 
-public class DefaultRegionChecker(TokenCredential credential, string subscriptionId) : AzureRegionChecker(credential, subscriptionId)
+public class DefaultRegionChecker(ArmClient armClient, string subscriptionId) : AzureRegionChecker(armClient, subscriptionId)
 {
     public override async Task<List<string>> GetAvailableRegionsAsync(string resourceType)
     {
@@ -71,8 +71,8 @@ public class CognitiveServicesRegionChecker : AzureRegionChecker
     private readonly string? _apiVersion;
     private readonly string? _modelName;
 
-    public CognitiveServicesRegionChecker(TokenCredential credential, string subscriptionId, string? skuName = null, string? apiVersion = null, string? modelName = null)
-        : base(credential, subscriptionId)
+    public CognitiveServicesRegionChecker(ArmClient armClient, string subscriptionId, string? skuName = null, string? apiVersion = null, string? modelName = null)
+        : base(armClient, subscriptionId)
     {
         _skuName = skuName;
         _apiVersion = apiVersion;
@@ -138,7 +138,7 @@ public class CognitiveServicesRegionChecker : AzureRegionChecker
     }
 }
 
-public class PostgreSqlRegionChecker(TokenCredential credential, string subscriptionId) : AzureRegionChecker(credential, subscriptionId)
+public class PostgreSqlRegionChecker(ArmClient armClient, string subscriptionId) : AzureRegionChecker(armClient, subscriptionId)
 {
     public override async Task<List<string>> GetAvailableRegionsAsync(string resourceType)
     {
@@ -146,13 +146,13 @@ public class PostgreSqlRegionChecker(TokenCredential credential, string subscrip
         var providerNamespace = parts[0];
         var resourceTypeName = parts[1];
 
-        var subscription = ResourceClient.GetSubscriptionResource(ResourceClient.GetDefaultSubscription().Id);
+        var subscription = ResourceClient.GetSubscriptionResource(new ResourceIdentifier($"/subscriptions/{SubscriptionId}"));
         var provider = await subscription.GetResourceProviderAsync(providerNamespace);
         var regions = provider?.Value?.Data?.ResourceTypes?
             .FirstOrDefault(rt => rt.ResourceType.Equals(resourceTypeName, StringComparison.OrdinalIgnoreCase))
             ?.Locations?
             .Select(location => location.Replace(" ", "").ToLowerInvariant())
-            .ToList() ?? [];
+            .ToList() ?? new List<string>();
 
         var availableRegions = new List<string>();
 
@@ -183,7 +183,7 @@ public class PostgreSqlRegionChecker(TokenCredential credential, string subscrip
 public static class RegionCheckerFactory
 {
     public static IRegionChecker CreateRegionChecker(
-        TokenCredential credential,
+        ArmClient armClient,
         string subscriptionId,
         string resourceType,
         CognitiveServiceProperties? properties = null)
@@ -193,13 +193,13 @@ public static class RegionCheckerFactory
         return provider switch
         {
             "microsoft.cognitiveservices" => new CognitiveServicesRegionChecker(
-                credential,
+                armClient,
                 subscriptionId,
                 properties?.DeploymentSkuName,
                 properties?.ModelVersion,
                 properties?.ModelName),
-            "microsoft.dbforpostgresql" => new PostgreSqlRegionChecker(credential, subscriptionId),
-            _ => new DefaultRegionChecker(credential, subscriptionId)
+            "microsoft.dbforpostgresql" => new PostgreSqlRegionChecker(armClient, subscriptionId),
+            _ => new DefaultRegionChecker(armClient, subscriptionId)
         };
     }
 }
@@ -207,7 +207,7 @@ public static class RegionCheckerFactory
 public static class AzureRegionService
 {
     public static async Task<Dictionary<string, List<string>>> GetAvailableRegionsForResourceTypesAsync(
-        TokenCredential credential,
+        ArmClient armClient,
         List<string> resourceTypes,
         string subscriptionId,
         CognitiveServiceProperties? cognitiveServiceProperties = null)
@@ -216,7 +216,7 @@ public static class AzureRegionService
 
         foreach (var resourceType in resourceTypes)
         {
-            var checker = RegionCheckerFactory.CreateRegionChecker(credential, subscriptionId, resourceType, cognitiveServiceProperties);
+            var checker = RegionCheckerFactory.CreateRegionChecker(armClient, subscriptionId, resourceType, cognitiveServiceProperties);
             result[resourceType] = await checker.GetAvailableRegionsAsync(resourceType);
         }
 
