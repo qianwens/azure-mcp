@@ -27,7 +27,7 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
 
     public override string Description =>
         """
-        This tool helps get infrastructure code rules based on deployment tool, IaC type, and resource types. Use this tool to understand the requirements and best practices for deploying Azure resources.
+        This tool provides guidelines for generating deployment code to Azure. It supports 2 deployment tools: AZD and Infrastructure as Code (IaC), including Bicep or Terraform. Azure CLI with command script.
         """;
 
     public override string Title => CommandTitle;
