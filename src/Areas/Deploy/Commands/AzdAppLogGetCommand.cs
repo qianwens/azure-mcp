@@ -20,7 +20,7 @@ public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : S
     private readonly Option<string> _endTimeOption = DeployOptionDefinitions.AzdAppLogOptions.EndTime;
     private readonly Option<int> _limitOption = DeployOptionDefinitions.AzdAppLogOptions.Limit;
 
-    public override string Name => "get";
+    public override string Name => "azd-app-log-get";
 
     public override string Description =>
         """

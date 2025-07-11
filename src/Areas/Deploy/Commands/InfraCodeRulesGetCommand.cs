@@ -23,7 +23,7 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
         IsRequired = true
     };
 
-    public override string Name => "get";
+    public override string Name => "infra-code-rules-get";
 
     public override string Description =>
         """

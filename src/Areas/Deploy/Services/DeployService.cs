@@ -85,7 +85,7 @@ internal sealed class DeployService(ILogger<DeployService> logger) : BaseAzureSe
             .SelectMany(regions => regions)
             .Distinct()
             .ToList();
-        var toolResult = $"If you are deploying an app, you MUST choose a region which exists in the following available region list for all resource types (because regions not listed are not available). DO NOT only choose a common region by yourself! Call the tool `azure_quota_check` to check if the selected region REALLY has enough quota for all resources.\n\n";
+        var toolResult = $"If you are deploying an app, you MUST choose a region which exists in the following available region list for all resource types (because regions not listed are not available). DO NOT only choose a common region by yourself! Call the tool `azure_quota-check` to check if the selected region REALLY has enough quota for all resources.\n\n";
 
         var commonValidRegions = availableRegions.Values
             .Aggregate((current, next) => current.Intersect(next).ToList());

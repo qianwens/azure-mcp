@@ -28,15 +28,15 @@ internal sealed class DeploySetup : IAreaSetup
 
         deploy.AddCommand("generate_architecture_diagram", new GenerateArchitectureDiagramCommand(loggerFactory.CreateLogger<GenerateArchitectureDiagramCommand>()));
 
-        deploy.AddCommand("plan_get", new PlanGetCommand(loggerFactory.CreateLogger<PlanGetCommand>()));
+        deploy.AddCommand("plan-get", new PlanGetCommand(loggerFactory.CreateLogger<PlanGetCommand>()));
 
-        deploy.AddCommand("infra_code_rules_get", new InfraCodeRulesGetCommand(loggerFactory.CreateLogger<InfraCodeRulesGetCommand>()));
+        deploy.AddCommand("infra-code-rules-get", new InfraCodeRulesGetCommand(loggerFactory.CreateLogger<InfraCodeRulesGetCommand>()));
 
-        deploy.AddCommand("region_check", new RegionCheckCommand(loggerFactory.CreateLogger<RegionCheckCommand>()));
-        deploy.AddCommand("quota_check", new QuotaCheckCommand(loggerFactory.CreateLogger<QuotaCheckCommand>()));
+        deploy.AddCommand("region-check", new RegionCheckCommand(loggerFactory.CreateLogger<RegionCheckCommand>()));
+        deploy.AddCommand("quota-check", new QuotaCheckCommand(loggerFactory.CreateLogger<QuotaCheckCommand>()));
 
-        deploy.AddCommand("azd_app_log_get", new AzdAppLogGetCommand(loggerFactory.CreateLogger<AzdAppLogGetCommand>()));
+        deploy.AddCommand("azd-app-log-get", new AzdAppLogGetCommand(loggerFactory.CreateLogger<AzdAppLogGetCommand>()));
 
-        deploy.AddCommand("pipeline_generate", new PipelineGenerateCommand(loggerFactory.CreateLogger<PipelineGenerateCommand>()));
+        deploy.AddCommand("pipeline-generate", new PipelineGenerateCommand(loggerFactory.CreateLogger<PipelineGenerateCommand>()));
     }
 }
