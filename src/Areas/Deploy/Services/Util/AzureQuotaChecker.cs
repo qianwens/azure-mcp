@@ -44,11 +44,14 @@ public abstract class AzureQuotaChecker : IQuotaChecker
 {
     protected readonly string SubscriptionId;
     protected readonly ArmClient ResourceClient;
+
+    protected readonly TokenCredential Credential;
     private static readonly HttpClient HttpClient = new();
 
     protected AzureQuotaChecker(TokenCredential credential, string subscriptionId)
     {
         SubscriptionId = subscriptionId;
+        Credential = credential ?? throw new ArgumentNullException(nameof(credential));
         ResourceClient = new ArmClient(credential, subscriptionId);
     }
 
@@ -58,8 +61,7 @@ public abstract class AzureQuotaChecker : IQuotaChecker
     {
         try
         {
-            var credential = new CustomChainedCredential();
-            var token = await credential.GetTokenAsync(new TokenRequestContext(["https://management.azure.com/.default"]), CancellationToken.None);
+            var token = await Credential.GetTokenAsync(new TokenRequestContext(["https://management.azure.com/.default"]), CancellationToken.None);
 
             using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);

@@ -114,8 +114,30 @@ public static class DeployOptionDefinitions
         };
 
     }
+    
+    public static class PlanGet
+    {
+        public const string WorkspaceFolderName = "workspace-folder";
+        public const string ProjectNameName = "project-name";
 
-    public static class AppTopologySchema
+        public static readonly Option<string> WorkspaceFolder = new(
+            $"--{WorkspaceFolderName}",
+            "The full path of the workspace folder."
+        )
+        {
+            IsRequired = true
+        };
+
+        public static readonly Option<string> ProjectName = new(
+            $"--{ProjectNameName}",
+            "The name of the project to generate the deployment plan for. If not provided, will be inferred from the workspace."
+        )
+        {
+            IsRequired = true
+        };
+    }
+
+public static class AppTopologySchema
     {
         public static readonly JsonObject Schema = new JsonObject
         {
@@ -243,27 +265,4 @@ public static class DeployOptionDefinitions
             ["required"] = new JsonArray("workspaceFolder", "services")
         };
     }
-
-    public static class PlanGet
-    {
-        public const string WorkspaceFolderName = "workspace-folder";
-        public const string ProjectNameName = "project-name";
-
-        public static readonly Option<string> WorkspaceFolder = new(
-            $"--{WorkspaceFolderName}",
-            "The full path of the workspace folder."
-        )
-        {
-            IsRequired = true
-        };
-
-        public static readonly Option<string> ProjectName = new(
-            $"--{ProjectNameName}",
-            "The name of the project to generate the deployment plan for. If not provided, will be inferred from the workspace."
-        )
-        {
-            IsRequired = true
-        };
-    }
 }
-

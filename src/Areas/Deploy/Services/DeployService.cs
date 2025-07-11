@@ -17,9 +17,8 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.Deploy.Services;
 
-internal sealed class DeployService(ILogger<DeployService> logger) : BaseAzureService, IDeployService
+internal sealed class DeployService() : BaseAzureService, IDeployService
 {
-    private readonly ILogger<DeployService> _logger = logger;
 
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
     public async Task<string> GetAzdResourceLogsAsync(
