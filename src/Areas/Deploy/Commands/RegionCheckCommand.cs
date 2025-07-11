@@ -26,7 +26,7 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger)
         IsRequired = true
     };
 
-    public override string Name => "check";
+    public override string Name => "region-check";
 
     public override string Description =>
         """

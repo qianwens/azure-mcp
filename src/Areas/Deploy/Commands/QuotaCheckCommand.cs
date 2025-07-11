@@ -26,7 +26,7 @@ public sealed class QuotaCheckCommand(ILogger<QuotaCheckCommand> logger)
         IsRequired = true
     };
 
-    public override string Name => "check";
+    public override string Name => "quota-check";
 
     public override string Description =>
         """
