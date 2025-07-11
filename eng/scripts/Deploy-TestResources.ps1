@@ -20,31 +20,32 @@ function New-StringHash($string) {
     return [BitConverter]::ToString($hashBytes) -replace '-', ''
 }
 
-$suffix = ($Unique ? [guid]::NewGuid().ToString() : (New-StringHash $account.Id)).ToLower().Substring(0, 8)
+$suffix = (if ($Unique) { [guid]::NewGuid().ToString() } else { New-StringHash $account.Id }).ToLower().Substring(0, 8)
 
-if(!$BaseName) {
+if (!$BaseName) {
     $BaseName = "mcp$($suffix)"
 }
 
-if(!$ResourceGroupName) {
+if (!$ResourceGroupName) {
     $username = $account.Id.Split('@')[0]
     $ResourceGroupName = "$username-mcp$($suffix)"
 }
 
 Push-Location $RepoRoot
 try {
-    $armParameters = @{ areas = ($Areas ?? @()) }
+    $armParameters = @{ areas = (if ($Areas) { $Areas } else { @() }) }
 
     Write-Host "Deploying:`n  ResourceGroupName: `"$ResourceGroupName`"`n  BaseName: `"$BaseName`"`n  DeleteAfterHours: $DeleteAfterHours`n  ArmTemplateParameters: $(ConvertTo-Json $armParameters -Compress)"
 
-    if($SubscriptionId) {
+    if ($SubscriptionId) {
         ./eng/common/TestResources/New-TestResources.ps1 `
             -SubscriptionId $SubscriptionId `
             -ResourceGroupName $ResourceGroupName `
             -BaseName $BaseName `
             -DeleteAfterHours $DeleteAfterHours `
             -AdditionalParameters $armParameters
-    } else {
+    }
+    else {
         ./eng/common/TestResources/New-TestResources.ps1 `
             -ResourceGroupName $ResourceGroupName `
             -BaseName $BaseName `
