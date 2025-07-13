@@ -17,13 +17,11 @@ public class DeployCommandTests : CommandTestsBase,
 {
     private readonly DeployService _deployService;
     private readonly string _subscriptionId;
-    private readonly string _accountName;
 
     public DeployCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper output) : base(liveTestFixture, output)
     {
         _deployService = new DeployService();
         _subscriptionId = Settings.SubscriptionId;
-        _accountName = Settings.ResourceBaseName;
     }
 
     [Fact]
