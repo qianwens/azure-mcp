@@ -42,6 +42,7 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
         options.DeploymentTool = parseResult.GetValueForOption(_deploymentToolOption) ?? string.Empty;
         options.IacType = parseResult.GetValueForOption(_iacTypeOption) ?? string.Empty;
         options.ResourceTypes = parseResult.GetValueForOption(_resourceTypesOption) ?? string.Empty;
+
         return options;
     }
 
@@ -75,32 +76,16 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
             .Where(rt => !string.IsNullOrWhiteSpace(rt))
             .ToArray();
 
-        var parameters = new InfraCodeRulesParameters
-        {
-            DeploymentTool = options.DeploymentTool,
-            IacType = options.IacType,
-            ResourceTypes = resourceTypes
-        };
-
-        List<string> result = InfraCodeRuleRetriever.PopulateLLMResponse(parameters);
+        List<string> result = InfraCodeRuleRetriever.PopulateLLMResponse(
+            options.DeploymentTool,
+            options.IacType,
+            resourceTypes);
 
         context.Response.Message = string.Join(Environment.NewLine, result);
         return Task.FromResult(context.Response);
     }
 
     // Implementation-specific error handling
-    protected override string GetErrorMessage(Exception ex) => ex switch
-    {
-        ArgumentException argEx => $"Invalid input: {argEx.Message}",
-        _ => base.GetErrorMessage(ex)
-    };
-
-    protected override int GetStatusCode(Exception ex) => ex switch
-    {
-        ArgumentException => 400,
-        _ => base.GetStatusCode(ex)
-    };
-}
     protected override string GetErrorMessage(Exception ex) => ex switch
     {
         ArgumentException argEx => $"Invalid input: {argEx.Message}",

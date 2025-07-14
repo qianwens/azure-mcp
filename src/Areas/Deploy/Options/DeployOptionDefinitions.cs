@@ -189,7 +189,8 @@ public static class DeployOptionDefinitions
             "--resource-types",
             "Comma-separated list of Azure resource types to generate rules for. Available types: azureaisearch, azureaiservices, appservice, azureapplicationinsights, azurebotservice, containerapp, azurecosmosdb, function, azurekeyvault, azuredatabaseformysql, azureopenai, azuredatabaseforpostgresql, azureprivateendpoint, azurecacheforredis, azuresqldatabase, azurestorageaccount, staticwebapp, azureservicebus, azuresignalrservice, azurevirtualnetwork, azurewebpubsub")
         {
-            IsRequired = true
+            IsRequired = true,
+            AllowMultipleArgumentsPerToken = true
         };
     }
 }

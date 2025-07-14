@@ -7,5 +7,5 @@ public sealed class InfraCodeRulesOptions
 {
     public string DeploymentTool { get; set; } = string.Empty;
     public string IacType { get; set; } = string.Empty;
-    public List<string> ResourceTypes { get; set; } = new List<string>();
+    public string ResourceTypes { get; set; } = string.Empty;
 }

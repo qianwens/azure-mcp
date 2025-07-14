@@ -1,22 +1,20 @@
-
-
 using AzureMcp.Areas.Deploy.Models;
 
 public static class InfraCodeRuleRetriever
 {
-    public static List<string> PopulateAZDPrompts(InfraCodeRulesParameters parameters)
+    public static List<string> PopulateAZDPrompts(string deploymentTool, string iacType, string[] resourceTypes)
     {
         var prompts = new List<string>
         {
             "Ensure an User-Assigned Managed Identity (UAMI) is created for the deployment.",
             "If the deployment infrastructure contains a resource group, it must have tag \"azd-env-name\" with the value of the environment name.",
-            $"Expected parameters in {parameters.IacType} parameters file: environmentName='${{AZURE_ENV_NAME}}', location='${{AZURE_LOCATION}}', resourceGroupName='rg-${{AZURE_ENV_NAME}}' (if scope is subscription).",
+            $"Expected parameters in {iacType} parameters file: environmentName='${{AZURE_ENV_NAME}}', location='${{AZURE_LOCATION}}', resourceGroupName='rg-${{AZURE_ENV_NAME}}' (if scope is subscription).",
             "All services (container app, app service, function app, static web app) must have tag \"azd-service-name\" matching the service name in azure.yaml."
         };
 
-        var outputsFileName = parameters.IacType == IacType.Bicep ? "main.bicep" : "outputs.tf";
+        var outputsFileName = iacType == IacType.Bicep ? "main.bicep" : "outputs.tf";
         prompts.Add($"Outputs file {outputsFileName} must output RESOURCE_GROUP_ID.");
-        if (parameters.ResourceTypes.Contains(AzureServiceNames.AzureContainerApp))
+        if (resourceTypes.Contains(AzureServiceNames.AzureContainerApp))
         {
             prompts.Add($"{outputsFileName} must output AZURE_CONTAINER_REGISTRY_ENDPOINT representing the URI of the container registry endpoint.");
         }
@@ -24,12 +22,12 @@ public static class InfraCodeRuleRetriever
         return prompts;
     }
 
-    public static List<string> PopulateAZCLIPrompts(InfraCodeRulesParameters parameters)
+    public static List<string> PopulateAZCLIPrompts(string deploymentTool, string iacType, string[] resourceTypes)
     {
         return new List<string> { "Not supported. Please use AZD for deployments." };
     }
 
-    public static List<string> PopulateBicepPrompts(InfraCodeRulesParameters parameters)
+    public static List<string> PopulateBicepPrompts(string deploymentTool, string iacType, string[] resourceTypes)
     {
         return [
             """
@@ -41,7 +39,7 @@ public static class InfraCodeRuleRetriever
         ];
     }
 
-    public static List<string> PopulateTerraformPrompts(InfraCodeRulesParameters parameters)
+    public static List<string> PopulateTerraformPrompts(string deploymentTool, string iacType, string[] resourceTypes)
     {
         return new List<string>
         {
@@ -50,7 +48,7 @@ public static class InfraCodeRuleRetriever
         };
     }
 
-    public static List<string> PopulateContainerAppPrompts(InfraCodeRulesParameters parameters)
+    public static List<string> PopulateContainerAppPrompts(string deploymentTool, string iacType, string[] resourceTypes)
     {
         var prompts = new List<string>
         {
@@ -59,11 +57,11 @@ public static class InfraCodeRuleRetriever
             "- User-Assigned Managed Identity must have the AcrPull role (\"7f951dda-4ed3-4680-a7ca-43fe172d538d\") on the container registry."
         };
 
-        if (parameters.IacType == IacType.Bicep)
+        if (iacType == IacType.Bicep)
         {
             prompts.Add("- Container App must have CORS enabled. This is enabled by configuring ingress.corsPolicy in the Bicep file.");
         }
-        else if (parameters.IacType == IacType.Terraform)
+        else if (iacType == IacType.Terraform)
         {
             prompts.Add("- Create an ***azapi_resource_action*** resource using :type `Microsoft.App/containerApps`, method `PATCH`, and body `properties.configuration.ingress.corsPolicy` property to enable CORS for all origins, headers, and methods. Use 'azure/azapi' provider version *2.0*. DO NOT use jsonencode() for the body.");
         }
@@ -71,12 +69,12 @@ public static class InfraCodeRuleRetriever
         prompts.Add("- All secrets used by the Container App must be first defined. Use Key Vault if possible.");
 
         const string image = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest";
-        var imageProperty = parameters.IacType == IacType.Bicep ? "properties.template.containers.image" : "azurerm_container_app.template.container.image";
+        var imageProperty = iacType == IacType.Bicep ? "properties.template.containers.image" : "azurerm_container_app.template.container.image";
         prompts.Add($"- Container Apps must use base container image {image}. It is absolutely required. The property is set via {imageProperty}.");
 
         prompts.Add("- Container App must be connected to the container registry via user-assigned managed identity and NOT 'system'. That identity must have AcrPull permissions into the registry.");
 
-        if (parameters.IacType == IacType.Bicep)
+        if (iacType == IacType.Bicep)
         {
             prompts.Add("- Container App Environment must be connected to Log Analytics Workspace. Please connect it using logAnalyticsConfiguration -> customerId=logAnalytics.properties.customerId and sharedKey=logAnalytics.listKeys().primarySharedKey.");
         }
@@ -88,7 +86,7 @@ public static class InfraCodeRuleRetriever
         return prompts;
     }
 
-    public static List<string> PopulateFunctionAppPrompts(InfraCodeRulesParameters parameters)
+    public static List<string> PopulateFunctionAppPrompts(string deploymentTool, string iacType, string[] resourceTypes)
     {
         var prompts = new List<string>
         {
@@ -97,7 +95,7 @@ public static class InfraCodeRuleRetriever
             "- Function App needs a storage account to store data. Please create a storage account and connect it to the function app."
         };
 
-        var diagnosticSettingsResourceType = parameters.IacType == IacType.Bicep ? "Microsoft.Insights/diagnosticSettings" : "azurerm_monitor_diagnostic_setting";
+        var diagnosticSettingsResourceType = iacType == IacType.Bicep ? "Microsoft.Insights/diagnosticSettings" : "azurerm_monitor_diagnostic_setting";
         prompts.Add($"Function App must have diagnostic settings defined for function app logs. The resource type is {diagnosticSettingsResourceType}.");
 
         var requiredRoles = new[]
@@ -126,69 +124,76 @@ public static class InfraCodeRuleRetriever
         };
     }
 
-    public static List<string> PopulateLLMResponse(InfraCodeRulesParameters parameters)
+    public static List<string> PopulateLLMResponse(string deploymentTool, string iacType, string[] resourceTypes)
     {
         var llmResponse = new List<string>
         {
             "Based on what is being deployed, you must ensure these rules are followed for deployment. Please adjust the infrastructure based on the listed rules.",
-            $"Deployment Tool: {parameters.DeploymentTool}. Deployment Tool rules:"
+            $"Deployment Tool: {deploymentTool}. Deployment Tool rules:"
         };
 
-        if (parameters.DeploymentTool == DeploymentTool.Azd)
+        if (deploymentTool == DeploymentTool.Azd)
         {
-            llmResponse.AddRange(PopulateAZDPrompts(parameters));
+            llmResponse.AddRange(PopulateAZDPrompts(deploymentTool, iacType, resourceTypes));
         }
-        else if (parameters.DeploymentTool == DeploymentTool.AzCLI)
+        else if (deploymentTool == DeploymentTool.AzCLI)
         {
-            llmResponse.AddRange(PopulateAZCLIPrompts(parameters));
-        }
-
-        llmResponse.Add($"IaC Type: {parameters.IacType}. IaC Type rules:");
-
-        if (parameters.IacType == IacType.Bicep)
-        {
-            llmResponse.AddRange(PopulateBicepPrompts(parameters));
-        }
-        else if (parameters.IacType == IacType.Terraform)
-        {
-            llmResponse.AddRange(PopulateTerraformPrompts(parameters));
+            llmResponse.AddRange(PopulateAZCLIPrompts(deploymentTool, iacType, resourceTypes));
         }
 
-        llmResponse.Add($"Resources: {string.Join(", ", parameters.ResourceTypes)}");
+        llmResponse.Add($"IaC Type: {iacType}. IaC Type rules:");
 
-        if (parameters.ResourceTypes.Contains(AzureServiceNames.AzureContainerApp))
+        if (iacType == IacType.Bicep)
         {
-            llmResponse.AddRange(PopulateContainerAppPrompts(parameters));
+            llmResponse.AddRange(PopulateBicepPrompts(deploymentTool, iacType, resourceTypes));
+        }
+        else if (iacType == IacType.Terraform)
+        {
+            llmResponse.AddRange(PopulateTerraformPrompts(deploymentTool, iacType, resourceTypes));
         }
 
-        if (parameters.ResourceTypes.Contains(AzureServiceNames.AzureAppService))
+        llmResponse.Add($"Resources: {string.Join(", ", resourceTypes)}");
+
+        if (resourceTypes.Contains(AzureServiceNames.AzureContainerApp))
         {
-            llmResponse.AddRange(PopulateAppServiceIaCPrompts(parameters.IacType));
+            llmResponse.AddRange(PopulateContainerAppPrompts(deploymentTool, iacType, resourceTypes));
         }
 
-        if (parameters.ResourceTypes.Contains(AzureServiceNames.AzureFunctionApp))
+        if (resourceTypes.Contains(AzureServiceNames.AzureAppService))
         {
-            llmResponse.AddRange(PopulateFunctionAppPrompts(parameters));
+            llmResponse.AddRange(PopulateAppServiceIaCPrompts(iacType));
+        }
+
+        if (resourceTypes.Contains(AzureServiceNames.AzureFunctionApp))
+        {
+            llmResponse.AddRange(PopulateFunctionAppPrompts(deploymentTool, iacType, resourceTypes));
         }
 
         llmResponse.Add("You must call the get_errors tool every time you make code changes, otherwise your deployment will fail.");
 
         var necessaryTools = new List<string> { "az cli (az --version)" };
 
-        if (parameters.DeploymentTool == DeploymentTool.Azd)
+        if (deploymentTool == DeploymentTool.Azd)
         {
             necessaryTools.Add("azd (azd --version)");
         }
 
-        if (parameters.ResourceTypes.Contains(AzureServiceNames.AzureContainerApp))
+        if (resourceTypes.Contains(AzureServiceNames.AzureContainerApp))
         {
             necessaryTools.Add("docker (docker --version)");
         }
 
         llmResponse.Add($"Ensure that the user has the necessary tools installed: {string.Join(",", necessaryTools)}.");
 
-        if (parameters.IacType == IacType.Terraform && parameters.DeploymentTool == DeploymentTool.Azd)
+        if (iacType == IacType.Terraform && deploymentTool == DeploymentTool.Azd)
         {
+            llmResponse.Add("Note: Do not use Terraform CLI directly.");
+        }
+
+        return llmResponse;
+    }
+}
+{
             llmResponse.Add("Note: Do not use Terraform CLI directly.");
         }
 
