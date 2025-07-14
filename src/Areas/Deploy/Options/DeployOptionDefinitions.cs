@@ -168,6 +168,30 @@ public static class DeployOptionDefinitions
             AllowMultipleArgumentsPerToken = true
         };
     }
+
+    public static class InfraCodeRules
+    {
+        public static readonly Option<string> DeploymentTool = new(
+            "--deployment-tool",
+            "The deployment tool to use (e.g., AZD, Bicep, Terraform, Azure CLI)")
+        {
+            IsRequired = true
+        };
+
+        public static readonly Option<string> IacType = new(
+            "--iac-type",
+            "The Infrastructure as Code type (e.g., Bicep, Terraform)")
+        {
+            IsRequired = true
+        };
+
+        public static readonly Option<string> ResourceTypes = new(
+            "--resource-types",
+            "Comma-separated list of Azure resource types to generate rules for. Available types: azureaisearch, azureaiservices, appservice, azureapplicationinsights, azurebotservice, containerapp, azurecosmosdb, function, azurekeyvault, azuredatabaseformysql, azureopenai, azuredatabaseforpostgresql, azureprivateendpoint, azurecacheforredis, azuresqldatabase, azurestorageaccount, staticwebapp, azureservicebus, azuresignalrservice, azurevirtualnetwork, azurewebpubsub")
+        {
+            IsRequired = true
+        };
+    }
 }
 
 public static class AppTopologySchema

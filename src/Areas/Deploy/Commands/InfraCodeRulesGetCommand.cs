@@ -15,13 +15,9 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
     private const string CommandTitle = "Get Infrastructure Code Rules";
     private readonly ILogger<InfraCodeRulesGetCommand> _logger = logger;
 
-    private readonly Option<string> _rawMcpToolInputOption = new(
-        $"--{DeployOptionDefinitions.RawMcpToolInput.RawMcpToolInputName}",
-        InfraCodeRulesParametersSchema.Schema.ToJsonString()
-    )
-    {
-        IsRequired = true
-    };
+    private readonly Option<string> _deploymentToolOption = DeployOptionDefinitions.InfraCodeRules.DeploymentTool;
+    private readonly Option<string> _iacTypeOption = DeployOptionDefinitions.InfraCodeRules.IacType;
+    private readonly Option<string> _resourceTypesOption = DeployOptionDefinitions.InfraCodeRules.ResourceTypes;
 
     public override string Name => "infra-code-rules-get";
 
@@ -35,13 +31,17 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
     protected override void RegisterOptions(Command command)
     {
         base.RegisterOptions(command);
-        command.AddOption(_rawMcpToolInputOption);
+        command.AddOption(_deploymentToolOption);
+        command.AddOption(_iacTypeOption);
+        command.AddOption(_resourceTypesOption);
     }
 
-    private RawMcpToolInputOptions BindOptions(ParseResult parseResult)
+    private InfraCodeRulesOptions BindOptions(ParseResult parseResult)
     {
-        var options = new RawMcpToolInputOptions();
-        options.RawMcpToolInput = parseResult.GetValueForOption(_rawMcpToolInputOption);
+        var options = new InfraCodeRulesOptions();
+        options.DeploymentTool = parseResult.GetValueForOption(_deploymentToolOption) ?? string.Empty;
+        options.IacType = parseResult.GetValueForOption(_iacTypeOption) ?? string.Empty;
+        options.ResourceTypes = parseResult.GetValueForOption(_resourceTypesOption) ?? string.Empty;
         return options;
     }
 
@@ -52,55 +52,55 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
     public override Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var options = BindOptions(parseResult);
-        var rawMcpToolInput = options.RawMcpToolInput;
-        if (string.IsNullOrWhiteSpace(rawMcpToolInput))
+
+        if (string.IsNullOrWhiteSpace(options.DeploymentTool))
         {
-            throw new ArgumentException("Input cannot be null or empty.", nameof(options.RawMcpToolInput));
+            throw new ArgumentException("Deployment tool cannot be null or empty.", nameof(options.DeploymentTool));
         }
 
-        InfraCodeRulesParameters? parameters;
-        try
+        if (string.IsNullOrWhiteSpace(options.IacType))
         {
-            parameters = JsonSerializer.Deserialize<InfraCodeRulesParameters>(
-                          rawMcpToolInput, DeployJsonContext.Default.InfraCodeRulesParameters)
-                          ?? throw new ArgumentException("Failed to deserialize input.", nameof(rawMcpToolInput));
-        }
-        catch (JsonException ex)
-        {
-            throw new ArgumentException($"Invalid JSON format: {ex.Message}", nameof(rawMcpToolInput), ex);
+            throw new ArgumentException("IaC type cannot be null or empty.", nameof(options.IacType));
         }
 
-        _logger.LogInformation("Successfully parsed InfraCodeRulesParameters");
-        if (parameters == null)
+        if (string.IsNullOrWhiteSpace(options.ResourceTypes))
         {
-            throw new ArgumentException("Parsed parameters cannot be null.", nameof(rawMcpToolInput));
+            throw new ArgumentException("Resource types cannot be null or empty.", nameof(options.ResourceTypes));
         }
 
-        if (string.IsNullOrWhiteSpace(parameters.DeploymentTool))
+        _logger.LogInformation("Successfully parsed InfraCodeRulesOptions");
+
+        var resourceTypes = options.ResourceTypes.Split(',')
+            .Select(rt => rt.Trim())
+            .Where(rt => !string.IsNullOrWhiteSpace(rt))
+            .ToArray();
+
+        var parameters = new InfraCodeRulesParameters
         {
-            throw new ArgumentException("Deployment tool cannot be null or empty.", nameof(parameters.DeploymentTool));
-        }
+            DeploymentTool = options.DeploymentTool,
+            IacType = options.IacType,
+            ResourceTypes = resourceTypes
+        };
 
-        if (string.IsNullOrWhiteSpace(parameters.IacType))
-        {
-            throw new ArgumentException("IaC type cannot be null or empty.", nameof(parameters.IacType));
-        }
-
-        if (parameters.ResourceTypes == null || parameters.ResourceTypes.Length == 0)
-        {
-            throw new ArgumentException("Resource types cannot be null or empty.", nameof(parameters.ResourceTypes));
-        }
-
-
-        List<string> result = InfraCodeRuleRetriever.PopulateLLMResponse(
-            parameters
-        );
+        List<string> result = InfraCodeRuleRetriever.PopulateLLMResponse(parameters);
 
         context.Response.Message = string.Join(Environment.NewLine, result);
         return Task.FromResult(context.Response);
     }
 
     // Implementation-specific error handling
+    protected override string GetErrorMessage(Exception ex) => ex switch
+    {
+        ArgumentException argEx => $"Invalid input: {argEx.Message}",
+        _ => base.GetErrorMessage(ex)
+    };
+
+    protected override int GetStatusCode(Exception ex) => ex switch
+    {
+        ArgumentException => 400,
+        _ => base.GetStatusCode(ex)
+    };
+}
     protected override string GetErrorMessage(Exception ex) => ex switch
     {
         ArgumentException argEx => $"Invalid input: {argEx.Message}",
