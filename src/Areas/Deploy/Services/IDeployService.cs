@@ -13,8 +13,6 @@ public interface IDeployService
         string workspaceFolder,
         string azdEnvName,
         string subscriptionId,
-        DateTime? startTime = null,
-        DateTime? endTime = null,
         int? limit = null);
 
     Task<string> GetAzureQuotaAsync(

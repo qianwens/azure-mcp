@@ -14,12 +14,6 @@ public class AzdAppLogOptions : SubscriptionOptions
     [JsonPropertyName("azdEnvName")]
     public string AzdEnvName { get; set; } = string.Empty;
 
-    [JsonPropertyName("startTime")]
-    public string? StartTime { get; set; }
-
-    [JsonPropertyName("endTime")]
-    public string? EndTime { get; set; }
-
     [JsonPropertyName("limit")]
     public int? Limit { get; set; }
 }

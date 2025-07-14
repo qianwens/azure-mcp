@@ -14,8 +14,6 @@ public static class AzdResourceLogService
         string workspaceFolder,
         string azdEnvName,
         string subscriptionId,
-        DateTime? startTime = null,
-        DateTime? endTime = null,
         int? limit = null)
     {
         var toolErrorLogs = new List<string>();
@@ -36,7 +34,7 @@ public static class AzdResourceLogService
                     if (service.Host != null)
                     {
                         var resourceType = ResourceTypeExtensions.GetResourceTypeFromHost(service.Host);
-                        var logs = await azdAppLogRetriever.QueryAppLogsAsync(resourceType, serviceName, startTime, endTime, limit);
+                        var logs = await azdAppLogRetriever.QueryAppLogsAsync(resourceType, serviceName, limit);
                         appLogs.Add(logs);
                     }
                 }

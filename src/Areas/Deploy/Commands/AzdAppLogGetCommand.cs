@@ -16,8 +16,6 @@ public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : S
 
     private readonly Option<string> _workspaceFolderOption = DeployOptionDefinitions.AzdAppLogOptions.WorkspaceFolder;
     private readonly Option<string> _azdEnvNameOption = DeployOptionDefinitions.AzdAppLogOptions.AzdEnvName;
-    private readonly Option<string> _startTimeOption = DeployOptionDefinitions.AzdAppLogOptions.StartTime;
-    private readonly Option<string> _endTimeOption = DeployOptionDefinitions.AzdAppLogOptions.EndTime;
     private readonly Option<int> _limitOption = DeployOptionDefinitions.AzdAppLogOptions.Limit;
 
     public override string Name => "azd-app-log-get";
@@ -34,8 +32,6 @@ public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : S
         base.RegisterOptions(command);
         command.AddOption(_workspaceFolderOption);
         command.AddOption(_azdEnvNameOption);
-        command.AddOption(_startTimeOption);
-        command.AddOption(_endTimeOption);
         command.AddOption(_limitOption);
     }
 
@@ -44,8 +40,6 @@ public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : S
         var options = base.BindOptions(parseResult);
         options.WorkspaceFolder = parseResult.GetValueForOption(_workspaceFolderOption)!;
         options.AzdEnvName = parseResult.GetValueForOption(_azdEnvNameOption)!;
-        options.StartTime = parseResult.GetValueForOption(_startTimeOption);
-        options.EndTime = parseResult.GetValueForOption(_endTimeOption);
         options.Limit = parseResult.GetValueForOption(_limitOption);
         return options;
     }
@@ -65,26 +59,12 @@ public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : S
             context.Activity?.WithSubscriptionTag(options);
 
             // Parse optional date parameters
-            DateTime? startTime = null;
-            DateTime? endTime = null;
-
-            if (!string.IsNullOrEmpty(options.StartTime) && DateTime.TryParse(options.StartTime, out var parsedStartTime))
-            {
-                startTime = parsedStartTime;
-            }
-
-            if (!string.IsNullOrEmpty(options.EndTime) && DateTime.TryParse(options.EndTime, out var parsedEndTime))
-            {
-                endTime = parsedEndTime;
-            }
 
             var deployService = context.GetService<IDeployService>();
             string result = await deployService.GetAzdResourceLogsAsync(
                 options.WorkspaceFolder!,
                 options.AzdEnvName!,
                 options.Subscription!,
-                startTime,
-                endTime,
                 options.Limit);
 
             context.Response.Message = result;

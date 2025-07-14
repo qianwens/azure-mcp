@@ -90,7 +90,7 @@ public class AzdAppLogRetriever(TokenCredential credential, string subscriptionI
     private static string GetFunctionAppLogsQuery(string functionAppName, int limit) =>
         $"AppTraces | where AppRoleName == '{functionAppName}' | order by TimeGenerated desc | project TimeGenerated, Message | take {limit}";
 
-    public async Task<string> QueryAppLogsAsync(ResourceType resourceType, string serviceName, DateTimeOffset? startTime = null, DateTimeOffset? endTime = null, int? limit = null)
+    public async Task<string> QueryAppLogsAsync(ResourceType resourceType, string serviceName, int? limit = null)
     {
         var app = await RegisterAppAsync(resourceType, serviceName);
         var getLogErrors = new List<string>();
@@ -99,8 +99,8 @@ public class AzdAppLogRetriever(TokenCredential credential, string subscriptionI
         DateTimeOffset? lastDeploymentTime = null;
 
         var actualLimit = limit ?? 200;
-        endTime ??= DateTime.UtcNow;
-        startTime ??= endTime.Value.AddHours(-4);
+        DateTimeOffset endTime = DateTime.UtcNow;
+        DateTimeOffset startTime = endTime.AddHours(-4);
 
         switch (resourceType)
         {
@@ -144,16 +144,18 @@ public class AzdAppLogRetriever(TokenCredential credential, string subscriptionI
                 throw new ArgumentException($"Unsupported resource type: {resourceType}");
         }
 
+        // startTime is now, endTime is 1 hour ago
+
         if (lastDeploymentTime.HasValue && lastDeploymentTime > startTime)
         {
-            startTime = lastDeploymentTime;
+            startTime = lastDeploymentTime ?? startTime;
         }
 
         foreach (var logAnalyticsId in _logAnalyticsWorkspaceIds)
         {
             try
             {
-                var timeRange = new QueryTimeRange(startTime.Value, endTime.Value);
+                var timeRange = new QueryTimeRange(startTime, endTime);
                 var response = await _queryClient!.QueryResourceAsync(new(logAnalyticsId), logSearchQuery, timeRange);
 
                 if (response.Value.Status == LogsQueryResultStatus.Success)

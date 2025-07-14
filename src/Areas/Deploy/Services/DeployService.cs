@@ -25,8 +25,6 @@ public class DeployService() : BaseAzureService, IDeployService
          string workspaceFolder,
          string azdEnvName,
          string subscriptionId,
-         DateTime? startTime = null,
-         DateTime? endTime = null,
          int? limit = null)
     {
         TokenCredential credential = await GetCredential();
@@ -35,8 +33,6 @@ public class DeployService() : BaseAzureService, IDeployService
             workspaceFolder,
             azdEnvName,
             subscriptionId,
-            startTime,
-            endTime,
             limit);
         return result;
     }

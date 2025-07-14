@@ -26,8 +26,6 @@ public static class DeployOptionDefinitions
     {
         public const string WorkspaceFolderName = "workspace-folder";
         public const string AzdEnvNameName = "azd-env-name";
-        public const string StartTimeName = "start-time";
-        public const string EndTimeName = "end-time";
         public const string LimitName = "limit";
 
         public static readonly Option<string> WorkspaceFolder = new(
@@ -44,22 +42,6 @@ public static class DeployOptionDefinitions
         )
         {
             IsRequired = true
-        };
-
-        public static readonly Option<string> StartTime = new(
-            $"--{StartTimeName}",
-            "The start time from which this tool will retrieve the logs. Use this when the logs of a specific time range needs checking. For example, older logs or only recent logs are required."
-        )
-        {
-            IsRequired = false
-        };
-
-        public static readonly Option<string> EndTime = new(
-            $"--{EndTimeName}",
-            "The end time to which this tool will retrieve the logs. Use this when the logs of a specific time range needs checking. For example, older logs or only recent logs are required."
-        )
-        {
-            IsRequired = false
         };
 
         public static readonly Option<int> Limit = new(
