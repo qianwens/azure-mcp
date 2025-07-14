@@ -193,11 +193,3 @@ public static class InfraCodeRuleRetriever
         return llmResponse;
     }
 }
-{
-            llmResponse.Add("Note: Do not use Terraform CLI directly.");
-        }
-
-        return llmResponse;
-    }
-}
-
