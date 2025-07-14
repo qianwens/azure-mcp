@@ -3,7 +3,6 @@
 
 using AzureMcp.Areas.Deploy.Options;
 using AzureMcp.Areas.Deploy.Services.Util;
-using AzureMcp.Commands;
 using AzureMcp.Commands.Subscription;
 using AzureMcp.Services.Telemetry;
 using Microsoft.Extensions.Logging;
@@ -63,35 +62,17 @@ public sealed class PipelineGenerateCommand(ILogger<PipelineGenerateCommand> log
             {
                 return Task.FromResult(context.Response);
             }
-
             context.Activity?.WithSubscriptionTag(options);
             var result = PipelineGenerationUtil.GeneratePipelineGuidelines(options);
 
             context.Response.Message = result;
             context.Response.Status = 200;
-            return Task.FromResult(context.Response);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error generating deployment pipeline");
-            context.Response.Status = 500;
-            context.Response.Message = $"Error generating deployment pipeline: {ex.Message}";
-            return Task.FromResult(context.Response);
+            HandleException(context, ex);
         }
+        return Task.FromResult(context.Response);
     }
 
-    // Implementation-specific error handling
-    protected override string GetErrorMessage(Exception ex) => ex switch
-    {
-        ArgumentException argEx => $"Invalid argument: {argEx.Message}",
-        JsonException jsonEx => $"JSON parsing error: {jsonEx.Message}",
-        _ => base.GetErrorMessage(ex)
-    };
-
-    protected override int GetStatusCode(Exception ex) => ex switch
-    {
-        ArgumentException => 400,
-        JsonException => 400,
-        _ => base.GetStatusCode(ex)
-    };
 }

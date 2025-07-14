@@ -6,6 +6,7 @@ using AzureMcp.Areas.Deploy.Models;
 using AzureMcp.Areas.Deploy.Options;
 using AzureMcp.Areas.Deploy.Services;
 using AzureMcp.Commands;
+using AzureMcp.Models.Command;
 using AzureMcp.Options;
 using AzureMcp.Services.Telemetry;
 using Microsoft.Extensions.Logging;
@@ -66,37 +67,47 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger)
         try
         {
             parameters = JsonSerializer.Deserialize<AzureRegionCheckParameters>(
-                          rawMcpToolInput, DeployJsonContext.Default.AzureRegionCheckParameters)
-                          ?? throw new ArgumentException("Failed to deserialize input.", nameof(rawMcpToolInput));
-        }
-        catch (JsonException ex)
-        {
-            throw new ArgumentException($"Invalid JSON format: {ex.Message}", nameof(rawMcpToolInput), ex);
-        }
-        _logger.LogInformation("Successfully parsed AzureRegionCheckParameters");
-        if (parameters == null)
-        {
-            throw new ArgumentException("Parsed parameters cannot be null.", nameof(rawMcpToolInput));
-        }
-        if (string.IsNullOrWhiteSpace(parameters.SubscriptionId))
-        {
-            throw new ArgumentException("Subscription ID cannot be null or empty.", nameof(parameters.SubscriptionId));
-        }
-        if (parameters.ResourceTypes is null || !parameters.ResourceTypes.Any())
-        {
-            throw new ArgumentException("Resource types is empty.", nameof(parameters.ResourceTypes));
-        }
-        context.Activity?.WithSubscriptionTag(new SubscriptionOptions
-        {
-            Subscription = parameters.SubscriptionId,
-        });
+                         rawMcpToolInput, DeployJsonContext.Default.AzureRegionCheckParameters)
+                         ?? throw new ArgumentException("Failed to deserialize input.", nameof(rawMcpToolInput));
 
-        var deployService = context.GetService<IDeployService>();
-        string toolResult = await deployService.GetAvailableRegionsForResourceTypesAsync(
-            parameters.ResourceTypes,
-            parameters.SubscriptionId,
-            parameters.CognitiveServiceProperties);
-        context.Response.Message = toolResult;
+            _logger.LogInformation("Successfully parsed AzureRegionCheckParameters");
+            if (parameters == null)
+            {
+                throw new ArgumentException("Parsed parameters cannot be null.", nameof(rawMcpToolInput));
+            }
+            if (string.IsNullOrWhiteSpace(parameters.SubscriptionId))
+            {
+                throw new ArgumentException("Subscription ID cannot be null or empty.", nameof(parameters.SubscriptionId));
+            }
+            if (parameters.ResourceTypes is null || !parameters.ResourceTypes.Any())
+            {
+                throw new ArgumentException("Resource types is empty.", nameof(parameters.ResourceTypes));
+            }
+            context.Activity?.WithSubscriptionTag(new SubscriptionOptions
+            {
+                Subscription = parameters.SubscriptionId,
+            });
+
+            var deployService = context.GetService<IDeployService>();
+            List<string> toolResult = await deployService.GetAvailableRegionsForResourceTypesAsync(
+                parameters.ResourceTypes,
+                parameters.SubscriptionId,
+                parameters.CognitiveServiceProperties);
+
+            _logger.LogInformation("Region check result: {ToolResult}", toolResult);
+
+            context.Response.Results = toolResult?.Count > 0 ?
+                ResponseResult.Create(
+                    new RegionCheckCommandResult(toolResult),
+                    DeployJsonContext.Default.RegionCheckCommandResult) :
+                null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An exception occurred checking available Azure regions.");
+            HandleException(context, ex);
+        }
+
         return context.Response;
     }
 
@@ -105,13 +116,6 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger)
     {
         ArgumentException argEx => $"Invalid input: {argEx.Message}",
         JsonException jsonEx => $"Invalid JSON format: {jsonEx.Message}",
-        UnauthorizedAccessException => "Access denied. Verify you have Reader permissions on the subscription.",
-        Azure.RequestFailedException rfEx when rfEx.Status == 404 =>
-            "Subscription not found. Verify the subscription ID is correct and accessible.",
-        Azure.RequestFailedException rfEx when rfEx.Status == 403 =>
-            "Access forbidden. Verify you have the required permissions to read subscription resources.",
-        Azure.Identity.AuthenticationFailedException authEx =>
-            $"Authentication failed. Please run 'az login' to sign in. Details: {authEx.Message}",
         _ => base.GetErrorMessage(ex)
     };
 
@@ -119,10 +123,9 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger)
     {
         ArgumentException => 400,
         JsonException => 400,
-        UnauthorizedAccessException => 403,
-        Azure.RequestFailedException rfEx => rfEx.Status,
-        Azure.Identity.AuthenticationFailedException => 401,
         _ => base.GetStatusCode(ex)
     };
+
+    internal record RegionCheckCommandResult(List<string> AvailableRegions);
 
 }

@@ -78,25 +78,4 @@ public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : S
         return context.Response;
     }
 
-    protected override string GetErrorMessage(Exception ex) => ex switch
-    {
-        ArgumentException argEx => $"Invalid input: {argEx.Message}",
-        UnauthorizedAccessException => "Access denied. Verify you have Reader permissions on the subscription.",
-        Azure.RequestFailedException rfEx when rfEx.Status == 404 =>
-            "Subscription not found. Verify the subscription ID is correct and accessible.",
-        Azure.RequestFailedException rfEx when rfEx.Status == 403 =>
-            "Access forbidden. Verify you have the required permissions to read subscription resources.",
-        Azure.Identity.AuthenticationFailedException authEx =>
-            $"Authentication failed. Please run 'az login' to sign in. Details: {authEx.Message}",
-        _ => base.GetErrorMessage(ex)
-    };
-
-    protected override int GetStatusCode(Exception ex) => ex switch
-    {
-        ArgumentException => 400,
-        UnauthorizedAccessException => 403,
-        Azure.RequestFailedException rfEx => rfEx.Status,
-        Azure.Identity.AuthenticationFailedException => 401,
-        _ => base.GetStatusCode(ex)
-    };
 }

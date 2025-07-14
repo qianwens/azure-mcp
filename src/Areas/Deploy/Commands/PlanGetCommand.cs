@@ -52,42 +52,24 @@ public sealed class PlanGetCommand(ILogger<PlanGetCommand> logger)
     {
         var options = BindOptions(parseResult);
 
-        if (string.IsNullOrWhiteSpace(options.WorkspaceFolder))
-        {
-            throw new ArgumentException("Workspace folder cannot be null or empty.", nameof(options.WorkspaceFolder));
-        }
-        if (string.IsNullOrWhiteSpace(options.ProjectName))
-        {
-            throw new ArgumentException("Project name cannot be null or empty.", nameof(options.ProjectName));
-        }
-
-        _logger.LogInformation("Successfully parsed PlanGetOptions");
-
         try
         {
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
+            {
+                return Task.FromResult(context.Response);
+            }
             var planTemplate = DeploymentPlanTemplateUtil.GetPlanTemplate(options.ProjectName);
 
             context.Response.Message = planTemplate;
             context.Response.Status = 200;
-            return Task.FromResult(context.Response);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error generating deployment plan");
             HandleException(context, ex);
-            return Task.FromResult(context.Response);
         }
+        return Task.FromResult(context.Response);
+
     }
 
-    protected override string GetErrorMessage(Exception ex) => ex switch
-    {
-        ArgumentException argEx => $"Invalid input: {argEx.Message}",
-        _ => base.GetErrorMessage(ex)
-    };
-
-    protected override int GetStatusCode(Exception ex) => ex switch
-    {
-        ArgumentException => 400,
-        _ => base.GetStatusCode(ex)
-    };
 }

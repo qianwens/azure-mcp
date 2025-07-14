@@ -15,13 +15,13 @@ public interface IDeployService
         string subscriptionId,
         int? limit = null);
 
-    Task<string> GetAzureQuotaAsync(
+    Task<Dictionary<string, List<QuotaInfo>>> GetAzureQuotaAsync(
         List<string> resourceTypes,
         string subscriptionId,
         string location);
 
 
-    Task<string> GetAvailableRegionsForResourceTypesAsync(
+    Task<List<string>> GetAvailableRegionsForResourceTypesAsync(
         List<string> resourceTypes,
         string subscriptionId,
         CognitiveServiceProperties? cognitiveServiceProperties = null);

@@ -53,50 +53,30 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
     public override Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var options = BindOptions(parseResult);
-
-        if (string.IsNullOrWhiteSpace(options.DeploymentTool))
+        try
         {
-            throw new ArgumentException("Deployment tool cannot be null or empty.", nameof(options.DeploymentTool));
-        }
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
+            {
+                return Task.FromResult(context.Response);
+            }
 
-        if (string.IsNullOrWhiteSpace(options.IacType))
+            var resourceTypes = options.ResourceTypes.Split(',')
+                .Select(rt => rt.Trim())
+                .Where(rt => !string.IsNullOrWhiteSpace(rt))
+                .ToArray();
+
+            List<string> result = InfraCodeRuleRetriever.PopulateLLMResponse(
+                options.DeploymentTool,
+                options.IacType,
+                resourceTypes);
+
+            context.Response.Message = string.Join(Environment.NewLine, result);
+        }
+        catch (Exception ex)
         {
-            throw new ArgumentException("IaC type cannot be null or empty.", nameof(options.IacType));
+            _logger.LogError(ex, "An exception occurred listing accounts.");
+            HandleException(context, ex);
         }
-
-        if (string.IsNullOrWhiteSpace(options.ResourceTypes))
-        {
-            throw new ArgumentException("Resource types cannot be null or empty.", nameof(options.ResourceTypes));
-        }
-
-        _logger.LogInformation("Successfully parsed InfraCodeRulesOptions");
-
-        var resourceTypes = options.ResourceTypes.Split(',')
-            .Select(rt => rt.Trim())
-            .Where(rt => !string.IsNullOrWhiteSpace(rt))
-            .ToArray();
-
-        List<string> result = InfraCodeRuleRetriever.PopulateLLMResponse(
-            options.DeploymentTool,
-            options.IacType,
-            resourceTypes);
-
-        context.Response.Message = string.Join(Environment.NewLine, result);
         return Task.FromResult(context.Response);
     }
-
-    // Implementation-specific error handling
-    protected override string GetErrorMessage(Exception ex) => ex switch
-    {
-        ArgumentException argEx => $"Invalid input: {argEx.Message}",
-        JsonException jsonEx => $"Invalid JSON format: {jsonEx.Message}",
-        _ => base.GetErrorMessage(ex)
-    };
-
-    protected override int GetStatusCode(Exception ex) => ex switch
-    {
-        ArgumentException => 400,
-        JsonException => 400,
-        _ => base.GetStatusCode(ex)
-    };
 }

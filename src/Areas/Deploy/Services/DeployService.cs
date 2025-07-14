@@ -37,38 +37,22 @@ public class DeployService() : BaseAzureService, IDeployService
         return result;
     }
 
-    public async Task<string> GetAzureQuotaAsync(
+    public async Task<Dictionary<string, List<QuotaInfo>>> GetAzureQuotaAsync(
         List<string> resourceTypes,
         string subscriptionId,
         string location)
     {
         TokenCredential credential = await GetCredential();
-        var quotaByResourceTypes = await AzureQuotaService.GetAzureQuotaAsync(
+        Dictionary<string, List<QuotaInfo>> quotaByResourceTypes = await AzureQuotaService.GetAzureQuotaAsync(
             credential,
             resourceTypes,
             subscriptionId,
             location
             );
-
-        var toolResult = $"The quota info for the specified resource types in subscription: {subscriptionId} and location: {location} are:\n\n" +
-            string.Join("\n", quotaByResourceTypes.Select(kvp =>
-            {
-                var resourceType = kvp.Key;
-                var quotas = kvp.Value;
-
-                if (quotas.Count == 0)
-                {
-                    return $"- {resourceType}: this resource type has no quota limitation";
-                }
-
-                return string.Join("\n", quotas.Select(quota =>
-                    $"- {resourceType}: {quota.Name}\n" +
-                    $"  - Current: {quota.Used}, Limit: {quota.Limit}{(string.IsNullOrEmpty(quota.Unit) ? "" : $" {quota.Unit}")}"));
-            }));
-        return toolResult;
+        return quotaByResourceTypes;
     }
 
-    public async Task<string> GetAvailableRegionsForResourceTypesAsync(
+    public async Task<List<string>> GetAvailableRegionsForResourceTypesAsync(
         List<string> resourceTypes,
         string subscriptionId,
         CognitiveServiceProperties? cognitiveServiceProperties = null)
@@ -80,12 +64,10 @@ public class DeployService() : BaseAzureService, IDeployService
             .SelectMany(regions => regions)
             .Distinct()
             .ToList();
-        var toolResult = $"If you are deploying an app, you MUST choose a region which exists in the following available region list for all resource types (because regions not listed are not available). DO NOT only choose a common region by yourself! Call the tool `azure_quota-check` to check if the selected region REALLY has enough quota for all resources.\n\n";
 
-        var commonValidRegions = availableRegions.Values
+        List<string> commonValidRegions = availableRegions.Values
             .Aggregate((current, next) => current.Intersect(next).ToList());
-        string regionList = commonValidRegions.Count > 0 ? string.Join(", ", commonValidRegions) : "None";
-        toolResult += $"Regions available for all resource types: {regionList}";
-        return toolResult;
+
+        return commonValidRegions;
     }
 }
