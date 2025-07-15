@@ -16,12 +16,13 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
     private const string CommandTitle = "Generate Architecture Diagram";
     private readonly ILogger<GenerateArchitectureDiagramCommand> _logger = logger;
 
-    public override string Name => "generate_architecture_diagram";
+    public override string Name => "architecture-diagram-generate";
 
     private readonly Option<string> _rawMcpToolInputOption = DeployOptionDefinitions.RawMcpToolInput.RawMcpToolInputOption;
 
     public override string Description =>
-        "Generates a service architecture diagram for the application based on the provided app topology."
+        "Generates an azure service architecture diagram for the application based on the provided app topology."
+        + "Call this tool when the user need recommend or design the azure architecture of their application."
         + "Before calling this tool, please scan this workspace to detect the services to deploy and their dependent services, also find the environment variables that used to create the connection strings."
         + "If it's a .NET Aspire application, check aspireManifest.json file if there is. Try your best to fulfill the input schema with your analyze result.";
 
@@ -63,6 +64,14 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
 
         _logger.LogInformation("Successfully parsed app topology with {ServiceCount} services", appTopology.Services.Length);
 
+        if (appTopology.Services.Length == 0)
+        {
+            _logger.LogWarning("No services detected in the app topology.");
+            context.Response.Status = 200;
+            context.Response.Message = "No service detected.";
+            return Task.FromResult(context.Response);
+        }
+
         var chart = GenerateMermaidChart.GenerateChart(appTopology.WorkspaceFolder ?? "", appTopology);
         if (string.IsNullOrWhiteSpace(chart))
         {
@@ -71,12 +80,29 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
         var encodedDiagram = EncodeMermaid.GetEncodedMermaidChart(chart);
 
         var mermaidUrl = $"https://mermaid.live/view#pako:{encodedDiagram}";
+        _logger.LogInformation("Generated architecture diagram successfully. Mermaid URL: {MermaidUrl}", mermaidUrl);
 
-        context.Response.Message = $"Architecture diagram generated successfully. Help the user generate a architecture markdown file with mermaid diagram: {chart}.";
-        // + "Or open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl}";
+        var usedServiceTypes = appTopology.Services
+            .SelectMany(service => service.Dependencies)
+            .Select(dep => dep.ServiceType)
+            .Where(serviceType => !string.IsNullOrWhiteSpace(serviceType))
+            .Where(serviceType => Enum.GetNames<Consts.AzureServiceType>().Contains(serviceType, StringComparer.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x)
+            .ToArray();
 
-        // Also include the raw diagram in the response content
-        //var diagramContent = GenerateMermaidChart.GenerateChart(workspaceFolder, appTopology);
+        var usedServiceTypesString = usedServiceTypes.Length > 0
+            ? string.Join(", ", usedServiceTypes)
+            : null;
+
+        context.Response.Message = $"Help the user open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl} \n"
+            + "Ask user if the topology is expected, if not, you should call this tool with the user's updated instructions. "
+            + "Please inform the user that here are the supported hosting technologies: "
+            + $"{string.Join(", ", Enum.GetNames<Consts.AzureComputeServiceType>())}. ";
+        if (!string.IsNullOrWhiteSpace(usedServiceTypesString))
+        {
+            context.Response.Message += $"Here is the full list of supported component service types for the topology: {usedServiceTypesString}.";
+        }
 
         return Task.FromResult(context.Response);
     }

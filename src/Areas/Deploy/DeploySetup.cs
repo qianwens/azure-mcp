@@ -26,8 +26,6 @@ internal sealed class DeploySetup : IAreaSetup
         var deploy = new CommandGroup("deploy", "Deploy commands for deploying applications to Azure");
         rootGroup.AddSubGroup(deploy);
 
-        deploy.AddCommand("generate_architecture_diagram", new GenerateArchitectureDiagramCommand(loggerFactory.CreateLogger<GenerateArchitectureDiagramCommand>()));
-
         deploy.AddCommand("plan-get", new PlanGetCommand(loggerFactory.CreateLogger<PlanGetCommand>()));
 
         deploy.AddCommand("infra-code-rules-get", new InfraCodeRulesGetCommand(loggerFactory.CreateLogger<InfraCodeRulesGetCommand>()));
@@ -38,5 +36,7 @@ internal sealed class DeploySetup : IAreaSetup
         deploy.AddCommand("azd-app-log-get", new AzdAppLogGetCommand(loggerFactory.CreateLogger<AzdAppLogGetCommand>()));
 
         deploy.AddCommand("pipeline-generate", new PipelineGenerateCommand(loggerFactory.CreateLogger<PipelineGenerateCommand>()));
+
+        deploy.AddCommand("architecture-diagram-generate", new GenerateArchitectureDiagramCommand(loggerFactory.CreateLogger<GenerateArchitectureDiagramCommand>()));
     }
 }

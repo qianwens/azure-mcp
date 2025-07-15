@@ -125,7 +125,7 @@ public class ToolOperations
 
         if (realCommand.Options.Count == 1 && realCommand.Options[0].Name == RawMcpToolInputOptionName)
         {
-            commandOptions = realCommand.ParseRawMcpToolInput(parameters.Params.Arguments);
+            commandOptions = realCommand.ParseFromRawMcpToolInput(parameters.Params.Arguments);
         }
         else
         {

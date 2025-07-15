@@ -29,7 +29,7 @@ public static class GenerateMermaidChart
         {
             var serviceName = new List<string> { $"Name: {service.Name}" };
 
-            var projectRelativePath = Path.GetRelativePath(workspaceFolder, service.Path);
+            var projectRelativePath = Path.GetRelativePath(workspaceFolder, string.IsNullOrWhiteSpace(service.Path) ? workspaceFolder : service.Path);
             serviceName.Add($"Path: {projectRelativePath}");
             serviceName.Add($"Language: {service.Language}");
             serviceName.Add($"Port: {service.Port}");
@@ -52,7 +52,7 @@ public static class GenerateMermaidChart
         {
             foreach (var dependency in service.Dependencies)
             {
-                var instanceInternalName = $"${{{FlattenServiceType(dependency.ServiceType)}.{dependency.Name}}}";
+                var instanceInternalName = $"{FlattenServiceType(dependency.ServiceType)}.{dependency.Name}";
                 var instanceName = $"{dependency.Name} ({dependency.ServiceType})";
 
                 if (IsComputeResourceType(dependency.ServiceType))
@@ -126,15 +126,7 @@ public static class GenerateMermaidChart
 
     private static bool IsComputeResourceType(string serviceType)
     {
-        var computeTypes = new[]
-        {
-            "azureappservice",
-            "azurecontainerapp", 
-            "azurefunctions",
-            "azurekubernetesservice"
-        };
-
-        return computeTypes.Contains(serviceType.ToLowerInvariant());
+        return Enum.GetNames<Consts.AzureComputeServiceType>().Contains(serviceType, StringComparer.OrdinalIgnoreCase);
     }
 }
 
