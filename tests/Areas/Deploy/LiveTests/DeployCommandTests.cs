@@ -16,12 +16,10 @@ namespace AzureMcp.Tests.Areas.Deploy.LiveTests;
 public class DeployCommandTests : CommandTestsBase,
     IClassFixture<LiveTestFixture>
 {
-    private readonly DeployService _deployService;
     private readonly string _subscriptionId;
 
     public DeployCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper output) : base(liveTestFixture, output)
     {
-        _deployService = new DeployService();
         _subscriptionId = Settings.SubscriptionId;
     }
 
@@ -154,7 +152,7 @@ public class DeployCommandTests : CommandTestsBase,
             new()
             {
                 { "subscription", _subscriptionId },
-                { "workspace-folder", "C:/Users/xiaofanzhou/zxf/samples/samples/csharp-dotnet" },
+                { "workspace-folder", "C:/Users/" },
                 { "azd-env-name", "dotnetdeo" },
                 { "limit", 10 }
             });
@@ -180,7 +178,6 @@ public class DeployCommandTests : CommandTestsBase,
         var availableRegions = result.AssertProperty("availableRegions");
         Assert.Equal(JsonValueKind.Array, availableRegions.ValueKind);
         Assert.NotEmpty(availableRegions.EnumerateArray());
-        // Assert.Contains("eastus", result ?? String.Empty, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
