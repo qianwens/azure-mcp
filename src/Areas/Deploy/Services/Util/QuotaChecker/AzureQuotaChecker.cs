@@ -31,7 +31,8 @@ public record QuotaInfo(
     string Name,
     int Limit,
     int Used,
-    string? Unit = null
+    string? Unit = null,
+    string? Description = null
 );
 
 public interface IQuotaChecker
@@ -135,47 +136,44 @@ public static class AzureQuotaService
         string subscriptionId,
         string location)
     {
-        var result = new Dictionary<string, List<QuotaInfo>>();
-        var processedProviders = new HashSet<string>();
-        var quotaTasks = new List<Task>();
+        // Group resource types by provider to avoid duplicate processing
+        var providerToResourceTypes = resourceTypes
+            .GroupBy(rt => rt.Split('/')[0])
+            .ToDictionary(g => g.Key, g => g.ToList());
 
-        foreach (var resourceType in resourceTypes)
+        // Use Select to create tasks and await them all
+        var quotaTasks = providerToResourceTypes.Select(async kvp =>
         {
-            var provider = resourceType.Split('/')[0];
-
-            // Skip if we've already processed this provider
-            if (processedProviders.Contains(provider))
+            var (provider, resourceTypesForProvider) = (kvp.Key, kvp.Value);
+            try
             {
-                continue;
+                var quotaChecker = QuotaCheckerFactory.CreateQuotaChecker(credential, provider, subscriptionId);
+                var quotaInfo = await quotaChecker.GetQuotaForLocationAsync(location);
+                Console.WriteLine($"Quota info for provider {provider}: {quotaInfo.Count} items");
+
+                return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<QuotaInfo>>(rt, quotaInfo));
             }
-
-            quotaTasks.Add(Task.Run(async () =>
+            catch (ArgumentException ex) when (ex.Message.Contains("Unsupported resource provider", StringComparison.OrdinalIgnoreCase))
             {
-                try
+                return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<QuotaInfo>>(rt, new List<QuotaInfo>(){
+                    new QuotaInfo(rt, 0, 0, Description: "No Limit")
+                }));
+            }
+            catch (Exception error)
+            {
+                Console.WriteLine($"Error fetching quota for provider {provider}: {error.Message}");
+                return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<QuotaInfo>>(rt, new List<QuotaInfo>()
                 {
-                    var quotaChecker = QuotaCheckerFactory.CreateQuotaChecker(credential, provider, subscriptionId);
-                    var quotaInfo = await quotaChecker.GetQuotaForLocationAsync(location);
-                    Console.WriteLine($"Quota info for {resourceType}: {quotaInfo.Count} items");
+                    new QuotaInfo(rt, 0, 0, Description: error.Message)
+                }));
+            }
+        });
 
-                    lock (result)
-                    {
-                        result[resourceType] = quotaInfo;
-                        processedProviders.Add(provider);
-                    }
-                }
-                catch (Exception error)
-                {
-                    Console.WriteLine($"Error fetching quota for {resourceType}: {error.Message}");
+        var results = await Task.WhenAll(quotaTasks);
 
-                    lock (result)
-                    {
-                        result[resourceType] = [];
-                    }
-                }
-            }));
-        }
-
-        await Task.WhenAll(quotaTasks);
-        return result;
+        // Flatten the results into a single dictionary
+        return results
+            .SelectMany(kvps => kvps)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 }

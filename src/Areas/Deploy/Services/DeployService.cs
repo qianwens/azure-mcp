@@ -53,11 +53,28 @@ public class DeployService() : BaseAzureService, IDeployService
     }
 
     public async Task<List<string>> GetAvailableRegionsForResourceTypesAsync(
-        List<string> resourceTypes,
+        string[] resourceTypes,
         string subscriptionId,
-        CognitiveServiceProperties? cognitiveServiceProperties = null)
+        string? cognitiveServiceModelName = null,
+        string? cognitiveServiceModelVersion = null,
+        string? cognitiveServiceDeploymentSkuName = null)
     {
         ArmClient armClient = await CreateArmClientAsync();
+
+        // Create cognitive service properties if any of the parameters are provided
+        CognitiveServiceProperties? cognitiveServiceProperties = null;
+        if (!string.IsNullOrWhiteSpace(cognitiveServiceModelName) ||
+            !string.IsNullOrWhiteSpace(cognitiveServiceModelVersion) ||
+            !string.IsNullOrWhiteSpace(cognitiveServiceDeploymentSkuName))
+        {
+            cognitiveServiceProperties = new CognitiveServiceProperties
+            {
+                ModelName = cognitiveServiceModelName,
+                ModelVersion = cognitiveServiceModelVersion,
+                DeploymentSkuName = cognitiveServiceDeploymentSkuName
+            };
+        }
+
         var availableRegions = await AzureRegionService.GetAvailableRegionsForResourceTypesAsync(armClient, resourceTypes, subscriptionId, cognitiveServiceProperties);
         var allRegions = availableRegions.Values
             .Where(regions => regions.Count > 0)

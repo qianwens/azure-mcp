@@ -208,7 +208,7 @@ public static class AzureRegionService
 {
     public static async Task<Dictionary<string, List<string>>> GetAvailableRegionsForResourceTypesAsync(
         ArmClient armClient,
-        List<string> resourceTypes,
+        string[] resourceTypes,
         string subscriptionId,
         CognitiveServiceProperties? cognitiveServiceProperties = null)
     {

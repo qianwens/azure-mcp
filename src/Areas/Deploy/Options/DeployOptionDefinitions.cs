@@ -60,7 +60,6 @@ public static class DeployOptionDefinitions
         public const string OrganizationNameName = "organization-name";
         public const string RepositoryNameName = "repository-name";
         public const string GithubEnvironmentNameName = "github-environment-name";
-        public const string SubscriptionIdName = "subscription-id";
 
         public static readonly Option<bool> UseAZDPipelineConfig = new(
             $"--{UseAZDPipelineConfigName}",
@@ -121,17 +120,8 @@ public static class DeployOptionDefinitions
 
     public static class QuotaCheck
     {
-        public const string SubscriptionIdName = "subscription-id";
         public const string RegionName = "region";
         public const string ResourceTypesName = "resource-types";
-
-        public static readonly Option<string> SubscriptionId = new(
-            $"--{SubscriptionIdName}",
-            "The Azure subscription ID where the resources will be deployed. Retrieve the subscription ID from the context, or by prompting the user to provide it."
-        )
-        {
-            IsRequired = true
-        };
 
         public static readonly Option<string> Region = new(
             $"--{RegionName}",
@@ -148,6 +138,47 @@ public static class DeployOptionDefinitions
         {
             IsRequired = true,
             AllowMultipleArgumentsPerToken = true
+        };
+    }
+
+    public static class RegionCheck
+    {
+        public const string ResourceTypesName = "resource-types";
+        public const string CognitiveServiceModelNameName = "cognitive-service-model-name";
+        public const string CognitiveServiceModelVersionName = "cognitive-service-model-version";
+        public const string CognitiveServiceDeploymentSkuNameName = "cognitive-service-deployment-sku-name";
+
+        public static readonly Option<string> ResourceTypes = new(
+            $"--{ResourceTypesName}",
+            "Comma-separated list of Azure resource types to check available regions for. The valid Azure resource types. E.g. 'Microsoft.App/containerApps, Microsoft.Web/sites, Microsoft.CognitiveServices/accounts'."
+        )
+        {
+            IsRequired = true,
+            AllowMultipleArgumentsPerToken = true
+        };
+
+        public static readonly Option<string> CognitiveServiceModelName = new(
+            $"--{CognitiveServiceModelNameName}",
+            "Optional model name for cognitive services. Only needed when Microsoft.CognitiveServices is included in resource types."
+        )
+        {
+            IsRequired = false
+        };
+
+        public static readonly Option<string> CognitiveServiceModelVersion = new(
+            $"--{CognitiveServiceModelVersionName}",
+            "Optional model version for cognitive services. Only needed when Microsoft.CognitiveServices is included in resource types."
+        )
+        {
+            IsRequired = false
+        };
+
+        public static readonly Option<string> CognitiveServiceDeploymentSkuName = new(
+            $"--{CognitiveServiceDeploymentSkuNameName}",
+            "Optional deployment SKU name for cognitive services. Only needed when Microsoft.CognitiveServices is included in resource types."
+        )
+        {
+            IsRequired = false
         };
     }
 

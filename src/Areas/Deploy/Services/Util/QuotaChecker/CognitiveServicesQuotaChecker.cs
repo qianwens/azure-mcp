@@ -20,7 +20,8 @@ public class CognitiveServicesQuotaChecker(TokenCredential credential, string su
                     Name: item.Name?.LocalizedValue ?? item.Name?.Value ?? string.Empty,
                     Limit: (int)(item.Limit ?? 0),
                     Used: (int)(item.CurrentValue ?? 0),
-                    Unit: item.Unit.ToString()
+                    Unit: item.Unit.ToString(),
+                    Description: null
                 ));
             }
 

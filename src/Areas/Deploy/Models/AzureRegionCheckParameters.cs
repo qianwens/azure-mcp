@@ -1,19 +1,30 @@
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace AzureMcp.Areas.Deploy.Models;
 
-public sealed class AzureRegionCheckParameters
+public class AzureRegionCheckParameters
 {
+    [JsonPropertyName("subscriptionId")]
     public string SubscriptionId { get; set; } = string.Empty;
-    public List<string> ResourceTypes { get; set; } = new List<string>();
+
+    [JsonPropertyName("resourceTypes")]
+    public string[] ResourceTypes { get; set; } = [];
+
+    [JsonPropertyName("cognitiveServiceProperties")]
     public CognitiveServiceProperties? CognitiveServiceProperties { get; set; }
 }
 
-public sealed class CognitiveServiceProperties
+public class CognitiveServiceProperties
 {
-    public string ModelName { get; set; } = string.Empty;
-    public string ModelVersion { get; set; } = string.Empty;
-    public string DeploymentSkuName { get; set; } = string.Empty;
+    [JsonPropertyName("modelName")]
+    public string? ModelName { get; set; } = string.Empty;
+
+    [JsonPropertyName("modelVersion")]
+    public string? ModelVersion { get; set; } = string.Empty;
+
+    [JsonPropertyName("deploymentSkuName")]
+    public string? DeploymentSkuName { get; set; } = string.Empty;
 }
 
 public static class AzureRegionCheckParametersSchema

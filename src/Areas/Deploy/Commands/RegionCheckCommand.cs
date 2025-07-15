@@ -6,34 +6,28 @@ using AzureMcp.Areas.Deploy.Models;
 using AzureMcp.Areas.Deploy.Options;
 using AzureMcp.Areas.Deploy.Services;
 using AzureMcp.Commands;
+using AzureMcp.Commands.Subscription;
 using AzureMcp.Models.Command;
-using AzureMcp.Options;
 using AzureMcp.Services.Telemetry;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.Deploy.Commands.Region;
 
-public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger)
-    : BaseCommand()
+public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger) : SubscriptionCommand<RegionCheckOptions>()
 {
     private const string CommandTitle = "Check Available Azure Regions";
     private readonly ILogger<RegionCheckCommand> _logger = logger;
 
-    private readonly Option<string> _rawMcpToolInputOption = new(
-        $"--{DeployOptionDefinitions.RawMcpToolInput.RawMcpToolInputName}",
-        AzureRegionCheckParametersSchema.Schema.ToJsonString()
-    )
-    {
-        IsRequired = true
-    };
+    private readonly Option<string> _resourceTypesOption = DeployOptionDefinitions.RegionCheck.ResourceTypes;
+    private readonly Option<string> _cognitiveServiceModelNameOption = DeployOptionDefinitions.RegionCheck.CognitiveServiceModelName;
+    private readonly Option<string> _cognitiveServiceModelVersionOption = DeployOptionDefinitions.RegionCheck.CognitiveServiceModelVersion;
+    private readonly Option<string> _cognitiveServiceDeploymentSkuNameOption = DeployOptionDefinitions.RegionCheck.CognitiveServiceDeploymentSkuName;
 
     public override string Name => "region-check";
 
     public override string Description =>
         """
-        Checks available Azure regions for deployment and optionally their capabilities.
-        Returns a list of regions with metadata including geography, location, and paired regions.
-        Provide parameters as JSON matching the AzureRegionCheckParameters schema.
+        Given a list of Azure resource types, this tool will return a list of regions where the resource types are available. Always get the user's subscription ID before calling this tool.
         """;
 
     public override string Title => CommandTitle;
@@ -41,13 +35,19 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger)
     protected override void RegisterOptions(Command command)
     {
         base.RegisterOptions(command);
-        command.AddOption(_rawMcpToolInputOption);
+        command.AddOption(_resourceTypesOption);
+        command.AddOption(_cognitiveServiceModelNameOption);
+        command.AddOption(_cognitiveServiceModelVersionOption);
+        command.AddOption(_cognitiveServiceDeploymentSkuNameOption);
     }
 
-    private RawMcpToolInputOptions BindOptions(ParseResult parseResult)
+    protected override RegionCheckOptions BindOptions(ParseResult parseResult)
     {
-        var options = new RawMcpToolInputOptions();
-        options.RawMcpToolInput = parseResult.GetValueForOption(_rawMcpToolInputOption);
+        var options = base.BindOptions(parseResult);
+        options.ResourceTypes = parseResult.GetValueForOption(_resourceTypesOption) ?? string.Empty;
+        options.CognitiveServiceModelName = parseResult.GetValueForOption(_cognitiveServiceModelNameOption);
+        options.CognitiveServiceModelVersion = parseResult.GetValueForOption(_cognitiveServiceModelVersionOption);
+        options.CognitiveServiceDeploymentSkuName = parseResult.GetValueForOption(_cognitiveServiceDeploymentSkuNameOption);
         return options;
     }
 
@@ -58,41 +58,33 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger)
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var options = BindOptions(parseResult);
-        var rawMcpToolInput = options.RawMcpToolInput;
-        if (string.IsNullOrWhiteSpace(rawMcpToolInput))
-        {
-            throw new ArgumentException("Input cannot be null or empty.", nameof(options.RawMcpToolInput));
-        }
-        AzureRegionCheckParameters? parameters;
+
         try
         {
-            parameters = JsonSerializer.Deserialize<AzureRegionCheckParameters>(
-                         rawMcpToolInput, DeployJsonContext.Default.AzureRegionCheckParameters)
-                         ?? throw new ArgumentException("Failed to deserialize input.", nameof(rawMcpToolInput));
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
+            {
+                return context.Response;
+            }
 
-            _logger.LogInformation("Successfully parsed AzureRegionCheckParameters");
-            if (parameters == null)
+            context.Activity?.WithSubscriptionTag(options);
+
+            var resourceTypes = options.ResourceTypes.Split(',')
+                .Select(rt => rt.Trim())
+                .Where(rt => !string.IsNullOrWhiteSpace(rt))
+                .ToArray();
+
+            if (resourceTypes.Length == 0)
             {
-                throw new ArgumentException("Parsed parameters cannot be null.", nameof(rawMcpToolInput));
+                throw new ArgumentException("Resource types cannot be empty.", nameof(options.ResourceTypes));
             }
-            if (string.IsNullOrWhiteSpace(parameters.SubscriptionId))
-            {
-                throw new ArgumentException("Subscription ID cannot be null or empty.", nameof(parameters.SubscriptionId));
-            }
-            if (parameters.ResourceTypes is null || !parameters.ResourceTypes.Any())
-            {
-                throw new ArgumentException("Resource types is empty.", nameof(parameters.ResourceTypes));
-            }
-            context.Activity?.WithSubscriptionTag(new SubscriptionOptions
-            {
-                Subscription = parameters.SubscriptionId,
-            });
 
             var deployService = context.GetService<IDeployService>();
             List<string> toolResult = await deployService.GetAvailableRegionsForResourceTypesAsync(
-                parameters.ResourceTypes,
-                parameters.SubscriptionId,
-                parameters.CognitiveServiceProperties);
+                resourceTypes,
+                options.Subscription!,
+                options.CognitiveServiceModelName,
+                options.CognitiveServiceModelVersion,
+                options.CognitiveServiceDeploymentSkuName);
 
             _logger.LogInformation("Region check result: {ToolResult}", toolResult);
 
@@ -111,21 +103,5 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger)
         return context.Response;
     }
 
-    // Implementation-specific error handling
-    protected override string GetErrorMessage(Exception ex) => ex switch
-    {
-        ArgumentException argEx => $"Invalid input: {argEx.Message}",
-        JsonException jsonEx => $"Invalid JSON format: {jsonEx.Message}",
-        _ => base.GetErrorMessage(ex)
-    };
-
-    protected override int GetStatusCode(Exception ex) => ex switch
-    {
-        ArgumentException => 400,
-        JsonException => 400,
-        _ => base.GetStatusCode(ex)
-    };
-
     internal record RegionCheckCommandResult(List<string> AvailableRegions);
-
 }

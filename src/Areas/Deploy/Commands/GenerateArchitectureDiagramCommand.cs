@@ -53,7 +53,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
         AppTopology appTopology;
         try
         {
-            appTopology = JsonSerializer.Deserialize(rawMcpToolInput, DeployJsonContext.Default.AppTopology) 
+            appTopology = JsonSerializer.Deserialize(rawMcpToolInput, DeployJsonContext.Default.AppTopology)
                 ?? throw new ArgumentException("Failed to deserialize app topology.", nameof(rawMcpToolInput));
         }
         catch (JsonException ex)
@@ -73,8 +73,8 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
         var mermaidUrl = $"https://mermaid.live/view#pako:{encodedDiagram}";
 
         context.Response.Message = $"Architecture diagram generated successfully. Help the user generate a architecture markdown file with mermaid diagram: {chart}.";
-       // + "Or open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl}";
-        
+        // + "Or open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl}";
+
         // Also include the raw diagram in the response content
         //var diagramContent = GenerateMermaidChart.GenerateChart(workspaceFolder, appTopology);
 

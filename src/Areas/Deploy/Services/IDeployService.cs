@@ -22,7 +22,9 @@ public interface IDeployService
 
 
     Task<List<string>> GetAvailableRegionsForResourceTypesAsync(
-        List<string> resourceTypes,
+        string[] resourceTypes,
         string subscriptionId,
-        CognitiveServiceProperties? cognitiveServiceProperties = null);
+        string? cognitiveServiceModelName = null,
+        string? cognitiveServiceModelVersion = null,
+        string? cognitiveServiceDeploymentSkuName = null);
 }

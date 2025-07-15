@@ -8,9 +8,6 @@ namespace AzureMcp.Areas.Deploy.Options;
 
 public sealed class QuotaCheckOptions : SubscriptionOptions
 {
-    [JsonPropertyName("subscriptionId")]
-    public string SubscriptionId { get; set; } = string.Empty;
-
     [JsonPropertyName("region")]
     public string Region { get; set; } = string.Empty;
 

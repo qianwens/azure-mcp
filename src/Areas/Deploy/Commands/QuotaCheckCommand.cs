@@ -41,7 +41,6 @@ public class QuotaCheckCommand(ILogger<QuotaCheckCommand> logger) : Subscription
         var options = base.BindOptions(parseResult);
         options.Region = parseResult.GetValueForOption(_regionOption) ?? string.Empty;
         options.ResourceTypes = parseResult.GetValueForOption(_resourceTypesOption) ?? string.Empty;
-        options.SubscriptionId = options.Subscription ?? string.Empty;
         return options;
     }
 
@@ -68,7 +67,7 @@ public class QuotaCheckCommand(ILogger<QuotaCheckCommand> logger) : Subscription
             var deployService = context.GetService<IDeployService>();
             Dictionary<string, List<QuotaInfo>> toolResult = await deployService.GetAzureQuotaAsync(
                 ResourceTypes,
-                options.SubscriptionId,
+                options.Subscription!,
                 options.Region);
 
             _logger.LogInformation("Quota check result: {ToolResult}", toolResult);

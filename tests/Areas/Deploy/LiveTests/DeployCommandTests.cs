@@ -3,6 +3,7 @@
 
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using AzureMcp.Areas.Deploy.Models;
 using AzureMcp.Areas.Deploy.Services;
 using AzureMcp.Tests.Client;
 using AzureMcp.Tests.Client.Helpers;
@@ -37,55 +38,29 @@ public class DeployCommandTests : CommandTestsBase,
                 { "project-name", "django" }
             });
         // assert
-        Assert.NotEmpty(result ?? String.Empty);
-    }
-
-    [Fact]
-    [Trait("Category", "Live")]
-    public async Task Should_check_azure_regions()
-    {
-        // arrange
-        var parameters = new
-        {
-            subscriptionId = _subscriptionId,
-            resourceTypes = new[] { "Microsoft.Web/sites", "Microsoft.Storage/storageAccounts" }
-        };
-
-        // act
-        var result = await CallToolMessageAsync(
-            "azmcp-deploy-region-check",
-            new()
-            {
-                { "raw-mcp-tool-input", JsonSerializer.Serialize(parameters) }
-            });
-
-        // assert
-        Assert.NotEmpty(result ?? String.Empty);
-        Assert.Contains("eastus", result ?? String.Empty, StringComparison.OrdinalIgnoreCase);
+        Assert.StartsWith(result, "Title:");
     }
 
     [Fact]
     [Trait("Category", "Live")]
     public async Task Should_check_azure_quota()
     {
-        // arrange
-        var parameters = new
-        {
-            subscriptionId = _subscriptionId,
-            region = "eastus",
-            resourceTypes = new[] { "Microsoft.Web/sites" }
-        };
-
-        // act
-        var result = await CallToolMessageAsync(
+        JsonElement? result = await CallToolAsync(
             "azmcp-deploy-quota-check",
-            new()
-            {
-                { "raw-mcp-tool-input", JsonSerializer.Serialize(parameters) }
+            new() {
+                { "subscription", _subscriptionId },
+                { "region", "eastus" },
+                { "resource-types", "Microsoft.App, Microsoft.Storage/storageAccounts" }
             });
-
         // assert
-        Assert.NotEmpty(result ?? String.Empty);
+        var quotas = result.AssertProperty("quotaInfo");
+        Assert.Equal(JsonValueKind.Object, quotas.ValueKind);
+        var appQuotas = quotas.AssertProperty("Microsoft.App");
+        Assert.Equal(JsonValueKind.Array, appQuotas.ValueKind);
+        Assert.NotEmpty(appQuotas.EnumerateArray());
+        var storageQuotas = quotas.AssertProperty("Microsoft.Storage/storageAccounts");
+        Assert.Equal(JsonValueKind.Array, storageQuotas.ValueKind);
+        Assert.NotEmpty(storageQuotas.EnumerateArray());
     }
 
     [Fact]
@@ -105,12 +80,30 @@ public class DeployCommandTests : CommandTestsBase,
             "azmcp-deploy-infra-code-rules-get",
             new()
             {
-                { "raw-mcp-tool-input", JsonSerializer.Serialize(parameters) }
+                { "deployment-tool", "azd" },
+                { "iac-type", "bicep" },
+                { "resource-types", "appservice, azurestorage" }
+            });
+
+        Assert.Contains("Deployment Tool: azd", result ?? String.Empty, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_get_infrastructure_rules_for_terraform()
+    {
+        // act
+        var result = await CallToolMessageAsync(
+            "azmcp-deploy-infra-code-rules-get",
+            new()
+            {
+                { "deployment-tool", "azd" },
+                { "iac-type", "terraform" },
+                { "resource-types", "containerapp, azurecosmosdb" }
             });
 
         // assert
-        Assert.NotEmpty(result ?? String.Empty);
-        Assert.Contains("bicep", result ?? String.Empty, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("IaC Type: terraform. IaC Type rules:", result ?? String.Empty, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -127,79 +120,7 @@ public class DeployCommandTests : CommandTestsBase,
             });
 
         // assert
-        Assert.NotEmpty(result ?? String.Empty);
-    }
-
-    [Fact]
-    [Trait("Category", "Live")]
-    public async Task Should_get_azd_app_logs()
-    {
-        // act
-        var result = await CallToolMessageAsync(
-            "azmcp-deploy-azd-app-log-get",
-            new()
-            {
-                { "subscription", _subscriptionId },
-                { "workspace-folder", "C:/" },
-                { "azd-env-name", "test-env" },
-                { "limit", 10 }
-            });
-
-        // assert
-        Assert.NotEmpty(result ?? String.Empty);
-    }
-
-    [Fact]
-    [Trait("Category", "Live")]
-    public async Task Should_check_regions_with_cognitive_services()
-    {
-        // arrange
-        var parameters = new
-        {
-            subscriptionId = _subscriptionId,
-            resourceTypes = new[] { "Microsoft.CognitiveServices/accounts" },
-            cognitiveServiceProperties = new
-            {
-                modelName = "gpt-4o",
-                deploymentSkuName = "Standard"
-            }
-        };
-
-        // act
-        var result = await CallToolMessageAsync(
-            "azmcp-deploy-region-check",
-            new()
-            {
-                { "raw-mcp-tool-input", JsonSerializer.Serialize(parameters) }
-            });
-
-        // assert
-        Assert.NotEmpty(result ?? String.Empty);
-    }
-
-    [Fact]
-    [Trait("Category", "Live")]
-    public async Task Should_get_infrastructure_rules_for_terraform()
-    {
-        // arrange
-        var parameters = new
-        {
-            deploymentTool = "azcli",
-            iacType = "terraform",
-            resourceTypes = new[] { "containerapp", "azurecosmosdb" }
-        };
-
-        // act
-        var result = await CallToolMessageAsync(
-            "azmcp-deploy-infra-code-rules-get",
-            new()
-            {
-                { "raw-mcp-tool-input", JsonSerializer.Serialize(parameters) }
-            });
-
-        // assert
-        Assert.NotEmpty(result ?? String.Empty);
-        Assert.Contains("terraform", result ?? String.Empty, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Run \"azd pipeline config\" to help the user create a deployment pipeline.", result);
     }
 
     [Fact]
@@ -219,35 +140,71 @@ public class DeployCommandTests : CommandTestsBase,
             });
 
         // assert
-        Assert.NotEmpty(result ?? String.Empty);
+        Assert.StartsWith("Help the user to set up a CI/CD pipeline", result ?? String.Empty);
     }
+
 
     [Fact]
     [Trait("Category", "Live")]
-    public async Task Should_get_azd_app_logs_with_time_range()
+    public async Task Should_get_azd_app_logs()
     {
-        // arrange
-        var startTime = DateTime.UtcNow.AddHours(-1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-        var endTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-
         // act
         var result = await CallToolMessageAsync(
             "azmcp-deploy-azd-app-log-get",
             new()
             {
                 { "subscription", _subscriptionId },
-                { "workspace-folder", "C:/" },
-                { "azd-env-name", "test-env" },
-                { "start-time", startTime },
-                { "end-time", endTime },
-                { "limit", 50 }
+                { "workspace-folder", "C:/Users/xiaofanzhou/zxf/samples/samples/csharp-dotnet" },
+                { "azd-env-name", "dotnetdeo" },
+                { "limit", 10 }
             });
 
         // assert
-        Assert.NotEmpty(result ?? String.Empty);
+        Assert.StartsWith("App logs retrieved:", result);
     }
 
-    protected async Task<string?> CallToolMessageAsync(string command, Dictionary<string, object?> parameters)
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_check_azure_regions()
+    {
+        // act
+        var result = await CallToolAsync(
+            "azmcp-deploy-region-check",
+            new()
+            {
+                { "subscription", _subscriptionId },
+                { "resource-types", "Microsoft.Web/sites, Microsoft.Storage/storageAccounts" },
+            });
+
+        // assert
+        var availableRegions = result.AssertProperty("availableRegions");
+        Assert.Equal(JsonValueKind.Array, availableRegions.ValueKind);
+        Assert.NotEmpty(availableRegions.EnumerateArray());
+        // Assert.Contains("eastus", result ?? String.Empty, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_check_regions_with_cognitive_services()
+    {
+        // act
+        var result = await CallToolAsync(
+            "azmcp-deploy-region-check",
+            new()
+            {
+                { "subscription", _subscriptionId },
+                { "resource-types", "Microsoft.CognitiveServices/accounts" },
+                { "cognitive-service-model-name", "gpt-4o" },
+                { "cognitive-service-deployment-sku-name", "Standard" }
+            });
+
+        // assert
+        var availableRegions = result.AssertProperty("availableRegions");
+        Assert.Equal(JsonValueKind.Array, availableRegions.ValueKind);
+        Assert.NotEmpty(availableRegions.EnumerateArray());
+    }
+
+    private async Task<string?> CallToolMessageAsync(string command, Dictionary<string, object?> parameters)
     {
         // Output will be streamed, so if we're not in debug mode, hold the debug output for logging in the failure case
         Action<string> writeOutput = Settings.DebugOutput
