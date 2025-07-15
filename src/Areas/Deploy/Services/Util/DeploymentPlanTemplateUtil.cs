@@ -33,11 +33,11 @@ public static class DeploymentPlanTemplateUtil
 
         var aksDeploySteps = """
         2. Build and Deploy the Application
-            1 Build and Push Docker Image: {Agent should check if Dockerfile exists, if not add the step: "generate a Dockerfile for the application deployment", if does, list the Dockerfile path}.
-            2 Prepare Kubernetes Manifests: {Agent should check if Kubernetes YAML files exists, if not add the step: "generate for the application deployment", if does, list the yaml files path}.
-            3 Deploy to AKS: Use `kubectl apply` to deploy manifests to the AKS cluster
-        3: Validation:
-            1 Verify pods are running and services are exposed
+            1. Build and Push Docker Image: {Agent should check if Dockerfile exists, if not add the step: "generate a Dockerfile for the application deployment", if does, list the Dockerfile path}.
+            2. Prepare Kubernetes Manifests: {Agent should check if Kubernetes YAML files exists, if not add the step: "generate for the application deployment", if does, list the yaml files path}.
+            3. Deploy to AKS: Use `kubectl apply` to deploy manifests to the AKS cluster
+        3. Validation:
+            1. Verify pods are running and services are exposed
         """;
 
         var summary = "Summarize the deployment result and save to '.codetocloud/summary.copilotmd'. It should list all changes deployment files and brief description of each file. Then have a diagram showing the provisioned azure resource.";
@@ -47,25 +47,25 @@ public static class DeploymentPlanTemplateUtil
         {
             steps.Add($"""
             1. Provision Azure Infrastructure
-                1 Based on following required Azure resources in plan, get the infra code rules from the tool infra-code-rules-get
-                2 Generate IaC ({azdIacOptions} files) for required azure resources based on the plan.
-                3 Precheck: use get_errors tool to check generated Bicep grammar errors and predeploy_check check the Bicep logic. Fix the errors if exist.
-                4 Run the AZD command `azd up` to provision the resources and confirm each resource is created or already exists
-                5 Check the deployment output to ensure the resources are provisioned successfully.
+                1. Based on following required Azure resources in plan, get the infra code rules from the tool infra-code-rules-get
+                2. Generate IaC ({azdIacOptions} files) for required azure resources based on the plan.
+                3. Precheck: use get_errors tool to check generated Bicep grammar errors and predeploy_check check the Bicep logic. Fix the errors if exist.
+                4. Run the AZD command `azd up` to provision the resources and confirm each resource is created or already exists
+                5. Check the deployment output to ensure the resources are provisioned successfully.
             """);
             if (targetAppService.ToLowerInvariant() == "aks")
             {
                 steps.Add(aksDeploySteps);
                 steps.Add($$"""
                 4: Summary:
-                    4.1 {{summary}}
+                    1. {{summary}}
                 """);
             }
             else
             {
                 steps.Add($$"""
                 3: Summary:
-                    1 {{summary}}
+                    1. {{summary}}
                 """);
             }
 
@@ -75,9 +75,9 @@ public static class DeploymentPlanTemplateUtil
         {
             steps.Add("""
             1. Provision Azure Infrastructure:
-                1 Generate Azure CLI scripts for required azure resources based on the plan.
-                2 Check and fix the generated Azure CLI scripts for grammar errors.
-                3 Run the Azure CLI scripts to provision the resources and confirm each resource is created or already exists
+                1. Generate Azure CLI scripts for required azure resources based on the plan.
+                2. Check and fix the generated Azure CLI scripts for grammar errors.
+                3. Run the Azure CLI scripts to provision the resources and confirm each resource is created or already exists
             """);
             if (targetAppService.ToLowerInvariant() == "aks")
             {
@@ -86,14 +86,14 @@ public static class DeploymentPlanTemplateUtil
             else
             {
                 var isContainerApp = targetAppService.ToLowerInvariant() == "containerapp";
-                var containerAppOptions = isContainerApp ? "    2.1 Build and Push Docker Image: Agent should check if Dockerfile exists, if not add the step: 'generate a Dockerfile for the application deployment', if it does, list the Dockerfile path" : "";
-                var orderList = isContainerApp ? "2.2" : "2.1";
+                var containerAppOptions = isContainerApp ? "    1. Build and Push Docker Image: Agent should check if Dockerfile exists, if not add the step: 'generate a Dockerfile for the application deployment', if it does, list the Dockerfile path" : "";
+                var orderList = isContainerApp ? "2." : "1.";
                 steps.Add($$"""
                 2. Build and Deploy the Application:
                     {{containerAppOptions}}
                     {{orderList}} Deploy to {{azureComputeHost}}: Use Azure CLI command to deploy the application
-                3: Validation:
-                    1 Verify command output to ensure the application is deployed successfully
+                3. Validation:
+                    1. Verify command output to ensure the application is deployed successfully
                 """);
             }
             steps.Add($$"""
