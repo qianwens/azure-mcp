@@ -31,16 +31,13 @@ public static class DeploymentPlanTemplateUtil
             _ => "Azure Container Apps"
         };
 
-        var title = string.IsNullOrWhiteSpace(projectName)
-        ? "Azure Deployment Plan"
-            : $"Azure Deployment Plan for {projectName} Project";
         var aksDeploySteps = """
-        2. Build and Deploy the Application:
-            2.1 Build and Push Docker Image: {Agent should check if Dockerfile exists, if not add the step: "generate a Dockerfile for the application deployment", if does, list the Dockerfile path}.
-            2.2 Prepare Kubernetes Manifests: {Agent should check if Kubernetes YAML files exists, if not add the step: "generate for the application deployment", if does, list the yaml files path}.
-            2.3 Deploy to AKS: Use `kubectl apply` to deploy manifests to the AKS cluster
+        2. Build and Deploy the Application
+            1 Build and Push Docker Image: {Agent should check if Dockerfile exists, if not add the step: "generate a Dockerfile for the application deployment", if does, list the Dockerfile path}.
+            2 Prepare Kubernetes Manifests: {Agent should check if Kubernetes YAML files exists, if not add the step: "generate for the application deployment", if does, list the yaml files path}.
+            3 Deploy to AKS: Use `kubectl apply` to deploy manifests to the AKS cluster
         3: Validation:
-            3.1 Verify pods are running and services are exposed
+            1 Verify pods are running and services are exposed
         """;
 
         var summary = "Summarize the deployment result and save to '.codetocloud/summary.copilotmd'. It should list all changes deployment files and brief description of each file. Then have a diagram showing the provisioned azure resource.";
@@ -49,12 +46,12 @@ public static class DeploymentPlanTemplateUtil
         if (provisioningTool.ToLowerInvariant() == "azd")
         {
             steps.Add($"""
-            1. Provision Azure Infrastructure:
-                1.0 Based on following required Azure resources in plan, get the infra code rules from the tool infra-code-rules-get
-                1.1 Generate IaC ({azdIacOptions} files) for required azure resources based on the plan.
-                1.2 Precheck: use get_errors tool to check generated Bicep grammar errors and predeploy_check check the Bicep logic. Fix the errors if exist.
-                1.3 Run the AZD command `azd up` to provision the resources and confirm each resource is created or already exists
-                1.4 Check the deployment output to ensure the resources are provisioned successfully.
+            1. Provision Azure Infrastructure
+                1 Based on following required Azure resources in plan, get the infra code rules from the tool infra-code-rules-get
+                2 Generate IaC ({azdIacOptions} files) for required azure resources based on the plan.
+                3 Precheck: use get_errors tool to check generated Bicep grammar errors and predeploy_check check the Bicep logic. Fix the errors if exist.
+                4 Run the AZD command `azd up` to provision the resources and confirm each resource is created or already exists
+                5 Check the deployment output to ensure the resources are provisioned successfully.
             """);
             if (targetAppService.ToLowerInvariant() == "aks")
             {
@@ -68,7 +65,7 @@ public static class DeploymentPlanTemplateUtil
             {
                 steps.Add($$"""
                 3: Summary:
-                    3.1 {{summary}}
+                    1 {{summary}}
                 """);
             }
 
@@ -78,9 +75,9 @@ public static class DeploymentPlanTemplateUtil
         {
             steps.Add("""
             1. Provision Azure Infrastructure:
-                1.1 Generate Azure CLI scripts for required azure resources based on the plan.
-                1.2 Check and fix the generated Azure CLI scripts for grammar errors.
-                1.3 Run the Azure CLI scripts to provision the resources and confirm each resource is created or already exists
+                1 Generate Azure CLI scripts for required azure resources based on the plan.
+                2 Check and fix the generated Azure CLI scripts for grammar errors.
+                3 Run the Azure CLI scripts to provision the resources and confirm each resource is created or already exists
             """);
             if (targetAppService.ToLowerInvariant() == "aks")
             {
@@ -96,17 +93,21 @@ public static class DeploymentPlanTemplateUtil
                     {{containerAppOptions}}
                     {{orderList}} Deploy to {{azureComputeHost}}: Use Azure CLI command to deploy the application
                 3: Validation:
-                    3.1 Verify command output to ensure the application is deployed successfully
+                    1 Verify command output to ensure the application is deployed successfully
                 """);
             }
             steps.Add($$"""
             4: Summary:
-                4.1 {{summary}}
+                1 {{summary}}
             """);
         }
-
+        var title = string.IsNullOrWhiteSpace(projectName)
+               ? "Azure Deployment Plan"
+                   : $"Azure Deployment Plan for {projectName} Project";
 
         return $$"""
+{Agent should fill in and polish the markdown template below to generate a deployment plan for the project. Then save it to '.codetocloud/plan.copilotmd' file.}
+---
 Title: "{{title}}"
 ## **Goal**
 Based on the project to provide a plan to deploy the project to Azure using AZD. It will generate Bicep files and Azure YAML configuration.
@@ -138,6 +139,7 @@ Recommended App service hosting the project //agent should fulfill this for each
     - Environment Variables: [] // the env variables that are used in the project/required by service
   - Dependencies Resource
     - Dependency Name
+    - SKU // recommend a sku, show its cost and performance
     - Service Type // it can be Azure SQL, Azure Cosmos DB, Azure Storage, etc.
     - Connection Type // it can be connection string, managed identity, etc.
     - Environment Variables: [] // the env variables that are used in the project/required by dependency
