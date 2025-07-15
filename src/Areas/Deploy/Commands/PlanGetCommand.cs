@@ -18,12 +18,15 @@ public sealed class PlanGetCommand(ILogger<PlanGetCommand> logger)
 
     private readonly Option<string> _workspaceFolderOption = DeployOptionDefinitions.PlanGet.WorkspaceFolder;
     private readonly Option<string> _projectNameOption = DeployOptionDefinitions.PlanGet.ProjectName;
+    private readonly Option<string> _deploymentTargetServiceOption = DeployOptionDefinitions.PlanGet.TargetAppService;
+    private readonly Option<string> _provisioningToolOption = DeployOptionDefinitions.PlanGet.ProvisioningTool;
+    private readonly Option<string> _azdIacOptionsOption = DeployOptionDefinitions.PlanGet.AzdIacOptions;
 
     public override string Name => "plan-get";
 
     public override string Description =>
         """
-        Entry point to help the agent deploy a service to the cloud. Agent should read its output and generate a deploy plan in '.codetocloud/plan.md' for execution steps, recommended azure services based on the information agent detected from project. Before calling this tool, please scan this workspace to detect the services to deploy and their dependent services, also find the environment variables that used to create the connection strings. Try your best to fulfill the input schema with your analyze result.
+        Entry point to help the agent deploy a service to the cloud. Agent should read its output and generate a deploy plan in '.codetocloud/plan.copilotmd' for execution steps, recommended azure services based on the information agent detected from project. Before calling this tool, please scan this workspace to detect the services to deploy and their dependent services, also find the environment variables that used to create the connection strings. Try your best to fulfill the input schema with your analyze result.
         """;
 
     public override string Title => CommandTitle;
@@ -33,6 +36,9 @@ public sealed class PlanGetCommand(ILogger<PlanGetCommand> logger)
         base.RegisterOptions(command);
         command.AddOption(_workspaceFolderOption);
         command.AddOption(_projectNameOption);
+        command.AddOption(_deploymentTargetServiceOption);
+        command.AddOption(_provisioningToolOption);
+        command.AddOption(_azdIacOptionsOption);
     }
 
     private PlanGetOptions BindOptions(ParseResult parseResult)
@@ -40,7 +46,10 @@ public sealed class PlanGetCommand(ILogger<PlanGetCommand> logger)
         return new PlanGetOptions
         {
             WorkspaceFolder = parseResult.GetValueForOption(_workspaceFolderOption) ?? string.Empty,
-            ProjectName = parseResult.GetValueForOption(_projectNameOption) ?? string.Empty
+            ProjectName = parseResult.GetValueForOption(_projectNameOption) ?? string.Empty,
+            TargetAppService = parseResult.GetValueForOption(_deploymentTargetServiceOption) ?? string.Empty,
+            ProvisioningTool = parseResult.GetValueForOption(_provisioningToolOption) ?? string.Empty,
+            AzdIacOptions = parseResult.GetValueForOption(_azdIacOptionsOption) ?? string.Empty
         };
     }
 
@@ -58,7 +67,8 @@ public sealed class PlanGetCommand(ILogger<PlanGetCommand> logger)
             {
                 return Task.FromResult(context.Response);
             }
-            var planTemplate = DeploymentPlanTemplateUtil.GetPlanTemplate(options.ProjectName);
+
+            var planTemplate = DeploymentPlanTemplateUtil.GetPlanTemplate(options.ProjectName, options.TargetAppService, options.ProvisioningTool, options.AzdIacOptions);
 
             context.Response.Message = planTemplate;
             context.Response.Status = 200;

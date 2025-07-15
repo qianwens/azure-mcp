@@ -124,7 +124,7 @@ public static class InfraCodeRuleRetriever
         };
     }
 
-    public static List<string> PopulateLLMResponse(string deploymentTool, string iacType, string[] resourceTypes)
+    public static List<string> GetInfraCodeRules(string deploymentTool, string iacType, string[] resourceTypes)
     {
         var llmResponse = new List<string>
         {

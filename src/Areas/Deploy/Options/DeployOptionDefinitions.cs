@@ -100,6 +100,9 @@ public static class DeployOptionDefinitions
     {
         public const string WorkspaceFolderName = "workspace-folder";
         public const string ProjectNameName = "project-name";
+        public const string TargetAppServiceName = "target-app-service";
+        public const string ProvisioningToolName = "provisioning-tool";
+        public const string AzdIacOptionsName = "azd-iac-options";
 
         public static readonly Option<string> WorkspaceFolder = new(
             $"--{WorkspaceFolderName}",
@@ -115,6 +118,30 @@ public static class DeployOptionDefinitions
         )
         {
             IsRequired = true
+        };
+
+        public static readonly Option<string> TargetAppService = new(
+            $"--{TargetAppServiceName}",
+            "The Azure service to deploy the application. Valid values: ContainerApp, WebApp, FunctionApp, AKS. Recommend one based on user application."
+        )
+        {
+            IsRequired = true
+        };
+
+        public static readonly Option<string> ProvisioningTool = new(
+            $"--{ProvisioningToolName}",
+            "The tool to use for provisioning Azure resources. Valid values: azd, azcli. Use azcli if TargetAppService is AKS."
+        )
+        {
+            IsRequired = true
+        };
+
+        public static readonly Option<string> AzdIacOptions = new(
+            $"--{AzdIacOptionsName}",
+            "The Infrastructure as Code option for azd. Valid values: bicep, terraform."
+        )
+        {
+            IsRequired = false
         };
     }
 

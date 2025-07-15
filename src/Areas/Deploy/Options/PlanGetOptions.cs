@@ -12,4 +12,13 @@ public sealed class PlanGetOptions
 
     [JsonPropertyName("projectName")]
     public string ProjectName { get; set; } = string.Empty;
+
+    [JsonPropertyName("targetAppService")]
+    public string TargetAppService { get; set; } = string.Empty;
+
+    [JsonPropertyName("provisioningTool")]
+    public string ProvisioningTool { get; set; } = string.Empty;
+
+    [JsonPropertyName("azdIacOptions")]
+    public string? AzdIacOptions { get; set; } = string.Empty;
 }

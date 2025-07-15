@@ -65,7 +65,7 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
                 .Where(rt => !string.IsNullOrWhiteSpace(rt))
                 .ToArray();
 
-            List<string> result = InfraCodeRuleRetriever.PopulateLLMResponse(
+            List<string> result = InfraCodeRuleRetriever.GetInfraCodeRules(
                 options.DeploymentTool,
                 options.IacType,
                 resourceTypes);
