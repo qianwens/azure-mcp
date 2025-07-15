@@ -213,21 +213,21 @@ public static class DeployOptionDefinitions
     {
         public static readonly Option<string> DeploymentTool = new(
             "--deployment-tool",
-            "The deployment tool to use (e.g., AZD, Bicep, Terraform, Azure CLI)")
+            "The deployment tool to use. Valid values: azd, azcli")
         {
             IsRequired = true
         };
 
         public static readonly Option<string> IacType = new(
             "--iac-type",
-            "The Infrastructure as Code type (e.g., Bicep, Terraform)")
+            "The Infrastructure as Code type. Valid values: bicep, terraform")
         {
             IsRequired = true
         };
 
         public static readonly Option<string> ResourceTypes = new(
             "--resource-types",
-            "Comma-separated list of Azure resource types to generate rules for. Available types: azureaisearch, azureaiservices, appservice, azureapplicationinsights, azurebotservice, containerapp, azurecosmosdb, function, azurekeyvault, azuredatabaseformysql, azureopenai, azuredatabaseforpostgresql, azureprivateendpoint, azurecacheforredis, azuresqldatabase, azurestorageaccount, staticwebapp, azureservicebus, azuresignalrservice, azurevirtualnetwork, azurewebpubsub")
+            "Comma-separated list of Azure resource types to generate rules for. Supported values: 'appservice' (App Service) and/or 'containerapp' (Container App) and/or 'function' (Function App). Other resources do not have special rules.")
         {
             IsRequired = true,
             AllowMultipleArgumentsPerToken = true

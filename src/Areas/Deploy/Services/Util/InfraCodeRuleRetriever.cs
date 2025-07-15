@@ -2,7 +2,7 @@ using AzureMcp.Areas.Deploy.Models;
 
 public static class InfraCodeRuleRetriever
 {
-    public static List<string> PopulateAZDPrompts(string deploymentTool, string iacType, string[] resourceTypes)
+    public static List<string> PopulateAZDPrompts(string iacType, string[] resourceTypes)
     {
         var prompts = new List<string>
         {
@@ -22,12 +22,12 @@ public static class InfraCodeRuleRetriever
         return prompts;
     }
 
-    public static List<string> PopulateAZCLIPrompts(string deploymentTool, string iacType, string[] resourceTypes)
+    public static List<string> PopulateAZCLIPrompts(string iacType, string[] resourceTypes)
     {
         return new List<string> { "Not supported. Please use AZD for deployments." };
     }
 
-    public static List<string> PopulateBicepPrompts(string deploymentTool, string iacType, string[] resourceTypes)
+    public static List<string> PopulateBicepPrompts()
     {
         return [
             """
@@ -39,7 +39,7 @@ public static class InfraCodeRuleRetriever
         ];
     }
 
-    public static List<string> PopulateTerraformPrompts(string deploymentTool, string iacType, string[] resourceTypes)
+    public static List<string> PopulateTerraformPrompts()
     {
         return new List<string>
         {
@@ -128,28 +128,28 @@ public static class InfraCodeRuleRetriever
     {
         var llmResponse = new List<string>
         {
-            "Based on what is being deployed, you must ensure these rules are followed for deployment. Please adjust the infrastructure based on the listed rules.",
-            $"Deployment Tool: {deploymentTool}. Deployment Tool rules:"
+            $"Mandatory rules for deployment. You must implement every rule exactly as stated, with no exceptions or omissions, even if it is not a common pattern or seems redundant. Do not use your own judgment to simplify, skip, or modify any rule. If a rule is present, it must be enforced in the code, regardless of context. Adjust {iacType} files to align with these rules.",
+            $"Deployment Tool {deploymentTool} rules:"
         };
 
         if (deploymentTool == DeploymentTool.Azd)
         {
-            llmResponse.AddRange(PopulateAZDPrompts(deploymentTool, iacType, resourceTypes));
+            llmResponse.AddRange(PopulateAZDPrompts(iacType, resourceTypes));
         }
         else if (deploymentTool == DeploymentTool.AzCLI)
         {
-            llmResponse.AddRange(PopulateAZCLIPrompts(deploymentTool, iacType, resourceTypes));
+            llmResponse.AddRange(PopulateAZCLIPrompts(iacType, resourceTypes));
         }
 
         llmResponse.Add($"IaC Type: {iacType}. IaC Type rules:");
 
         if (iacType == IacType.Bicep)
         {
-            llmResponse.AddRange(PopulateBicepPrompts(deploymentTool, iacType, resourceTypes));
+            llmResponse.AddRange(PopulateBicepPrompts());
         }
         else if (iacType == IacType.Terraform)
         {
-            llmResponse.AddRange(PopulateTerraformPrompts(deploymentTool, iacType, resourceTypes));
+            llmResponse.AddRange(PopulateTerraformPrompts());
         }
 
         llmResponse.Add($"Resources: {string.Join(", ", resourceTypes)}");
@@ -169,7 +169,7 @@ public static class InfraCodeRuleRetriever
             llmResponse.AddRange(PopulateFunctionAppPrompts(deploymentTool, iacType, resourceTypes));
         }
 
-        llmResponse.Add("You must call the get_errors tool every time you make code changes, otherwise your deployment will fail.");
+        llmResponse.Add("Call get_errors every time you make code changes, otherwise your deployment will fail. You must follow ALL of the previously mentioned rules. DO NOT IGNORE ANY RULES. Call get-infra-code-rules again if need to get the rules again. Show the user a report line-by-line of each rule that was applied. Only skip a rule if there is no corresponding resource (e.g. no function app). Do not stop at error-free code, you must apply all the rules.");
 
         var necessaryTools = new List<string> { "az cli (az --version)" };
 

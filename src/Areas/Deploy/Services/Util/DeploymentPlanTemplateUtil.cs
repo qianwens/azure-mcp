@@ -49,7 +49,7 @@ public static class DeploymentPlanTemplateUtil
             1. Provision Azure Infrastructure
                 1. Based on following required Azure resources in plan, get the infra code rules from the tool infra-code-rules-get
                 2. Generate IaC ({azdIacOptions} files) for required azure resources based on the plan.
-                3. Precheck: use get_errors tool to check generated Bicep grammar errors and predeploy_check check the Bicep logic. Fix the errors if exist.
+                3. Precheck: use get_errors tool to check generated Bicep grammar errors. Fix the errors if exist.
                 4. Run the AZD command `azd up` to provision the resources and confirm each resource is created or already exists
                 5. Check the deployment output to ensure the resources are provisioned successfully.
             """);
@@ -75,10 +75,9 @@ public static class DeploymentPlanTemplateUtil
         {
             steps.Add("""
             1. Provision Azure Infrastructure:
-                1. Based on following required Azure resources in plan, get the infra code rules from the tool infra-code-rules-get
-                2. Generate Azure CLI scripts for required azure resources based on the plan.
-                3. Check and fix the generated Azure CLI scripts for grammar errors.
-                4. Run the Azure CLI scripts to provision the resources and confirm each resource is created or already exists
+                1. Generate Azure CLI scripts for required azure resources based on the plan.
+                2. Check and fix the generated Azure CLI scripts for grammar errors.
+                3. Run the Azure CLI scripts to provision the resources and confirm each resource is created or already exists
             """);
             if (targetAppService.ToLowerInvariant() == "aks")
             {
