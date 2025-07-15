@@ -75,9 +75,10 @@ public static class DeploymentPlanTemplateUtil
         {
             steps.Add("""
             1. Provision Azure Infrastructure:
-                1. Generate Azure CLI scripts for required azure resources based on the plan.
-                2. Check and fix the generated Azure CLI scripts for grammar errors.
-                3. Run the Azure CLI scripts to provision the resources and confirm each resource is created or already exists
+                1. Based on following required Azure resources in plan, get the infra code rules from the tool infra-code-rules-get
+                2. Generate Azure CLI scripts for required azure resources based on the plan.
+                3. Check and fix the generated Azure CLI scripts for grammar errors.
+                4. Run the Azure CLI scripts to provision the resources and confirm each resource is created or already exists
             """);
             if (targetAppService.ToLowerInvariant() == "aks")
             {
@@ -107,8 +108,8 @@ public static class DeploymentPlanTemplateUtil
 
         return $$"""
 {Agent should fill in and polish the markdown template below to generate a deployment plan for the project. Then save it to '.codetocloud/plan.copilotmd' file.}
----
-Title: "{{title}}"
+
+#Title: {{title}}
 ## **Goal**
 Based on the project to provide a plan to deploy the project to Azure using AZD. It will generate Bicep files and Azure YAML configuration.
 
