@@ -32,17 +32,26 @@ Based on the project to provide a plan to deploy the project to Azure using AZD.
 4. After deployment finished, summarize the deployment result.
 
 ## **Project Summary**
-{Briefly summarize the project, such as language, framework, etc.}
+{
+briefly summarize the project structure, services, and configurations, example:
+- **Technology Stack**: ASP.NET Core 7.0 Razor Pages application
+- **Application Type**: Task Manager web application with client-side JavaScript
+- **Containerization**: Ready for deployment with existing Dockerfile
+- **Dependencies**: No external dependencies detected (database, APIs, etc.)
+- **Hosting Recommendation**: Azure Container Apps for scalable, serverless container hosting
+}
 
 ## **Recommended Azure Resources**
 
 Recommended App service hosting the project //agent should fulfill this for each app instance
-- AppName {service.name}
-  - Service Type: {azureComputeHost} // it can be containerapp, webapp, functionapp, etc. Recommend one based on the project.
-  - language: {language}  //detect from the project, it can be nodejs, python, dotnet, etc.
-  - dockerFilePath: {dockerFilePath}// fulfill this if service.azureComputeHost is ContainerApp
-  - dockerContext: {dockerContext}// fulfill this if service.azureComputeHost is ContainerApp
-  - Environment Variables: [] // the env variables that are used in the project/required by service
+- Application {{projectName}}
+  - Hosting Service Type: {azureComputeHost} // it can be Azure Container Apps, Web App Service, Azure Functions, Azure Kubernetes Service. Recommend one based on the project.
+  - SKU // recommend a sku based on the project, show its cost and performance
+  - Configuration:
+    - language: {language}  //detect from the project, it can be nodejs, python, dotnet, etc.
+    - dockerFilePath: {dockerFilePath}// fulfill this if service.azureComputeHost is ContainerApp
+    - dockerContext: {dockerContext}// fulfill this if service.azureComputeHost is ContainerApp
+    - Environment Variables: [] // the env variables that are used in the project/required by service
   - Dependencies Resource
     - Dependency Name
     - Service Type
@@ -62,7 +71,7 @@ If there is a WebApp(App Service):
 - User managed identity: Must have **AcrPull** role ("7f951dda-4ed3-4680-a7ca-43fe172d538d") to the container registry.
 
 ## **Azure Resources Architecture**
-{a mermaid graph of the deployed resource architecture}
+{a mermaid graph of the deployed resource architecture. Only keep the most important edges to make structure clear and readable.}
 """;
     }
 }
