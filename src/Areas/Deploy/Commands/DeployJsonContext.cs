@@ -18,7 +18,6 @@ namespace AzureMcp.Areas.Deploy.Commands;
 [JsonSerializable(typeof(AppTopology))]
 [JsonSerializable(typeof(MermaidData))]
 [JsonSerializable(typeof(MermaidConfig))]
-[JsonSerializable(typeof(AzureRegionCheckParameters))]
 [JsonSerializable(typeof(CognitiveServiceProperties))]
 [JsonSerializable(typeof(QuotaCheckCommand.QuotaCheckCommandResult))]
 [JsonSerializable(typeof(QuotaInfo))]
