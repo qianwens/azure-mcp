@@ -1,9 +1,7 @@
-[CmdletBinding()]
 param(
     [string]$SubscriptionId,
     [string]$ResourceGroupName,
     [string]$BaseName,
-    [string[]]$Areas,
     [int]$DeleteAfterHours = 12,
     [switch]$Unique
 )
@@ -20,7 +18,7 @@ function New-StringHash($string) {
     return [BitConverter]::ToString($hashBytes) -replace '-', ''
 }
 
-$suffix = (if ($Unique) { [guid]::NewGuid().ToString() } else { New-StringHash $account.Id }).ToLower().Substring(0, 8)
+$suffix = ($Unique ? [guid]::NewGuid().ToString() : (New-StringHash $account.Id)).ToLower().Substring(0, 8)
 
 if (!$BaseName) {
     $BaseName = "mcp$($suffix)"
@@ -33,24 +31,13 @@ if (!$ResourceGroupName) {
 
 Push-Location $RepoRoot
 try {
-    $armParameters = @{ areas = (if ($Areas) { $Areas } else { @() }) }
-
-    Write-Host "Deploying:`n  ResourceGroupName: `"$ResourceGroupName`"`n  BaseName: `"$BaseName`"`n  DeleteAfterHours: $DeleteAfterHours`n  ArmTemplateParameters: $(ConvertTo-Json $armParameters -Compress)"
-
     if ($SubscriptionId) {
-        ./eng/common/TestResources/New-TestResources.ps1 `
-            -SubscriptionId $SubscriptionId `
-            -ResourceGroupName $ResourceGroupName `
-            -BaseName $BaseName `
-            -DeleteAfterHours $DeleteAfterHours `
-            -AdditionalParameters $armParameters
+        Write-Host "./eng/common/TestResources/New-TestResources.ps1 -SubscriptionId `"$SubscriptionId`" -ResourceGroupName `"$ResourceGroupName`" -BaseName `"$BaseName`" -DeleteAfterHours $DeleteAfterHours"
+        ./eng/common/TestResources/New-TestResources.ps1 -SubscriptionId $SubscriptionId -ResourceGroupName $ResourceGroupName -BaseName $BaseName -DeleteAfterHours $DeleteAfterHours
     }
     else {
-        ./eng/common/TestResources/New-TestResources.ps1 `
-            -ResourceGroupName $ResourceGroupName `
-            -BaseName $BaseName `
-            -DeleteAfterHours $DeleteAfterHours `
-            -AdditionalParameters $armParameters
+        Write-Host "./eng/common/TestResources/New-TestResources.ps1 -ResourceGroupName `"$ResourceGroupName`" -BaseName `"$BaseName`" -DeleteAfterHours $DeleteAfterHours"
+        ./eng/common/TestResources/New-TestResources.ps1 -ResourceGroupName $ResourceGroupName -BaseName $BaseName -DeleteAfterHours $DeleteAfterHours
     }
 }
 finally {
