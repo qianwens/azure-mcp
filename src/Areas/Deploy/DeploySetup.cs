@@ -31,6 +31,7 @@ internal sealed class DeploySetup : IAreaSetup
         deploy.AddCommand("infra-code-rules-get", new InfraCodeRulesGetCommand(loggerFactory.CreateLogger<InfraCodeRulesGetCommand>()));
 
         deploy.AddCommand("available-region-get", new RegionCheckCommand(loggerFactory.CreateLogger<RegionCheckCommand>()));
+        
         deploy.AddCommand("quota-check", new QuotaCheckCommand(loggerFactory.CreateLogger<QuotaCheckCommand>()));
 
         deploy.AddCommand("azd-app-log-get", new AzdAppLogGetCommand(loggerFactory.CreateLogger<AzdAppLogGetCommand>()));
