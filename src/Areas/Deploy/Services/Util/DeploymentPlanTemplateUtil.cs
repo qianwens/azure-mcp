@@ -157,6 +157,7 @@ If there is a WebApp(App Service):
 - User managed identity: Must have **AcrPull** role ("7f951dda-4ed3-4680-a7ca-43fe172d538d") to the container registry.
 
 ## **Azure Resources Architecture**
+- **Install the mermaid extension in IDE to view the architecture.**
 {a mermaid graph of the deployed resource architecture. Only keep the most important edges to make structure clear and readable.}
 """;
     }
