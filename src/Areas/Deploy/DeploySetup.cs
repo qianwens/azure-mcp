@@ -6,6 +6,11 @@ using AzureMcp.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using AzureMcp.Areas.Deploy.Commands;
+using AzureMcp.Areas.Deploy.Commands.Region;
+using AzureMcp.Areas.Deploy.Commands.Plan;
+using AzureMcp.Areas.Deploy.Services;
+using AzureMcp.Areas.Deploy.Commands.Quota;
+using AzureMcp.Areas.Deploy.Commands.InfraCodeRules;
 
 namespace AzureMcp.Areas.Deploy;
 
@@ -13,14 +18,25 @@ internal sealed class DeploySetup : IAreaSetup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        // No additional services needed for Extension area
+        services.AddSingleton<IDeployService, DeployService>();
     }
 
     public void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFactory)
     {
-        var extension = new CommandGroup("deploy", "deploy commands for deploy application to Azure");
-        rootGroup.AddSubGroup(extension);
+        var deploy = new CommandGroup("deploy", "Deploy commands for deploying applications to Azure");
+        rootGroup.AddSubGroup(deploy);
 
-        extension.AddCommand("architecture-diagram-generate", new GenerateArchitectureDiagramCommand(loggerFactory.CreateLogger<GenerateArchitectureDiagramCommand>()));
+        deploy.AddCommand("plan-get", new PlanGetCommand(loggerFactory.CreateLogger<PlanGetCommand>()));
+
+        deploy.AddCommand("infra-code-rules-get", new InfraCodeRulesGetCommand(loggerFactory.CreateLogger<InfraCodeRulesGetCommand>()));
+
+        deploy.AddCommand("region-check", new RegionCheckCommand(loggerFactory.CreateLogger<RegionCheckCommand>()));
+        deploy.AddCommand("quota-check", new QuotaCheckCommand(loggerFactory.CreateLogger<QuotaCheckCommand>()));
+
+        deploy.AddCommand("azd-app-log-get", new AzdAppLogGetCommand(loggerFactory.CreateLogger<AzdAppLogGetCommand>()));
+
+        deploy.AddCommand("pipeline-generate", new PipelineGenerateCommand(loggerFactory.CreateLogger<PipelineGenerateCommand>()));
+
+        deploy.AddCommand("architecture-diagram-generate", new GenerateArchitectureDiagramCommand(loggerFactory.CreateLogger<GenerateArchitectureDiagramCommand>()));
     }
 }

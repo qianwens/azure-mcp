@@ -54,7 +54,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
         AppTopology appTopology;
         try
         {
-            appTopology = JsonSerializer.Deserialize(rawMcpToolInput, DeployJsonContext.Default.AppTopology) 
+            appTopology = JsonSerializer.Deserialize(rawMcpToolInput, DeployJsonContext.Default.AppTopology)
                 ?? throw new ArgumentException("Failed to deserialize app topology.", nameof(rawMcpToolInput));
         }
         catch (JsonException ex)
@@ -71,7 +71,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
             context.Response.Message = "No service detected.";
             return Task.FromResult(context.Response);
         }
-        
+
         var chart = GenerateMermaidChart.GenerateChart(appTopology.WorkspaceFolder ?? "", appTopology);
         if (string.IsNullOrWhiteSpace(chart))
         {
@@ -91,7 +91,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
             .OrderBy(x => x)
             .ToArray();
 
-        var usedServiceTypesString = usedServiceTypes.Length > 0 
+        var usedServiceTypesString = usedServiceTypes.Length > 0
             ? string.Join(", ", usedServiceTypes)
             : null;
 
