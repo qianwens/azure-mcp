@@ -35,7 +35,7 @@ internal sealed class DeploySetup : IAreaSetup
 
         deploy.AddCommand("azd-app-log-get", new AzdAppLogGetCommand(loggerFactory.CreateLogger<AzdAppLogGetCommand>()));
 
-        deploy.AddCommand("pipeline-generate", new PipelineGenerateCommand(loggerFactory.CreateLogger<PipelineGenerateCommand>()));
+        deploy.AddCommand("cicd-pipeline-guidance-get", new PipelineGenerateCommand(loggerFactory.CreateLogger<PipelineGenerateCommand>()));
 
         deploy.AddCommand("architecture-diagram-generate", new GenerateArchitectureDiagramCommand(loggerFactory.CreateLogger<GenerateArchitectureDiagramCommand>()));
     }

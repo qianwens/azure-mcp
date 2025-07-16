@@ -12,7 +12,7 @@ namespace AzureMcp.Areas.Deploy.Commands;
 public sealed class PipelineGenerateCommand(ILogger<PipelineGenerateCommand> logger)
     : SubscriptionCommand<PipelineGenerateOptions>()
 {
-    private const string CommandTitle = "Generate Azure Deployment Pipeline";
+    private const string CommandTitle = "Get Azure Deployment CICD Pipeline Guidance";
     private readonly ILogger<PipelineGenerateCommand> _logger = logger;
 
     private readonly Option<bool> _useAZDPipelineConfigOption = DeployOptionDefinitions.PipelineGenerateOptions.UseAZDPipelineConfig;
@@ -20,7 +20,7 @@ public sealed class PipelineGenerateCommand(ILogger<PipelineGenerateCommand> log
     private readonly Option<string> _repositoryNameOption = DeployOptionDefinitions.PipelineGenerateOptions.RepositoryName;
     private readonly Option<string> _githubEnvironmentNameOption = DeployOptionDefinitions.PipelineGenerateOptions.GithubEnvironmentName;
 
-    public override string Name => "pipeline-generate";
+    public override string Name => "cicd-pipeline-guidance-get";
 
     public override string Description =>
         """

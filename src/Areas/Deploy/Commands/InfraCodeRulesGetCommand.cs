@@ -23,7 +23,7 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
 
     public override string Description =>
         """
-        This tool provides guidelines for generating deployment code to Azure. It supports 2 deployment tools: AZD and Infrastructure as Code (IaC), including Bicep or Terraform. Azure CLI with command script.
+        This tool offers guidelines for creating Bicep/Terraform files to deploy applications on Azure. The guidelines outline rules to improve the quality of Infrastructure as Code files, ensuring they are compatible with the azd tool and adhere to best practices.
         """;
 
     public override string Title => CommandTitle;
