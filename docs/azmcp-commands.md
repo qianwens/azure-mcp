@@ -471,6 +471,21 @@ azmcp search index query --subscription <subscription> \
                          --query <query>
 ```
 
+### Deploy
+```bash
+# Check the Azure quota availability for the resources type
+azmcp deploy quota-check --subscription <subscription> \
+                         --region <region> \
+                         --resource-types <resource-types>
+
+# Get the available regions for the resources types
+azmcp deploy available-region-get --subscription <subscription> \
+                                  --resource-types <resource-types> \
+                                  [--cognitive-service-model-name <cognitive-service-model-name>] \
+                                  [--cognitive-service-model-version <cognitive-service-model-version>] \
+                                  [--cognitive-service-deployment-sku-name <cognitive-service-deployment-sku-name>]
+```
+
 ## Response Format
 
 All responses follow a consistent JSON format:

@@ -15,7 +15,7 @@ namespace AzureMcp.Areas.Deploy.Commands.Region;
 
 public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger) : SubscriptionCommand<RegionCheckOptions>()
 {
-    private const string CommandTitle = "Check Available Azure Regions";
+    private const string CommandTitle = "Get Available Azure Regions";
     private readonly ILogger<RegionCheckCommand> _logger = logger;
 
     private readonly Option<string> _resourceTypesOption = DeployOptionDefinitions.RegionCheck.ResourceTypes;
@@ -23,7 +23,7 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger) : Sub
     private readonly Option<string> _cognitiveServiceModelVersionOption = DeployOptionDefinitions.RegionCheck.CognitiveServiceModelVersion;
     private readonly Option<string> _cognitiveServiceDeploymentSkuNameOption = DeployOptionDefinitions.RegionCheck.CognitiveServiceDeploymentSkuName;
 
-    public override string Name => "region-check";
+    public override string Name => "available-region-get";
 
     public override string Description =>
         """

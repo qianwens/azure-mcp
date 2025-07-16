@@ -131,3 +131,9 @@
 
 # ServiceLabel: %area-Authorization
 # ServiceOwners:                       @vurhanau
+
+# PRLabel: %area-Deploy
+/src/Areas/Deploy/                     @qianwens @xiaofanzhou @Azure/azure-mcp
+
+# ServiceLabel: %area-Deploy
+# ServiceOwners:                       @qianwens @xiaofanzhou
