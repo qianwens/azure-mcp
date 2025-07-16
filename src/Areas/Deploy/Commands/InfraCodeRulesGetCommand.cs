@@ -4,6 +4,7 @@
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Areas.Deploy.Models;
 using AzureMcp.Areas.Deploy.Options;
+using AzureMcp.Areas.Deploy.Services.Util;
 using AzureMcp.Commands;
 using Microsoft.Extensions.Logging;
 
