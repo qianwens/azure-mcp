@@ -3,7 +3,7 @@
 
 namespace AzureMcp.Areas.Deploy.Commands;
 
-public static class Consts
+public static class AzureServiceConstants
 {
     public enum AzureComputeServiceType
     {

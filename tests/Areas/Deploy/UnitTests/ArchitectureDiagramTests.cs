@@ -34,7 +34,7 @@ public class ArchitectureDiagramTests
     public async Task GenerateArchitectureDiagram_ShouldReturnNoServiceDetected()
     {
         var command = new GenerateArchitectureDiagramCommand(_logger);
-        var args = command.GetCommand().Parse(["--rawMcpToolInput", "{\"projectName\": \"testsdk\",\"services\": []}"]);
+        var args = command.GetCommand().Parse(["--rawMcpToolInput", "{\"projectName\": \"test\",\"services\": []}"]);
         var context = new CommandContext(_serviceProvider);
         var response = await command.ExecuteAsync(context, args);
         Assert.NotNull(response);
@@ -54,13 +54,13 @@ public class ArchitectureDiagramTests
             {
                 new ServiceConfig
                 {
-                    Name = "testwebsite",
+                    Name = "website",
                     AzureComputeHost = "appservice",
                     Language = "dotnet",
                     Port = "80",
                     Dependencies = new DependencyConfig[]
                     {
-                        new DependencyConfig { Name = "testsitestore", ConnectionType = "system-identity", ServiceType = "azurestorageaccount" }
+                        new DependencyConfig { Name = "store", ConnectionType = "system-identity", ServiceType = "azurestorageaccount" }
                     },
                 }
             }
@@ -87,7 +87,7 @@ public class ArchitectureDiagramTests
         var encodedDiagram = extractedUrl.Substring(urlPattern.Length);
         var decodedDiagram = EncodeMermaid.GetDecodedMermaidChart(encodedDiagram);
         Assert.NotEmpty(decodedDiagram);
-        Assert.Contains("testwebsite", decodedDiagram);
-        Assert.Contains("testsitestore", decodedDiagram);
+        Assert.Contains("website", decodedDiagram);
+        Assert.Contains("store", decodedDiagram);
     }
 }

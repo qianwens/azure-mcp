@@ -126,7 +126,7 @@ public static class GenerateMermaidChart
 
     private static bool IsComputeResourceType(string serviceType)
     {
-        return Enum.GetNames<Consts.AzureComputeServiceType>().Contains(serviceType, StringComparer.OrdinalIgnoreCase);
+        return Enum.GetNames<AzureServiceConstants.AzureComputeServiceType>().Contains(serviceType, StringComparer.OrdinalIgnoreCase);
     }
 }
 

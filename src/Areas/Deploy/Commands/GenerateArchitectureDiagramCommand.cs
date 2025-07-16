@@ -88,7 +88,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
                 .SelectMany(service => service.Dependencies)
                 .Select(dep => dep.ServiceType)
                 .Where(serviceType => !string.IsNullOrWhiteSpace(serviceType))
-                .Where(serviceType => Enum.GetNames<Consts.AzureServiceType>().Contains(serviceType, StringComparer.OrdinalIgnoreCase))
+                .Where(serviceType => Enum.GetNames<AzureServiceConstants.AzureServiceType>().Contains(serviceType, StringComparer.OrdinalIgnoreCase))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .OrderBy(x => x)
                 .ToArray();
@@ -100,7 +100,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
             context.Response.Message = $"Help the user open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl} \n"
                 + "Ask user if the topology is expected, if not, you should call this tool with the user's updated instructions. "
                 + "Please inform the user that here are the supported hosting technologies: "
-                + $"{string.Join(", ", Enum.GetNames<Consts.AzureComputeServiceType>())}. ";
+                + $"{string.Join(", ", Enum.GetNames<AzureServiceConstants.AzureComputeServiceType>())}. ";
             if (!string.IsNullOrWhiteSpace(usedServiceTypesString))
             {
                 context.Response.Message += $"Here is the full list of supported component service types for the topology: {usedServiceTypesString}.";
