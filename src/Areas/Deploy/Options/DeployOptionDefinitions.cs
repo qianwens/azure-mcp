@@ -3,6 +3,7 @@
 
 using System.Text.Json.Nodes;
 using AzureMcp.Areas.Server.Commands;
+using AzureMcp.Areas.Server.Commands.ToolLoading;
 using AzureMcp.Options;
 
 namespace AzureMcp.Areas.Deploy.Options;
@@ -11,7 +12,7 @@ public static class DeployOptionDefinitions
 {
     public static class RawMcpToolInput
     {
-        public const string RawMcpToolInputName = ToolOperations.RawMcpToolInputOptionName;
+        public const string RawMcpToolInputName = CommandFactoryToolLoader.RawMcpToolInputOptionName;
 
         public static readonly Option<string> RawMcpToolInputOption = new(
             $"--{RawMcpToolInputName}",
