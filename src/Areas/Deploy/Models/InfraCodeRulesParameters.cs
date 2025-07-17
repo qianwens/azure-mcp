@@ -5,8 +5,8 @@ namespace AzureMcp.Areas.Deploy.Models;
 
 public static class DeploymentTool
 {
-    public const string Azd = "azd";
-    public const string AzCLI = "azcli";
+    public const string Azd = "AZD";
+    public const string AzCli = "AzCli";
 }
 
 public static class IacType

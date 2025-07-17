@@ -153,7 +153,7 @@ public class DeployCommandTests : CommandTestsBase,
             {
                 { "subscription", _subscriptionId },
                 { "workspace-folder", "C:/Users/" },
-                { "azd-env-name", "dotnetdeo" },
+                { "azd-env-name", "dotnet-demo" },
                 { "limit", 10 }
             });
 

@@ -15,13 +15,13 @@ public static class PipelineGenerationUtil
         }
         else
         {
-            return AZCLIPipelinePrompt(options);
+            return AzCliPipelinePrompt(options);
         }
     }
 
     private static readonly string AZDPipelinePrompt = "Run \"azd pipeline config\" to help the user create a deployment pipeline.\n";
 
-    private static string AZCLIPipelinePrompt(PipelineGenerateOptions options)
+    private static string AzCliPipelinePrompt(PipelineGenerateOptions options)
     {
         const string defaultEnvironment = "dev";
         var environmentNamePrompt = !string.IsNullOrEmpty(options.GithubEnvironmentName)

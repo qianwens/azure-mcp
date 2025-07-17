@@ -26,7 +26,7 @@ public sealed class PlanGetCommand(ILogger<PlanGetCommand> logger)
 
     public override string Description =>
         """
-        Entry point to help the agent deploy a service to the cloud. Agent should read its output and generate a deploy plan in '.codetocloud/plan.copilotmd' for execution steps, recommended azure services based on the information agent detected from project. Before calling this tool, please scan this workspace to detect the services to deploy and their dependent services.
+        Entry point to help the agent deploy a service to the cloud. Agent should read its output and generate a deploy plan in '.azure/plan.copilotmd' for execution steps, recommended azure services based on the information agent detected from project. Before calling this tool, please scan this workspace to detect the services to deploy and their dependent services.
         """;
 
     public override string Title => CommandTitle;

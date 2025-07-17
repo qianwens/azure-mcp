@@ -173,7 +173,7 @@ public static class AzureQuotaService
 
         // Flatten the results into a single dictionary
         return results
-            .SelectMany(kvps => kvps)
+            .SelectMany(i => i)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 }

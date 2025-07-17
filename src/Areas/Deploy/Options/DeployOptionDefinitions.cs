@@ -131,7 +131,7 @@ public static class DeployOptionDefinitions
 
         public static readonly Option<string> ProvisioningTool = new(
             $"--{ProvisioningToolName}",
-            "The tool to use for provisioning Azure resources. Valid values: azd, azcli. Use azcli if TargetAppService is AKS."
+            "The tool to use for provisioning Azure resources. Valid values: AZD, AzCli. Use AzCli if TargetAppService is AKS."
         )
         {
             IsRequired = true
@@ -153,7 +153,7 @@ public static class DeployOptionDefinitions
 
         public static readonly Option<string> Region = new(
             $"--{RegionName}",
-            "The valid Azure region where the resources will be deployed. E.g. 'eastus', 'westus', 'westeurope', etc."
+            "The valid Azure region where the resources will be deployed. E.g. 'eastus', 'westus', etc."
         )
         {
             IsRequired = true
@@ -214,7 +214,7 @@ public static class DeployOptionDefinitions
     {
         public static readonly Option<string> DeploymentTool = new(
             "--deployment-tool",
-            "The deployment tool to use. Valid values: azd, azcli")
+            "The deployment tool to use. Valid values: AZD, AzCli")
         {
             IsRequired = true
         };
@@ -319,7 +319,7 @@ public static class AppTopologySchema
                                     ["name"] = new JsonObject
                                     {
                                         ["type"] = "string",
-                                        ["description"] = "The name of the dependent service. Can be arbitary, or must reference another service in the services array if referencing azureappservice, azurecontainerapp, azurestaticwebapps, or azurefunctions."
+                                        ["description"] = "The name of the dependent service. Can be arbitrary, or must reference another service in the services array if referencing azureappservice, azurecontainerapp, azurestaticwebapps, or azurefunctions."
                                     },
                                     ["serviceType"] = new JsonObject
                                     {

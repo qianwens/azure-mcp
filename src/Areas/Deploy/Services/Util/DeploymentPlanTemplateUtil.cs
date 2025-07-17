@@ -40,7 +40,7 @@ public static class DeploymentPlanTemplateUtil
             1. Verify pods are running and services are exposed
         """;
 
-        var summary = "Summarize the deployment result and save to '.codetocloud/summary.copilotmd'. It should list all changes deployment files and brief description of each file. Then have a diagram showing the provisioned azure resource.";
+        var summary = "Summarize the deployment result and save to '.azure/summary.copilotmd'. It should list all changes deployment files and brief description of each file. Then have a diagram showing the provisioned azure resource.";
         var steps = new List<string>();
 
         if (provisioningTool.ToLowerInvariant() == "azd")
@@ -49,7 +49,7 @@ public static class DeploymentPlanTemplateUtil
             1. Provision Azure Infrastructure
                 1. Based on following required Azure resources in plan, get the infra code rules from the tool infra-code-rules-get
                 2. Generate IaC ({azdIacOptions} files) for required azure resources based on the plan.
-                3. Precheck: use get_errors tool to check generated Bicep grammar errors. Fix the errors if exist.
+                3. Pre-check: use get_errors tool to check generated Bicep grammar errors. Fix the errors if exist.
                 4. Run the AZD command `azd provision` to provision the resources and confirm each resource is created or already exists.
                 5. Check the deployment output to ensure the resources are provisioned successfully.
             """);
@@ -71,7 +71,7 @@ public static class DeploymentPlanTemplateUtil
 
 
         }
-        else if (provisioningTool.ToLowerInvariant() == "azcli")
+        else if (provisioningTool.Equals(DeploymentTool.AzCli, StringComparison.OrdinalIgnoreCase))
         {
             steps.Add("""
             1. Provision Azure Infrastructure:
@@ -106,7 +106,7 @@ public static class DeploymentPlanTemplateUtil
                    : $"Azure Deployment Plan for {projectName} Project";
 
         return $$"""
-{Agent should fill in and polish the markdown template below to generate a deployment plan for the project. Then save it to '.codetocloud/plan.copilotmd' file.}
+{Agent should fill in and polish the markdown template below to generate a deployment plan for the project. Then save it to '.azure/plan.copilotmd' file.}
 
 #Title: {{title}}
 ## **Goal**

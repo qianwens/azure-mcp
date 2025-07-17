@@ -6,7 +6,7 @@ public static class InfraCodeRuleRetriever
 {
     public static void PopulateAZDPrompts(string iacType, string[] resourceTypes, List<string> llmResponse)
     {
-        llmResponse.Add("- Ensure an User-Assigned Managed Identity (UAMI) exists.");
+        llmResponse.Add("- Ensure an User-Assigned Managed Identity exists.");
         llmResponse.Add("- Resource Group resource (if exists) must have tag \"azd-env-name\" = environmentName. Apply this tag to resource group resource ONLY.");
         llmResponse.Add($"- Expected parameters in {iacType} parameters: environmentName='${{AZURE_ENV_NAME}}', location='${{AZURE_LOCATION}}'. resourceGroupName='rg-${{AZURE_ENV_NAME}}' is required if scope is subscription.");
         llmResponse.Add("- All container apps, app services, function apps, static web apps (and nothing else) must have tag \"azd-service-name\" matching the service name in azure.yaml.");
@@ -19,7 +19,7 @@ public static class InfraCodeRuleRetriever
         }
     }
 
-    public static void PopulateAZCLIPrompts(List<string> llmResponse)
+    public static void PopulateAzCliPrompts(List<string> llmResponse)
     {
         // TODO: Enrich Me
         llmResponse.Add("- No additional rules.");
@@ -43,7 +43,7 @@ public static class InfraCodeRuleRetriever
         var roleAssignmentResourceName = iacType == IacType.Bicep ? "Microsoft.Authorization/roleAssignments" : "azurerm_role_assignment";
 
         var returnString = $"- MANDATORY: Add a {roleAssignmentResourceName} resource to assign the {roleName} ({roleId}) role to the user-assigned managed identity";
-        
+
         if (!string.IsNullOrEmpty(additionalInstructions))
         {
             returnString += $" ({additionalInstructions})";
@@ -89,7 +89,7 @@ public static class InfraCodeRuleRetriever
     {
         llmResponse.Add("=== Additional requirements for Function Apps:");
         llmResponse.Add("- Attach User-Assigned Managed Identity.");
-        
+
         var requiredRoles = new[]
         {
             new { RoleId = "b7e6dc6d-f1e8-4753-8033-0f276bb0955b", Name = "Storage Blob Data Owner" },
@@ -125,13 +125,13 @@ public static class InfraCodeRuleRetriever
             $"Deployment Tool {deploymentTool} rules:"
         };
 
-        if (deploymentTool == DeploymentTool.Azd)
+        if (deploymentTool.Equals(DeploymentTool.Azd, StringComparison.OrdinalIgnoreCase))
         {
             PopulateAZDPrompts(iacType, resourceTypes, llmResponse);
         }
-        else if (deploymentTool == DeploymentTool.AzCLI)
+        else if (deploymentTool.Equals(DeploymentTool.AzCli, StringComparison.OrdinalIgnoreCase))
         {
-            PopulateAZCLIPrompts(llmResponse);
+            PopulateAzCliPrompts(llmResponse);
         }
 
         llmResponse.Add($"IaC Type: {iacType} rules:");
