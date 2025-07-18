@@ -10,17 +10,17 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.Deploy.Commands.InfraCodeRules;
 
-public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> logger)
+public sealed class IaCRulesGetCommand(ILogger<IaCRulesGetCommand> logger)
     : BaseCommand()
 {
-    private const string CommandTitle = "Get Infrastructure Code Rules";
-    private readonly ILogger<InfraCodeRulesGetCommand> _logger = logger;
+    private const string CommandTitle = "Get Iac(Infrastructure as Code) Rules";
+    private readonly ILogger<IaCRulesGetCommand> _logger = logger;
 
     private readonly Option<string> _deploymentToolOption = DeployOptionDefinitions.InfraCodeRules.DeploymentTool;
     private readonly Option<string> _iacTypeOption = DeployOptionDefinitions.InfraCodeRules.IacType;
     private readonly Option<string> _resourceTypesOption = DeployOptionDefinitions.InfraCodeRules.ResourceTypes;
 
-    public override string Name => "infra-code-rules-get";
+    public override string Name => "iac-rules-get";
 
     public override string Description =>
         """
@@ -66,7 +66,7 @@ public sealed class InfraCodeRulesGetCommand(ILogger<InfraCodeRulesGetCommand> l
                 .Where(rt => !string.IsNullOrWhiteSpace(rt))
                 .ToArray();
 
-            List<string> result = InfraCodeRuleRetriever.GetInfraCodeRules(
+            List<string> result = InfraCodeRuleRetriever.GetIaCRules(
                 options.DeploymentTool,
                 options.IacType,
                 resourceTypes);

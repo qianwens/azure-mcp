@@ -117,7 +117,7 @@ public static class InfraCodeRuleRetriever
         llmResponse.Add("- App Service must be configured with appropriate settings.");
     }
 
-    public static List<string> GetInfraCodeRules(string deploymentTool, string iacType, string[] resourceTypes)
+    public static List<string> GetIaCRules(string deploymentTool, string iacType, string[] resourceTypes)
     {
         var llmResponse = new List<string>
         {

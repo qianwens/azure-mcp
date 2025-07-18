@@ -3,17 +3,10 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Areas.Deploy.Services.Util;
-using Azure;
 using Azure.Core;
-using Azure.Identity;
 using Azure.ResourceManager;
-using Azure.ResourceManager.Resources;
 using AzureMcp.Areas.Deploy.Models;
-using AzureMcp.Helpers;
-using AzureMcp.Options;
 using AzureMcp.Services.Azure;
-using AzureMcp.Services.Azure.Subscription;
-using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.Deploy.Services;
 
