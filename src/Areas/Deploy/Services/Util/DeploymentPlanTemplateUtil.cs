@@ -47,7 +47,7 @@ public static class DeploymentPlanTemplateUtil
         {
             steps.Add($"""
             1. Provision Azure Infrastructure
-                1. Based on following required Azure resources in plan, get the infra code rules from the tool infra-code-rules-get
+                1. Based on following required Azure resources in plan, get the IaC rules from the tool infra-code-rules-get
                 2. Generate IaC ({azdIacOptions} files) for required azure resources based on the plan.
                 3. Pre-check: use get_errors tool to check generated Bicep grammar errors. Fix the errors if exist.
                 4. Run the AZD command `azd provision` to provision the resources and confirm each resource is created or already exists.
@@ -106,19 +106,17 @@ public static class DeploymentPlanTemplateUtil
                    : $"Azure Deployment Plan for {projectName} Project";
 
         return $$"""
-{Agent should fill in and polish the markdown template below to generate a deployment plan for the project. Then save it to '.azure/plan.copilotmd' file.}
+{Agent should fill in and polish the markdown template below to generate a deployment plan for the project. Then save it to '.azure/plan.copilotmd' file. Don't add cost estimation!}
 
 #Title: {{title}}
 ## **Goal**
 Based on the project to provide a plan to deploy the project to Azure using AZD. It will generate Bicep files and Azure YAML configuration.
 
-## **Execution Step**
 
-{{string.Join(Environment.NewLine, steps)}}
-
-## **Project Summary**
+## **Project Information**
 {
 briefly summarize the project structure, services, and configurations, example:
+AppName: web
 - **Technology Stack**: ASP.NET Core 7.0 Razor Pages application
 - **Application Type**: Task Manager web application with client-side JavaScript
 - **Containerization**: Ready for deployment with existing Dockerfile
@@ -126,12 +124,22 @@ briefly summarize the project structure, services, and configurations, example:
 - **Hosting Recommendation**: Azure Container Apps for scalable, serverless container hosting
 }
 
+## **Azure Resources Architecture**
+- **Install the mermaid extension in IDE to view the architecture.**
+{a mermaid graph of following recommended azure resource architecture. Only keep the most important edges to make structure clear and readable.}
+{
+List how data flows between the services, example:
+- The container app gets its image from the Azure Container Registry.
+- The container app gets requests and interacts with the Azure SQL Database for data storage and retrieval.
+}
+
+
 ## **Recommended Azure Resources**
 
 Recommended App service hosting the project //agent should fulfill this for each app instance
 - Application {{projectName}}
   - Hosting Service Type: {{azureComputeHost}} // it can be Azure Container Apps, Web App Service, Azure Functions, Azure Kubernetes Service. Recommend one based on the project.
-  - SKU // recommend a sku based on the project, show its cost and performance
+  - SKU // recommend a sku based on the project, show its performance. Don't estimate the cost.
   - Configuration:
     - language: {language}  //detect from the project, it can be nodejs, python, dotnet, etc.
     - dockerFilePath: {dockerFilePath}// fulfill this if service.azureComputeHost is ContainerApp
@@ -139,7 +147,7 @@ Recommended App service hosting the project //agent should fulfill this for each
     - Environment Variables: [] // the env variables that are used in the project/required by service
   - Dependencies Resource
     - Dependency Name
-    - SKU // recommend a sku, show its cost and performance
+    - SKU // recommend a sku, show its performance.
     - Service Type // it can be Azure SQL, Azure Cosmos DB, Azure Storage, etc.
     - Connection Type // it can be connection string, managed identity, etc.
     - Environment Variables: [] // the env variables that are used in the project/required by dependency
@@ -150,15 +158,18 @@ Recommended Supporting Services
 - Key Vault(Optional): If there are dependencies such as postgresql/sql/mysql, create a Key Vault to store connection string. If not, the resource should not show.
 If there is a Container App, the following resources are required:
 - Container Registry
-- User managed identity: Must be assigned to the container app.
-- AcrPull role assignment: User managed identity must have **AcrPull** role ("7f951dda-4ed3-4680-a7ca-43fe172d538d") assigned to the container registry.
 If there is a WebApp(App Service):
 - App Service Site Extension (Microsoft.Web/sites/siteextensions): Required for App Service deployments.
-- User managed identity: Must have **AcrPull** role ("7f951dda-4ed3-4680-a7ca-43fe172d538d") to the container registry.
 
-## **Azure Resources Architecture**
-- **Install the mermaid extension in IDE to view the architecture.**
-{a mermaid graph of the deployed resource architecture. Only keep the most important edges to make structure clear and readable.}
+Recommended Security Configurations
+If there is a Container App
+- User managed identity: Must be assigned to the container app.
+- AcrPull role assignment: User managed identity must have **AcrPull** role ("7f951dda-4ed3-4680-a7ca-43fe172d538d") assigned to the container registry.
+
+## **Execution Step**
+
+{{string.Join(Environment.NewLine, steps)}}
+
 """;
     }
 }
