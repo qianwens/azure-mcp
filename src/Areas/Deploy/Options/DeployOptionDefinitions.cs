@@ -210,7 +210,7 @@ public static class DeployOptionDefinitions
         };
     }
 
-    public static class InfraCodeRules
+    public static class IaCRules
     {
         public static readonly Option<string> DeploymentTool = new(
             "--deployment-tool",

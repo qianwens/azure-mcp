@@ -16,9 +16,9 @@ public sealed class IaCRulesGetCommand(ILogger<IaCRulesGetCommand> logger)
     private const string CommandTitle = "Get Iac(Infrastructure as Code) Rules";
     private readonly ILogger<IaCRulesGetCommand> _logger = logger;
 
-    private readonly Option<string> _deploymentToolOption = DeployOptionDefinitions.InfraCodeRules.DeploymentTool;
-    private readonly Option<string> _iacTypeOption = DeployOptionDefinitions.InfraCodeRules.IacType;
-    private readonly Option<string> _resourceTypesOption = DeployOptionDefinitions.InfraCodeRules.ResourceTypes;
+    private readonly Option<string> _deploymentToolOption = DeployOptionDefinitions.IaCRules.DeploymentTool;
+    private readonly Option<string> _iacTypeOption = DeployOptionDefinitions.IaCRules.IacType;
+    private readonly Option<string> _resourceTypesOption = DeployOptionDefinitions.IaCRules.ResourceTypes;
 
     public override string Name => "iac-rules-get";
 
