@@ -3,11 +3,16 @@
 
 using System.Text;
 using AzureMcp.Areas.Deploy.Options;
+using Microsoft.Extensions.ObjectPool;
 
 namespace AzureMcp.Areas.Deploy.Commands;
 
 public static class GenerateMermaidChart
 {
+    // used to create a subgraph for AKS cluster in the chart
+    private const string aksClusterInternalName = "akscluster";
+    private const string aksClusterName = "Azure Kubernetes Service (AKS) Cluster";
+
     public static string GenerateChart(string workspaceFolder, AppTopology appTopology)
     {
         var chartComponents = new List<string>();
@@ -20,6 +25,10 @@ public static class GenerateMermaidChart
                 classDef compute fill:#9cf00b,stroke:#333,stroke-width:2px,color:#000
                 classDef binding fill:#fef200,stroke:#333,stroke-width:2px,color:#000
             """);
+        if (appTopology.Services.Any(s => s.AzureComputeHost == "aks"))
+        {
+            chartComponents.Add("classDef cluster fill:#ffffd0,stroke:#333,stroke-width:2px,color:#000");
+        }
 
         var services = new List<string> { "%% Services" };
         var resources = new List<string> { "%% Resources" };
@@ -48,8 +57,31 @@ public static class GenerateMermaidChart
             relationships.Add(CreateRelationshipString(serviceInternalName, service.Name, "hosted on", ArrowType.Solid));
         }
 
+        var aksClusterExists = false;
         foreach (var service in appTopology.Services)
         {
+
+            if (service.AzureComputeHost == "aks")
+            {
+                if (!aksClusterExists)
+                {
+                    // Add AKS cluster as a subgraph
+                    resources.Add($"subgraph {aksClusterInternalName} [{aksClusterName}]");
+                    // containerized services share the same AKS cluster
+                    foreach (var aksservice in appTopology.Services.Where(s => s.AzureComputeHost == "aks"))
+                    {
+                        resources.Add(CreateComponentName($"{aksservice.AzureComputeHost}_{aksservice.Name}", $"{aksservice.Name} (Containerized Service)", "compute", NodeShape.RoundedRectangle));
+                    }
+                    resources.Add("end");
+                    resources.Add($"class {aksClusterInternalName}:::cluster");
+                    aksClusterExists = true;
+                }
+            }
+            // each service should have a compute resource type
+            else
+            {
+                resources.Add(CreateComponentName($"{FlattenServiceType(service.AzureComputeHost)}_{service.Name}", $"{service.Name} ({service.AzureComputeHost})", "compute", NodeShape.RoundedRectangle));
+            }
             foreach (var dependency in service.Dependencies)
             {
                 var instanceInternalName = $"{FlattenServiceType(dependency.ServiceType)}.{dependency.Name}";
@@ -57,7 +89,10 @@ public static class GenerateMermaidChart
 
                 if (IsComputeResourceType(dependency.ServiceType))
                 {
-                    resources.Add(CreateComponentName(instanceInternalName, instanceName, "compute", NodeShape.RoundedRectangle));
+                    if (!resources.Any(r => r.Contains(instanceInternalName)))
+                    {
+                        resources.Add(CreateComponentName(instanceInternalName, instanceName, "compute", NodeShape.RoundedRectangle));
+                    }
                 }
                 else
                 {

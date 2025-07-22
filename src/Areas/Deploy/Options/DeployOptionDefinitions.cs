@@ -286,7 +286,7 @@ public static class AppTopologySchema
                         {
                             ["type"] = "string",
                             ["description"] = "The appropriate azure service that should be used to host this service. Use containerapp if the service is containerized and has a Dockerfile.",
-                            ["enum"] = new JsonArray("appservice", "containerapp", "function", "staticwebapp")
+                            ["enum"] = new JsonArray("appservice", "containerapp", "function", "staticwebapp", "aks")
                         },
                         ["dockerSettings"] = new JsonObject
                         {
