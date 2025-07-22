@@ -59,8 +59,7 @@ public class DefaultRegionChecker(ArmClient armClient, string subscriptionId) : 
         }
         catch (Exception error)
         {
-            Console.WriteLine($"Error fetching regions for resource type {resourceType}: {error.Message}");
-            return [];
+            throw new Exception($"Error fetching regions for resource type {resourceType}: {error.Message}");
         }
     }
 }
@@ -130,7 +129,7 @@ public class CognitiveServicesRegionChecker : AzureRegionChecker
             }
             catch (Exception error)
             {
-                Console.WriteLine($"Error checking cognitive services models for region {region}: {error.Message}");
+                throw new Exception($"Error checking cognitive services models for region {region}: {error.Message}");
             }
         }
 
@@ -172,7 +171,7 @@ public class PostgreSqlRegionChecker(ArmClient armClient, string subscriptionId)
             }
             catch (Exception error)
             {
-                Console.WriteLine($"Error checking PostgreSQL capabilities for region {region}: {error.Message}");
+                throw new Exception($"Error checking PostgreSQL capabilities for region {region}: {error.Message}");
             }
         }
 
