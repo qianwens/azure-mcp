@@ -79,7 +79,7 @@ public static class GenerateMermaidChart
                 }
             }
             // each service should have a compute resource type
-            else
+            else if (!resources.Any(r => r.Contains(serviceResourceInternalName)))
             {
                 resources.Add(CreateComponentName(serviceResourceInternalName, $"{service.Name} ({GetFormalName(service.AzureComputeHost)})", "compute", NodeShape.RoundedRectangle));
             }
@@ -90,7 +90,7 @@ public static class GenerateMermaidChart
 
                 if (IsComputeResourceType(dependency.ServiceType))
                 {
-                    if (!resources.Any(r => r.Contains(instanceInternalName)))
+                    if (!resources.Any(r => r.Contains(EnsureUrlFriendlyName(instanceInternalName))))
                     {
                         resources.Add(CreateComponentName(instanceInternalName, instanceName, "compute", NodeShape.RoundedRectangle));
                     }

@@ -10,7 +10,8 @@ public static class AzureServiceConstants
         AppService,
         FunctionApp,
         ContainerApp,
-        StaticWebApp
+        StaticWebApp,
+        AKS
     }
 
     public enum AzureServiceType
@@ -24,6 +25,7 @@ public static class AzureServiceConstants
         AzureCosmosDB,
         AzureFunctionApp,
         AzureKeyVault,
+        AKS,
         AzureDatabaseForMySQL,
         AzureOpenAI,
         AzureDatabaseForPostgreSQL,
