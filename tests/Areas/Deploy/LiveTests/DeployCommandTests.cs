@@ -33,7 +33,10 @@ public class DeployCommandTests : CommandTestsBase,
             new()
             {
                 { "workspace-folder", "C:/" },
-                { "project-name", "django" }
+                { "project-name", "django" },
+                { "target-app-service", "ContainerApp" },
+                { "provisioning-tool", "AZD" },
+                { "azd-iac-options", "bicep" }
             });
         // assert
         Assert.StartsWith(result, "Title:");
