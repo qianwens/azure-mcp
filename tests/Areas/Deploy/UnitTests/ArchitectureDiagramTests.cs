@@ -62,6 +62,55 @@ public class ArchitectureDiagramTests
                     {
                         new DependencyConfig { Name = "store", ConnectionType = "system-identity", ServiceType = "azurestorageaccount" }
                     },
+                },
+                new ServiceConfig
+                {
+                    Name = "frontend",
+                    Path = "testWorkspace/web",
+                    AzureComputeHost = "containerapp",
+                    Language = "js",
+                    Port = "8080",
+                    Dependencies = new DependencyConfig[]
+                    {
+                        new DependencyConfig { Name = "backend", ConnectionType = "http", ServiceType = "containerapp" }
+                    }
+                },
+                new ServiceConfig
+                {
+                    Name = "backend",
+                    Path = "testWorkspace/api",
+                    AzureComputeHost = "containerapp",
+                    Language = "python",
+                    Port = "3000",
+                    Dependencies = new DependencyConfig[]
+                    {
+                        new DependencyConfig { Name = "db", ConnectionType = "secret", ServiceType = "azurecosmosdb" },
+                        new DependencyConfig { Name = "secretStore", ConnectionType = "system-identity", ServiceType = "azurekeyvault" }
+                    }
+                },
+                new ServiceConfig
+                {
+                    Name = "frontendservice",
+                    Path = "testWorkspace/web",
+                    AzureComputeHost = "aks",
+                    Language = "ts",
+                    Port = "3001",
+                    Dependencies = new DependencyConfig[]
+                    {
+                        new DependencyConfig { Name = "backendservice", ConnectionType = "user-identity", ServiceType = "aks"}
+                    }
+                },
+                new ServiceConfig
+                {
+                    Name = "backendservice",
+                    Path = "testWorkspace/api",
+                    AzureComputeHost = "aks",
+                    Language = "python",
+                    Port = "3000",
+                    Dependencies = new DependencyConfig[]
+                    {
+                        new DependencyConfig { Name = "database", ConnectionType = "user-identity", ServiceType = "azurecacheforredis" }
+                    }
                 }
             }
         };
