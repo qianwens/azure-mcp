@@ -319,13 +319,13 @@ public static class AppTopologySchema
                                     ["name"] = new JsonObject
                                     {
                                         ["type"] = "string",
-                                        ["description"] = "The name of the dependent service. Can be arbitrary, or must reference another service in the services array if referencing azureappservice, azurecontainerapp, azurestaticwebapps, or azurefunctions."
+                                        ["description"] = "The name of the dependent service. Can be arbitrary, or must reference another service in the services array if referencing appservice, containerapp, staticwebapps, aks, or functionapp."
                                     },
                                     ["serviceType"] = new JsonObject
                                     {
                                         ["type"] = "string",
                                         ["description"] = "The name of the azure service that can be used for this dependent service.",
-                                        ["enum"] = new JsonArray("azureaisearch", "azureaiservices", "appservice", "azureapplicationinsights", "azurebotservice", "containerapp", "azurecosmosdb", "functionapp", "azurekeyvault", "azuredatabaseformysql", "azureopenai", "azuredatabaseforpostgresql", "azureprivateendpoint", "azurecacheforredis", "azuresqldatabase", "azurestorageaccount", "staticwebapp", "azureservicebus", "azuresignalrservice", "azurevirtualnetwork", "azurewebpubsub")
+                                        ["enum"] = new JsonArray("azureaisearch", "azureaiservices", "appservice", "azureapplicationinsights", "azurebotservice", "containerapp", "azurecosmosdb", "functionapp", "azurekeyvault", "aks", "azuredatabaseformysql", "azureopenai", "azuredatabaseforpostgresql", "azureprivateendpoint", "azurecacheforredis", "azuresqldatabase", "azurestorageaccount", "staticwebapp", "azureservicebus", "azuresignalrservice", "azurevirtualnetwork", "azurewebpubsub")
                                     },
                                     ["connectionType"] = new JsonObject
                                     {

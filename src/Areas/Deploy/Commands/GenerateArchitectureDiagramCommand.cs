@@ -79,7 +79,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
             {
                 throw new InvalidOperationException("Failed to generate architecture diagram. The chart content is empty.");
             }
-            var encodedDiagram = EncodeMermaid.GetEncodedMermaidChart(chart);
+            var encodedDiagram = EncodeMermaid.GetEncodedMermaidChart(chart).Replace("+", "-"); // replace '+' with '-' for URL safety and consistency with mermaid.live URL encoding
 
             var mermaidUrl = $"https://mermaid.live/view#pako:{encodedDiagram}";
             _logger.LogInformation("Generated architecture diagram successfully. Mermaid URL: {MermaidUrl}", mermaidUrl);
@@ -98,7 +98,6 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
                 : null;
 
             context.Response.Message = $"Help the user open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl} \n"
-                + "**You MUST replace the \"\\u002B\" with the actual plus sign when providing the URL to the user.**\n\n"
                 + "Ask user if the topology is expected, if not, you should call this tool with the user's updated instructions. "
                 + "Please inform the user that here are the supported hosting technologies: "
                 + $"{string.Join(", ", Enum.GetNames<AzureServiceConstants.AzureComputeServiceType>())}. ";
