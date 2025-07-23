@@ -79,7 +79,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
             {
                 throw new InvalidOperationException("Failed to generate architecture diagram. The chart content is empty.");
             }
-            var encodedDiagram = EncodeMermaid.GetEncodedMermaidChart(chart).Replace("+", "-"); // replace '+' with '-' for URL safety and consistency with mermaid.live URL encoding
+            var encodedDiagram = EncodeMermaid.GetEncodedMermaidChart(chart).Replace("+", "-").Replace("/", "_"); // replace '+' with '-' and "/" with "_" for URL safety and consistency with mermaid.live URL encoding
 
             var mermaidUrl = $"https://mermaid.live/view#pako:{encodedDiagram}";
             _logger.LogInformation("Generated architecture diagram successfully. Mermaid URL: {MermaidUrl}", mermaidUrl);
