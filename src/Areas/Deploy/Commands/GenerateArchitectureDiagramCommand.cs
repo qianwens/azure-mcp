@@ -98,6 +98,7 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
                 : null;
 
             context.Response.Message = $"Help the user open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl} \n"
+                + "**You MUST replace the \"\\u002B\" with the actual plus sign when providing the URL to the user.**\n\n"
                 + "Ask user if the topology is expected, if not, you should call this tool with the user's updated instructions. "
                 + "Please inform the user that here are the supported hosting technologies: "
                 + $"{string.Join(", ", Enum.GetNames<AzureServiceConstants.AzureComputeServiceType>())}. ";
