@@ -12,9 +12,10 @@ namespace AzureMcp.Areas.Quota.Commands;
     PropertyNameCaseInsensitive = true,
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
 )]
-[JsonSerializable(typeof(QuotaCheckCommand.QuotaCheckCommandResult))]
-[JsonSerializable(typeof(QuotaInfo))]
-[JsonSerializable(typeof(Dictionary<string, List<QuotaInfo>>))]
+[JsonSerializable(typeof(UsageCheckCommand.UsageCheckCommandResult))]
+[JsonSerializable(typeof(RegionCheckCommand.RegionCheckCommandResult))]
+[JsonSerializable(typeof(UsageInfo))]
+[JsonSerializable(typeof(Dictionary<string, List<UsageInfo>>))]
 internal sealed partial class QuotaJsonContext : JsonSerializerContext
 {
 }

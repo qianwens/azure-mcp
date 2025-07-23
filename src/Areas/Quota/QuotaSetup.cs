@@ -18,9 +18,10 @@ internal sealed class QuotaSetup : IAreaSetup
 
     public void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFactory)
     {
-        var quota = new CommandGroup("quota", "Quota commands for checking Azure resource quotas");
+        var quota = new CommandGroup("quota", "Quota commands for getting available region for Azure resources or getting usage for Azure resource per region");
         rootGroup.AddSubGroup(quota);
 
-        quota.AddCommand("check", new QuotaCheckCommand(loggerFactory.CreateLogger<QuotaCheckCommand>()));
+        quota.AddCommand("usage-get", new UsageCheckCommand(loggerFactory.CreateLogger<UsageCheckCommand>()));
+        quota.AddCommand("available-region-get", new RegionCheckCommand(loggerFactory.CreateLogger<RegionCheckCommand>()));
     }
 }

@@ -4,19 +4,19 @@ using Azure.ResourceManager.ContainerInstance.Models;
 
 namespace AzureMcp.Areas.Quota.Services.Util;
 
-public class ContainerInstanceQuotaChecker(TokenCredential credential, string subscriptionId) : AzureQuotaChecker(credential, subscriptionId)
+public class ContainerInstanceUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
 {
-    public override async Task<List<QuotaInfo>> GetQuotaForLocationAsync(string location)
+    public override async Task<List<UsageInfo>> GetQuotaForLocationAsync(string location)
     {
         try
         {
             var subscription = ResourceClient.GetSubscriptionResource(new ResourceIdentifier($"/subscriptions/{SubscriptionId}"));
             var usages = subscription.GetUsagesWithLocationAsync(location);
 
-            var result = new List<QuotaInfo>();
+            var result = new List<UsageInfo>();
             await foreach (ContainerInstanceUsage item in usages)
             {
-                result.Add(new QuotaInfo(
+                result.Add(new UsageInfo(
                     Name: item.Name?.LocalizedValue ?? item.Name?.Value ?? string.Empty,
                     Limit: (int)(item.Limit ?? 0),
                     Used: (int)(item.CurrentValue ?? 0),
@@ -28,8 +28,7 @@ public class ContainerInstanceQuotaChecker(TokenCredential credential, string su
         }
         catch (Exception error)
         {
-            Console.WriteLine($"Error fetching Container Instance quotas: {error.Message}");
-            return [];
+            throw new Exception($"Error fetching Container Instance quotas: {error.Message}");
         }
     }
 }

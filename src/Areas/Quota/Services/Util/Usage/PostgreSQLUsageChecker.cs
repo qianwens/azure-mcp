@@ -3,9 +3,9 @@ using Azure.Core;
 
 namespace AzureMcp.Areas.Quota.Services.Util;
 
-public class PostgreSQLQuotaChecker(TokenCredential credential, string subscriptionId) : AzureQuotaChecker(credential, subscriptionId)
+public class PostgreSQLUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
 {
-    public override async Task<List<QuotaInfo>> GetQuotaForLocationAsync(string location)
+    public override async Task<List<UsageInfo>> GetQuotaForLocationAsync(string location)
     {
         try
         {
@@ -17,7 +17,7 @@ public class PostgreSQLQuotaChecker(TokenCredential credential, string subscript
                 return [];
             }
 
-            var result = new List<QuotaInfo>();
+            var result = new List<UsageInfo>();
             foreach (var item in valueElement.EnumerateArray())
             {
                 var name = string.Empty;
@@ -45,15 +45,14 @@ public class PostgreSQLQuotaChecker(TokenCredential credential, string subscript
                     unit = unitElement.GetStringSafe();
                 }
 
-                result.Add(new QuotaInfo(name, limit, used, unit));
+                result.Add(new UsageInfo(name, limit, used, unit));
             }
 
             return result;
         }
         catch (Exception error)
         {
-            Console.WriteLine($"Error fetching PostgreSQL quotas: {error.Message}");
-            return [];
+            throw new Exception($"Error fetching PostgreSQL quotas: {error.Message}");
         }
     }
 }

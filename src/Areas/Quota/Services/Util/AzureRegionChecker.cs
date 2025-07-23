@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using Azure;
 using Azure.Core;
 using Azure.ResourceManager;
@@ -5,9 +8,9 @@ using Azure.ResourceManager.CognitiveServices;
 using Azure.ResourceManager.CognitiveServices.Models;
 using Azure.ResourceManager.PostgreSql.FlexibleServers;
 using Azure.ResourceManager.PostgreSql.FlexibleServers.Models;
-using AzureMcp.Areas.Deploy.Models;
+using AzureMcp.Areas.Quota.Models;
 
-namespace Areas.Deploy.Services.Util;
+namespace AzureMcp.Areas.Quota.Services.Util;
 
 public interface IRegionChecker
 {

@@ -27,7 +27,7 @@ public enum ResourceProvider
     ContainerInstance
 }
 
-public record QuotaInfo(
+public record UsageInfo(
     string Name,
     int Limit,
     int Used,
@@ -35,13 +35,13 @@ public record QuotaInfo(
     string? Description = null
 );
 
-public interface IQuotaChecker
+public interface IUsageChecker
 {
-    Task<List<QuotaInfo>> GetQuotaForLocationAsync(string location);
+    Task<List<UsageInfo>> GetQuotaForLocationAsync(string location);
 }
 
 // Abstract base class for checking Azure quotas
-public abstract class AzureQuotaChecker : IQuotaChecker
+public abstract class AzureUsageChecker : IUsageChecker
 {
     protected readonly string SubscriptionId;
     protected readonly ArmClient ResourceClient;
@@ -49,14 +49,14 @@ public abstract class AzureQuotaChecker : IQuotaChecker
     protected readonly TokenCredential Credential;
     private static readonly HttpClient HttpClient = new();
 
-    protected AzureQuotaChecker(TokenCredential credential, string subscriptionId)
+    protected AzureUsageChecker(TokenCredential credential, string subscriptionId)
     {
         SubscriptionId = subscriptionId;
         Credential = credential ?? throw new ArgumentNullException(nameof(credential));
         ResourceClient = new ArmClient(credential, subscriptionId);
     }
 
-    public abstract Task<List<QuotaInfo>> GetQuotaForLocationAsync(string location);
+    public abstract Task<List<UsageInfo>> GetQuotaForLocationAsync(string location);
 
     protected async Task<JsonDocument?> GetQuotaByUrlAsync(string requestUrl)
     {
@@ -86,8 +86,8 @@ public abstract class AzureQuotaChecker : IQuotaChecker
     }
 }
 
-// Factory function to create quota checkers
-public static class QuotaCheckerFactory
+// Factory function to create usage checkers
+public static class UsageCheckerFactory
 {
     private static readonly Dictionary<string, ResourceProvider> ProviderMapping = new()
     {
@@ -103,7 +103,7 @@ public static class QuotaCheckerFactory
         { "Microsoft.ContainerInstance", ResourceProvider.ContainerInstance }
     };
 
-    public static IQuotaChecker CreateQuotaChecker(TokenCredential credential, string provider, string subscriptionId)
+    public static IUsageChecker CreateUsageChecker(TokenCredential credential, string provider, string subscriptionId)
     {
         if (!ProviderMapping.TryGetValue(provider, out var resourceProvider))
         {
@@ -112,16 +112,16 @@ public static class QuotaCheckerFactory
 
         return resourceProvider switch
         {
-            ResourceProvider.Compute => new ComputeQuotaChecker(credential, subscriptionId),
-            ResourceProvider.CognitiveServices => new CognitiveServicesQuotaChecker(credential, subscriptionId),
-            ResourceProvider.Storage => new StorageQuotaChecker(credential, subscriptionId),
-            ResourceProvider.ContainerApp => new ContainerAppQuotaChecker(credential, subscriptionId),
-            ResourceProvider.Network => new NetworkQuotaChecker(credential, subscriptionId),
-            ResourceProvider.MachineLearning => new MachineLearningQuotaChecker(credential, subscriptionId),
-            ResourceProvider.PostgreSQL => new PostgreSQLQuotaChecker(credential, subscriptionId),
-            ResourceProvider.HDInsight => new HDInsightQuotaChecker(credential, subscriptionId),
-            ResourceProvider.Search => new SearchQuotaChecker(credential, subscriptionId),
-            ResourceProvider.ContainerInstance => new ContainerInstanceQuotaChecker(credential, subscriptionId),
+            ResourceProvider.Compute => new ComputeUsageChecker(credential, subscriptionId),
+            ResourceProvider.CognitiveServices => new CognitiveServicesUsageChecker(credential, subscriptionId),
+            ResourceProvider.Storage => new StorageUsageChecker(credential, subscriptionId),
+            ResourceProvider.ContainerApp => new ContainerAppUsageChecker(credential, subscriptionId),
+            ResourceProvider.Network => new NetworkUsageChecker(credential, subscriptionId),
+            ResourceProvider.MachineLearning => new MachineLearningUsageChecker(credential, subscriptionId),
+            ResourceProvider.PostgreSQL => new PostgreSQLUsageChecker(credential, subscriptionId),
+            ResourceProvider.HDInsight => new HDInsightUsageChecker(credential, subscriptionId),
+            ResourceProvider.Search => new SearchUsageChecker(credential, subscriptionId),
+            ResourceProvider.ContainerInstance => new ContainerInstanceUsageChecker(credential, subscriptionId),
             _ => throw new ArgumentException($"No implementation for provider: {provider}")
         };
     }
@@ -130,7 +130,7 @@ public static class QuotaCheckerFactory
 // Service to get Azure quota for a list of resource types
 public static class AzureQuotaService
 {
-    public static async Task<Dictionary<string, List<QuotaInfo>>> GetAzureQuotaAsync(
+    public static async Task<Dictionary<string, List<UsageInfo>>> GetAzureQuotaAsync(
         TokenCredential credential,
         List<string> resourceTypes,
         string subscriptionId,
@@ -147,24 +147,24 @@ public static class AzureQuotaService
             var (provider, resourceTypesForProvider) = (kvp.Key, kvp.Value);
             try
             {
-                var quotaChecker = QuotaCheckerFactory.CreateQuotaChecker(credential, provider, subscriptionId);
-                var quotaInfo = await quotaChecker.GetQuotaForLocationAsync(location);
+                var usageChecker = UsageCheckerFactory.CreateUsageChecker(credential, provider, subscriptionId);
+                var quotaInfo = await usageChecker.GetQuotaForLocationAsync(location);
                 Console.WriteLine($"Quota info for provider {provider}: {quotaInfo.Count} items");
 
-                return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<QuotaInfo>>(rt, quotaInfo));
+                return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<UsageInfo>>(rt, quotaInfo));
             }
             catch (ArgumentException ex) when (ex.Message.Contains("Unsupported resource provider", StringComparison.OrdinalIgnoreCase))
             {
-                return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<QuotaInfo>>(rt, new List<QuotaInfo>(){
-                    new QuotaInfo(rt, 0, 0, Description: "No Limit")
+                return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<UsageInfo>>(rt, new List<UsageInfo>(){
+                    new UsageInfo(rt, 0, 0, Description: "No Limit")
                 }));
             }
             catch (Exception error)
             {
                 Console.WriteLine($"Error fetching quota for provider {provider}: {error.Message}");
-                return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<QuotaInfo>>(rt, new List<QuotaInfo>()
+                return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<UsageInfo>>(rt, new List<UsageInfo>()
                 {
-                    new QuotaInfo(rt, 0, 0, Description: error.Message)
+                    new UsageInfo(rt, 0, 0, Description: error.Message)
                 }));
             }
         });

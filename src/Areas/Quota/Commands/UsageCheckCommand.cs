@@ -12,10 +12,10 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.Quota.Commands;
 
-public class QuotaCheckCommand(ILogger<QuotaCheckCommand> logger) : SubscriptionCommand<QuotaCheckOptions>()
+public class UsageCheckCommand(ILogger<UsageCheckCommand> logger) : SubscriptionCommand<UsageCheckOptions>()
 {
     private const string CommandTitle = "Check Available Azure Quota for Regions";
-    private readonly ILogger<QuotaCheckCommand> _logger = logger;
+    private readonly ILogger<UsageCheckCommand> _logger = logger;
 
     private readonly Option<string> _regionOption = QuotaOptionDefinitions.QuotaCheck.Region;
     private readonly Option<string> _resourceTypesOption = QuotaOptionDefinitions.QuotaCheck.ResourceTypes;
@@ -36,7 +36,7 @@ public class QuotaCheckCommand(ILogger<QuotaCheckCommand> logger) : Subscription
         command.AddOption(_resourceTypesOption);
     }
 
-    protected override QuotaCheckOptions BindOptions(ParseResult parseResult)
+    protected override UsageCheckOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
         options.Region = parseResult.GetValueForOption(_regionOption) ?? string.Empty;
@@ -65,7 +65,7 @@ public class QuotaCheckCommand(ILogger<QuotaCheckCommand> logger) : Subscription
                 .Where(rt => !string.IsNullOrWhiteSpace(rt))
                 .ToList();
             var quotaService = context.GetService<IQuotaService>();
-            Dictionary<string, List<QuotaInfo>> toolResult = await quotaService.GetAzureQuotaAsync(
+            Dictionary<string, List<UsageInfo>> toolResult = await quotaService.GetAzureQuotaAsync(
                 ResourceTypes,
                 options.Subscription!,
                 options.Region);
@@ -74,19 +74,19 @@ public class QuotaCheckCommand(ILogger<QuotaCheckCommand> logger) : Subscription
 
             context.Response.Results = toolResult?.Count > 0 ?
                 ResponseResult.Create(
-                    new QuotaCheckCommandResult(toolResult),
-                    QuotaJsonContext.Default.QuotaCheckCommandResult) :
+                    new UsageCheckCommandResult(toolResult),
+                    QuotaJsonContext.Default.UsageCheckCommandResult) :
                 null;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking Azure quota");
+            _logger.LogError(ex, "Error checking Azure resource usage");
             HandleException(context, ex);
         }
         return context.Response;
 
     }
 
-    internal record QuotaCheckCommandResult(Dictionary<string, List<QuotaInfo>> QuotaInfo);
+    internal record UsageCheckCommandResult(Dictionary<string, List<UsageInfo>> QuotaInfo);
 
 }

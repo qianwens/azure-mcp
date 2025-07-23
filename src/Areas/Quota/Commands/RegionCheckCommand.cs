@@ -1,27 +1,25 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Areas.Deploy.Services.Util;
-using AzureMcp.Areas.Deploy.Models;
-using AzureMcp.Areas.Deploy.Options;
-using AzureMcp.Areas.Deploy.Services;
+using AzureMcp.Areas.Quota.Options;
+using AzureMcp.Areas.Quota.Services;
 using AzureMcp.Commands;
 using AzureMcp.Commands.Subscription;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Telemetry;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Areas.Deploy.Commands.Region;
+namespace AzureMcp.Areas.Quota.Commands;
 
 public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger) : SubscriptionCommand<RegionCheckOptions>()
 {
     private const string CommandTitle = "Get Available Azure Regions";
     private readonly ILogger<RegionCheckCommand> _logger = logger;
 
-    private readonly Option<string> _resourceTypesOption = DeployOptionDefinitions.RegionCheck.ResourceTypes;
-    private readonly Option<string> _cognitiveServiceModelNameOption = DeployOptionDefinitions.RegionCheck.CognitiveServiceModelName;
-    private readonly Option<string> _cognitiveServiceModelVersionOption = DeployOptionDefinitions.RegionCheck.CognitiveServiceModelVersion;
-    private readonly Option<string> _cognitiveServiceDeploymentSkuNameOption = DeployOptionDefinitions.RegionCheck.CognitiveServiceDeploymentSkuName;
+    private readonly Option<string> _resourceTypesOption = QuotaOptionDefinitions.RegionCheck.ResourceTypes;
+    private readonly Option<string> _cognitiveServiceModelNameOption = QuotaOptionDefinitions.RegionCheck.CognitiveServiceModelName;
+    private readonly Option<string> _cognitiveServiceModelVersionOption = QuotaOptionDefinitions.RegionCheck.CognitiveServiceModelVersion;
+    private readonly Option<string> _cognitiveServiceDeploymentSkuNameOption = QuotaOptionDefinitions.RegionCheck.CognitiveServiceDeploymentSkuName;
 
     public override string Name => "available-region-get";
 
@@ -78,8 +76,8 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger) : Sub
                 throw new ArgumentException("Resource types cannot be empty.", nameof(options.ResourceTypes));
             }
 
-            var deployService = context.GetService<IDeployService>();
-            List<string> toolResult = await deployService.GetAvailableRegionsForResourceTypesAsync(
+            var quotaService = context.GetService<IQuotaService>();
+            List<string> toolResult = await quotaService.GetAvailableRegionsForResourceTypesAsync(
                 resourceTypes,
                 options.Subscription!,
                 options.CognitiveServiceModelName,
@@ -91,7 +89,7 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger) : Sub
             context.Response.Results = toolResult?.Count > 0 ?
                 ResponseResult.Create(
                     new RegionCheckCommandResult(toolResult),
-                    DeployJsonContext.Default.RegionCheckCommandResult) :
+                    QuotaJsonContext.Default.RegionCheckCommandResult) :
                 null;
         }
         catch (Exception ex)

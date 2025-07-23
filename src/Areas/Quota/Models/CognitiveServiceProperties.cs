@@ -1,4 +1,7 @@
-namespace AzureMcp.Areas.Deploy.Models;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+namespace AzureMcp.Areas.Quota.Models;
 
 public class CognitiveServiceProperties
 {

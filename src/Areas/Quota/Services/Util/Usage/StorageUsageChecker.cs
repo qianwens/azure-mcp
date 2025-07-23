@@ -5,19 +5,19 @@ using Azure.ResourceManager.Storage.Models;
 
 namespace AzureMcp.Areas.Quota.Services.Util;
 
-public class StorageQuotaChecker(TokenCredential credential, string subscriptionId) : AzureQuotaChecker(credential, subscriptionId)
+public class StorageUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
 {
-    public override async Task<List<QuotaInfo>> GetQuotaForLocationAsync(string location)
+    public override async Task<List<UsageInfo>> GetQuotaForLocationAsync(string location)
     {
         try
         {
             var subscription = ResourceClient.GetSubscriptionResource(new ResourceIdentifier($"/subscriptions/{SubscriptionId}"));
             var usages = subscription.GetUsagesByLocationAsync(location);
-            var result = new List<QuotaInfo>();
+            var result = new List<UsageInfo>();
 
             await foreach (var item in usages)
             {
-                result.Add(new QuotaInfo(
+                result.Add(new UsageInfo(
                     Name: item.Name?.Value ?? string.Empty,
                     Limit: item.Limit ?? 0,
                     Used: item.CurrentValue ?? 0,
@@ -29,8 +29,7 @@ public class StorageQuotaChecker(TokenCredential credential, string subscription
         }
         catch (Exception error)
         {
-            Console.WriteLine($"Error fetching storage quotas: {error.Message}");
-            return [];
+            throw new Exception($"Error fetching storage quotas: {error.Message}");
         }
     }
 }

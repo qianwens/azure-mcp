@@ -4,19 +4,19 @@ using Azure.ResourceManager.CognitiveServices.Models;
 
 namespace AzureMcp.Areas.Quota.Services.Util;
 
-public class CognitiveServicesQuotaChecker(TokenCredential credential, string subscriptionId) : AzureQuotaChecker(credential, subscriptionId)
+public class CognitiveServicesUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
 {
-    public override async Task<List<QuotaInfo>> GetQuotaForLocationAsync(string location)
+    public override async Task<List<UsageInfo>> GetQuotaForLocationAsync(string location)
     {
         try
         {
             var subscription = ResourceClient.GetSubscriptionResource(new ResourceIdentifier($"/subscriptions/{SubscriptionId}"));
             var usages = subscription.GetUsagesAsync(location);
-            var result = new List<QuotaInfo>();
+            var result = new List<UsageInfo>();
 
             await foreach (ServiceAccountUsage item in usages)
             {
-                result.Add(new QuotaInfo(
+                result.Add(new UsageInfo(
                     Name: item.Name?.LocalizedValue ?? item.Name?.Value ?? string.Empty,
                     Limit: (int)(item.Limit ?? 0),
                     Used: (int)(item.CurrentValue ?? 0),
@@ -29,8 +29,7 @@ public class CognitiveServicesQuotaChecker(TokenCredential credential, string su
         }
         catch (Exception error)
         {
-            Console.WriteLine($"Error fetching cognitive services quotas: {error.Message}");
-            return [];
+            throw new Exception($"Error fetching cognitive services quotas: {error.Message}");
         }
     }
 }

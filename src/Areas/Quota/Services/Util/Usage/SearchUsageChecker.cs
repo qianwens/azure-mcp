@@ -4,19 +4,19 @@ using Azure.ResourceManager.Search.Models;
 
 namespace AzureMcp.Areas.Quota.Services.Util;
 
-public class SearchQuotaChecker(TokenCredential credential, string subscriptionId) : AzureQuotaChecker(credential, subscriptionId)
+public class SearchUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
 {
-    public override async Task<List<QuotaInfo>> GetQuotaForLocationAsync(string location)
+    public override async Task<List<UsageInfo>> GetQuotaForLocationAsync(string location)
     {
         try
         {
             var subscription = ResourceClient.GetSubscriptionResource(new ResourceIdentifier($"/subscriptions/{SubscriptionId}"));
             var usages = subscription.GetUsagesBySubscriptionAsync(location);
-            var result = new List<QuotaInfo>();
+            var result = new List<UsageInfo>();
 
             await foreach (QuotaUsageResult item in usages)
             {
-                result.Add(new QuotaInfo(
+                result.Add(new UsageInfo(
                     Name: item.Name?.Value ?? string.Empty,
                     Limit: item.Limit ?? 0,
                     Used: item.CurrentValue ?? 0,
@@ -28,8 +28,7 @@ public class SearchQuotaChecker(TokenCredential credential, string subscriptionI
         }
         catch (Exception error)
         {
-            Console.WriteLine($"Error fetching Search quotas: {error.Message}");
-            return [];
+            throw new Exception($"Error fetching Search quotas: {error.Message}");
         }
     }
 }

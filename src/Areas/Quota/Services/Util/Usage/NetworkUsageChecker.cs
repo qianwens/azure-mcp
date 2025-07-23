@@ -1,22 +1,21 @@
 using Azure.Core;
-using Azure.ResourceManager.AppContainers;
-using Azure.ResourceManager.AppContainers.Models;
+using Azure.ResourceManager.Network;
 
 namespace AzureMcp.Areas.Quota.Services.Util;
 
-public class ContainerAppQuotaChecker(TokenCredential credential, string subscriptionId) : AzureQuotaChecker(credential, subscriptionId)
+public class NetworkUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
 {
-    public override async Task<List<QuotaInfo>> GetQuotaForLocationAsync(string location)
+    public override async Task<List<UsageInfo>> GetQuotaForLocationAsync(string location)
     {
         try
         {
             var subscription = ResourceClient.GetSubscriptionResource(new ResourceIdentifier($"/subscriptions/{SubscriptionId}"));
             var usages = subscription.GetUsagesAsync(location);
-            var result = new List<QuotaInfo>();
+            var result = new List<UsageInfo>();
 
             await foreach (var item in usages)
             {
-                result.Add(new QuotaInfo(
+                result.Add(new UsageInfo(
                     Name: item.Name?.Value ?? string.Empty,
                     Limit: (int)(item.Limit),
                     Used: (int)(item.CurrentValue),
@@ -28,8 +27,7 @@ public class ContainerAppQuotaChecker(TokenCredential credential, string subscri
         }
         catch (Exception error)
         {
-            Console.WriteLine($"Error fetching Container Apps quotas: {error.Message}");
-            return [];
+            throw new Exception($"Error fetching network quotas: {error.Message}");
         }
     }
 }

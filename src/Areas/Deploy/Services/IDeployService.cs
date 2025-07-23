@@ -13,11 +13,4 @@ public interface IDeployService
         string azdEnvName,
         string subscriptionId,
         int? limit = null);
-
-    Task<List<string>> GetAvailableRegionsForResourceTypesAsync(
-        string[] resourceTypes,
-        string subscriptionId,
-        string? cognitiveServiceModelName = null,
-        string? cognitiveServiceModelVersion = null,
-        string? cognitiveServiceDeploymentSkuName = null);
 }
