@@ -202,7 +202,7 @@ public sealed class RegionCheckCommandTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(400, result.Status);
-        Assert.Contains("Resource types cannot be empty", result.Message);
+        Assert.Contains("Missing Required options: --resource-types", result.Message);
         
         // Verify the service was not called
         await _quotaService.DidNotReceive().GetAvailableRegionsForResourceTypesAsync(
