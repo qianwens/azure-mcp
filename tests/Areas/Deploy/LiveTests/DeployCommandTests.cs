@@ -142,45 +142,6 @@ public class DeployCommandTests : CommandTestsBase,
         Assert.StartsWith("App logs retrieved:", result);
     }
 
-    [Fact]
-    [Trait("Category", "Live")]
-    public async Task Should_check_azure_regions()
-    {
-        // act
-        var result = await CallToolAsync(
-            "azmcp-deploy-region-check",
-            new()
-            {
-                { "subscription", _subscriptionId },
-                { "resource-types", "Microsoft.Web/sites, Microsoft.Storage/storageAccounts" },
-            });
-
-        // assert
-        var availableRegions = result.AssertProperty("availableRegions");
-        Assert.Equal(JsonValueKind.Array, availableRegions.ValueKind);
-        Assert.NotEmpty(availableRegions.EnumerateArray());
-    }
-
-    [Fact]
-    [Trait("Category", "Live")]
-    public async Task Should_check_regions_with_cognitive_services()
-    {
-        // act
-        var result = await CallToolAsync(
-            "azmcp-deploy-region-check",
-            new()
-            {
-                { "subscription", _subscriptionId },
-                { "resource-types", "Microsoft.CognitiveServices/accounts" },
-                { "cognitive-service-model-name", "gpt-4o" },
-                { "cognitive-service-deployment-sku-name", "Standard" }
-            });
-
-        // assert
-        var availableRegions = result.AssertProperty("availableRegions");
-        Assert.Equal(JsonValueKind.Array, availableRegions.ValueKind);
-        Assert.NotEmpty(availableRegions.EnumerateArray());
-    }
 
     private async Task<string?> CallToolMessageAsync(string command, Dictionary<string, object?> parameters)
     {

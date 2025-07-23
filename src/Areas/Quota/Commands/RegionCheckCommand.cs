@@ -13,7 +13,7 @@ namespace AzureMcp.Areas.Quota.Commands;
 
 public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger) : SubscriptionCommand<RegionCheckOptions>()
 {
-    private const string CommandTitle = "Get Available Azure Regions";
+    private const string CommandTitle = "Get available regions for Azure resource types";
     private readonly ILogger<RegionCheckCommand> _logger = logger;
 
     private readonly Option<string> _resourceTypesOption = QuotaOptionDefinitions.RegionCheck.ResourceTypes;

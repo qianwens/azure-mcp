@@ -14,17 +14,17 @@ namespace AzureMcp.Areas.Quota.Commands;
 
 public class UsageCheckCommand(ILogger<UsageCheckCommand> logger) : SubscriptionCommand<UsageCheckOptions>()
 {
-    private const string CommandTitle = "Check Available Azure Quota for Regions";
+    private const string CommandTitle = "Check Azure resources usage and quota in a region";
     private readonly ILogger<UsageCheckCommand> _logger = logger;
 
     private readonly Option<string> _regionOption = QuotaOptionDefinitions.QuotaCheck.Region;
     private readonly Option<string> _resourceTypesOption = QuotaOptionDefinitions.QuotaCheck.ResourceTypes;
 
-    public override string Name => "quota-check";
+    public override string Name => "usage-get";
 
     public override string Description =>
         """
-        This tool will check the Azure quota availability for the resources that are going to be deployed.
+        This tool will check the usage and quota information for Azure resources in a region.
         """;
 
     public override string Title => CommandTitle;
@@ -87,6 +87,6 @@ public class UsageCheckCommand(ILogger<UsageCheckCommand> logger) : Subscription
 
     }
 
-    internal record UsageCheckCommandResult(Dictionary<string, List<UsageInfo>> QuotaInfo);
+    internal record UsageCheckCommandResult(Dictionary<string, List<UsageInfo>> UsageInfo);
 
 }
