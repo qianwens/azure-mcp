@@ -133,7 +133,7 @@ public class ArchitectureDiagramTests
 
         var extractedUrl = response.Message.Substring(urlStartPosition, urlEndPosition - urlStartPosition);
         Assert.StartsWith(urlPattern, extractedUrl);
-        var encodedDiagram = extractedUrl.Substring(urlPattern.Length);
+        var encodedDiagram = extractedUrl.Substring(urlPattern.Length).Replace("_", "/").Replace("-", "+"); // Replace back for decoding
         var decodedDiagram = EncodeMermaid.GetDecodedMermaidChart(encodedDiagram);
         Assert.NotEmpty(decodedDiagram);
         Assert.Contains("website", decodedDiagram);
