@@ -18,7 +18,7 @@ public class PlanGetCommandTests
     private readonly ILogger<PlanGetCommand> _logger;
     private readonly Parser _parser;
     private readonly CommandContext _context;
-     private readonly PlanGetCommand _command;
+    private readonly PlanGetCommand _command;
 
     public PlanGetCommandTests()
     {

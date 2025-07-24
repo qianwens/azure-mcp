@@ -27,11 +27,11 @@ public sealed class RegionCheckCommandTests
     {
         _quotaService = Substitute.For<IQuotaService>();
         _logger = Substitute.For<ILogger<RegionCheckCommand>>();
-        
+
         var services = new ServiceCollection();
         services.AddSingleton(_quotaService);
         _serviceProvider = services.BuildServiceProvider();
-        
+
         _command = new RegionCheckCommand(_logger);
         _parser = new Parser(_command.GetCommand());
     }
@@ -42,7 +42,7 @@ public sealed class RegionCheckCommandTests
         // Arrange
         var subscriptionId = "test-subscription-id";
         var resourceTypes = "Microsoft.Web/sites, Microsoft.Storage/storageAccounts";
-        
+
         var expectedRegions = new List<string>
         {
             "eastus",
@@ -53,9 +53,9 @@ public sealed class RegionCheckCommandTests
         };
 
         _quotaService.GetAvailableRegionsForResourceTypesAsync(
-                Arg.Is<string[]>(array => 
-                    array.Length == 2 && 
-                    array.Contains("Microsoft.Web/sites") && 
+                Arg.Is<string[]>(array =>
+                    array.Length == 2 &&
+                    array.Contains("Microsoft.Web/sites") &&
                     array.Contains("Microsoft.Storage/storageAccounts")),
                 subscriptionId,
                 Arg.Any<string?>(),
@@ -80,9 +80,9 @@ public sealed class RegionCheckCommandTests
 
         // Verify the service was called with the correct parameters
         await _quotaService.Received(1).GetAvailableRegionsForResourceTypesAsync(
-            Arg.Is<string[]>(array => 
-                array.Length == 2 && 
-                array.Contains("Microsoft.Web/sites") && 
+            Arg.Is<string[]>(array =>
+                array.Length == 2 &&
+                array.Contains("Microsoft.Web/sites") &&
                 array.Contains("Microsoft.Storage/storageAccounts")),
             subscriptionId,
             null,
@@ -101,7 +101,7 @@ public sealed class RegionCheckCommandTests
         Assert.NotNull(response);
         Assert.NotNull(response.AvailableRegions);
         Assert.Equal(5, response.AvailableRegions.Count);
-        
+
         // Verify the expected regions are returned
         Assert.Contains("eastus", response.AvailableRegions);
         Assert.Contains("westus", response.AvailableRegions);
@@ -118,7 +118,7 @@ public sealed class RegionCheckCommandTests
         var resourceTypes = "Microsoft.CognitiveServices/accounts";
         var cognitiveServiceModelName = "gpt-4o";
         var cognitiveServiceDeploymentSkuName = "Standard";
-        
+
         var expectedRegions = new List<string>
         {
             "eastus",
@@ -127,8 +127,8 @@ public sealed class RegionCheckCommandTests
         };
 
         _quotaService.GetAvailableRegionsForResourceTypesAsync(
-                Arg.Is<string[]>(array => 
-                    array.Length == 1 && 
+                Arg.Is<string[]>(array =>
+                    array.Length == 1 &&
                     array.Contains("Microsoft.CognitiveServices/accounts")),
                 subscriptionId,
                 cognitiveServiceModelName,
@@ -155,8 +155,8 @@ public sealed class RegionCheckCommandTests
 
         // Verify the service was called with the correct parameters
         await _quotaService.Received(1).GetAvailableRegionsForResourceTypesAsync(
-            Arg.Is<string[]>(array => 
-                array.Length == 1 && 
+            Arg.Is<string[]>(array =>
+                array.Length == 1 &&
                 array.Contains("Microsoft.CognitiveServices/accounts")),
             subscriptionId,
             cognitiveServiceModelName,
@@ -175,7 +175,7 @@ public sealed class RegionCheckCommandTests
         Assert.NotNull(response);
         Assert.NotNull(response.AvailableRegions);
         Assert.Equal(3, response.AvailableRegions.Count);
-        
+
         // Verify the expected regions are returned
         Assert.Contains("eastus", response.AvailableRegions);
         Assert.Contains("westus2", response.AvailableRegions);
@@ -203,7 +203,7 @@ public sealed class RegionCheckCommandTests
         Assert.NotNull(result);
         Assert.Equal(400, result.Status);
         Assert.Contains("Missing Required options: --resource-types", result.Message);
-        
+
         // Verify the service was not called
         await _quotaService.DidNotReceive().GetAvailableRegionsForResourceTypesAsync(
             Arg.Any<string[]>(),
@@ -251,13 +251,13 @@ public sealed class RegionCheckCommandTests
         // Arrange
         var subscriptionId = "test-subscription-id";
         var resourceTypes = " Microsoft.Web/sites , Microsoft.Storage/storageAccounts , Microsoft.Compute/virtualMachines ";
-        
+
         var expectedRegions = new List<string> { "eastus", "westus2" };
 
         _quotaService.GetAvailableRegionsForResourceTypesAsync(
-                Arg.Is<string[]>(array => 
-                    array.Length == 3 && 
-                    array.Contains("Microsoft.Web/sites") && 
+                Arg.Is<string[]>(array =>
+                    array.Length == 3 &&
+                    array.Contains("Microsoft.Web/sites") &&
                     array.Contains("Microsoft.Storage/storageAccounts") &&
                     array.Contains("Microsoft.Compute/virtualMachines")),
                 subscriptionId,
@@ -282,9 +282,9 @@ public sealed class RegionCheckCommandTests
 
         // Verify the service was called with correctly parsed resource types
         await _quotaService.Received(1).GetAvailableRegionsForResourceTypesAsync(
-            Arg.Is<string[]>(array => 
-                array.Length == 3 && 
-                array.Contains("Microsoft.Web/sites") && 
+            Arg.Is<string[]>(array =>
+                array.Length == 3 &&
+                array.Contains("Microsoft.Web/sites") &&
                 array.Contains("Microsoft.Storage/storageAccounts") &&
                 array.Contains("Microsoft.Compute/virtualMachines")),
             subscriptionId,
@@ -333,7 +333,7 @@ public sealed class RegionCheckCommandTests
         var cognitiveServiceModelName = "gpt-4o";
         var cognitiveServiceModelVersion = "2024-05-13";
         var cognitiveServiceDeploymentSkuName = "Standard";
-        
+
         var expectedRegions = new List<string> { "eastus" };
 
         _quotaService.GetAvailableRegionsForResourceTypesAsync(
@@ -363,8 +363,8 @@ public sealed class RegionCheckCommandTests
 
         // Verify the service was called with all cognitive service parameters
         await _quotaService.Received(1).GetAvailableRegionsForResourceTypesAsync(
-            Arg.Is<string[]>(array => 
-                array.Length == 1 && 
+            Arg.Is<string[]>(array =>
+                array.Length == 1 &&
                 array.Contains("Microsoft.CognitiveServices/accounts")),
             subscriptionId,
             cognitiveServiceModelName,

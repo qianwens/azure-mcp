@@ -42,9 +42,9 @@ public class AzdAppLogGetCommandTests
         // arrange
         var expectedLogs = "App logs retrieved:\n[2024-01-01 10:00:00] Application started\n[2024-01-01 10:01:00] Processing request";
         _deployService.GetAzdResourceLogsAsync(
-            Arg.Any<string>(), 
-            Arg.Any<string>(), 
-            Arg.Any<string>(), 
+            Arg.Any<string>(),
+            Arg.Any<string>(),
+            Arg.Any<string>(),
             Arg.Any<int?>())
             .Returns(expectedLogs);
 
@@ -73,9 +73,9 @@ public class AzdAppLogGetCommandTests
         // arrange
         var expectedLogs = "App logs retrieved:\nSample log entry";
         _deployService.GetAzdResourceLogsAsync(
-            Arg.Any<string>(), 
-            Arg.Any<string>(), 
-            Arg.Any<string>(), 
+            Arg.Any<string>(),
+            Arg.Any<string>(),
+            Arg.Any<string>(),
             Arg.Any<int?>())
             .Returns(expectedLogs);
 
@@ -101,9 +101,9 @@ public class AzdAppLogGetCommandTests
     {
         // arrange
         _deployService.GetAzdResourceLogsAsync(
-            Arg.Any<string>(), 
-            Arg.Any<string>(), 
-            Arg.Any<string>(), 
+            Arg.Any<string>(),
+            Arg.Any<string>(),
+            Arg.Any<string>(),
             Arg.Any<int?>())
             .Returns("No logs found.");
 
@@ -129,9 +129,9 @@ public class AzdAppLogGetCommandTests
         // arrange
         var errorMessage = "Error during retrieval of app logs of azd project:\nNo resource group with tag {\"azd-env-name\": test-env} found.";
         _deployService.GetAzdResourceLogsAsync(
-            Arg.Any<string>(), 
-            Arg.Any<string>(), 
-            Arg.Any<string>(), 
+            Arg.Any<string>(),
+            Arg.Any<string>(),
+            Arg.Any<string>(),
             Arg.Any<int?>())
             .Returns(errorMessage);
 
@@ -157,9 +157,9 @@ public class AzdAppLogGetCommandTests
     {
         // arrange
         _deployService.GetAzdResourceLogsAsync(
-            Arg.Any<string>(), 
-            Arg.Any<string>(), 
-            Arg.Any<string>(), 
+            Arg.Any<string>(),
+            Arg.Any<string>(),
+            Arg.Any<string>(),
             Arg.Any<int?>())
             .ThrowsAsync(new InvalidOperationException("Failed to connect to Azure"));
 
@@ -197,5 +197,5 @@ public class AzdAppLogGetCommandTests
         Assert.NotEqual(200, result.Status); // Should fail validation
     }
 
-   
+
 }

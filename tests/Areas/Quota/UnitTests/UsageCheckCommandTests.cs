@@ -28,11 +28,11 @@ public sealed class UsageCheckCommandTests
     {
         _quotaService = Substitute.For<IQuotaService>();
         _logger = Substitute.For<ILogger<UsageCheckCommand>>();
-        
+
         var services = new ServiceCollection();
         services.AddSingleton(_quotaService);
         _serviceProvider = services.BuildServiceProvider();
-        
+
         _command = new UsageCheckCommand(_logger);
         _parser = new Parser(_command.GetCommand());
     }
@@ -44,7 +44,7 @@ public sealed class UsageCheckCommandTests
         var subscriptionId = "test-subscription-id";
         var region = "eastus";
         var resourceTypes = "Microsoft.App, Microsoft.Storage/storageAccounts";
-        
+
         var expectedQuotaInfo = new Dictionary<string, List<UsageInfo>>
         {
             {
@@ -66,9 +66,9 @@ public sealed class UsageCheckCommandTests
         };
 
         _quotaService.GetAzureQuotaAsync(
-                Arg.Is<List<string>>(list => 
-                    list.Count == 2 && 
-                    list.Contains("Microsoft.App") && 
+                Arg.Is<List<string>>(list =>
+                    list.Count == 2 &&
+                    list.Contains("Microsoft.App") &&
                     list.Contains("Microsoft.Storage/storageAccounts")),
                 subscriptionId,
                 region)
@@ -92,9 +92,9 @@ public sealed class UsageCheckCommandTests
 
         // Verify the service was called with the correct parameters
         await _quotaService.Received(1).GetAzureQuotaAsync(
-            Arg.Is<List<string>>(list => 
-                list.Count == 2 && 
-                list.Contains("Microsoft.App") && 
+            Arg.Is<List<string>>(list =>
+                list.Count == 2 &&
+                list.Contains("Microsoft.App") &&
                 list.Contains("Microsoft.Storage/storageAccounts")),
             subscriptionId,
             region);
@@ -111,14 +111,14 @@ public sealed class UsageCheckCommandTests
         Assert.NotNull(response);
         Assert.NotNull(response.UsageInfo);
         Assert.Equal(2, response.UsageInfo.Count);
-        
+
         // Verify Microsoft.App quotas
         Assert.True(response.UsageInfo.ContainsKey("Microsoft.App"));
         var appQuotas = response.UsageInfo["Microsoft.App"];
         Assert.Equal(2, appQuotas.Count);
         Assert.Contains(appQuotas, q => q.Name == "ContainerApps" && q.Limit == 100 && q.Used == 5);
         Assert.Contains(appQuotas, q => q.Name == "ContainerAppsEnvironments" && q.Limit == 10 && q.Used == 2);
-        
+
         // Verify Microsoft.Storage/storageAccounts quotas
         Assert.True(response.UsageInfo.ContainsKey("Microsoft.Storage/storageAccounts"));
         var storageQuotas = response.UsageInfo["Microsoft.Storage/storageAccounts"];
@@ -196,7 +196,7 @@ public sealed class UsageCheckCommandTests
         var subscriptionId = "test-subscription-id";
         var region = "westus2";
         var resourceTypes = " Microsoft.Web/sites , Microsoft.Storage/storageAccounts , Microsoft.Compute/virtualMachines ";
-        
+
         var expectedQuotaInfo = new Dictionary<string, List<UsageInfo>>
         {
             { "Microsoft.Web/sites", new List<UsageInfo> { new("WebApps", 10, 3, "Count") } },
@@ -205,9 +205,9 @@ public sealed class UsageCheckCommandTests
         };
 
         _quotaService.GetAzureQuotaAsync(
-                Arg.Is<List<string>>(list => 
-                    list.Count == 3 && 
-                    list.Contains("Microsoft.Web/sites") && 
+                Arg.Is<List<string>>(list =>
+                    list.Count == 3 &&
+                    list.Contains("Microsoft.Web/sites") &&
                     list.Contains("Microsoft.Storage/storageAccounts") &&
                     list.Contains("Microsoft.Compute/virtualMachines")),
                 subscriptionId,
@@ -231,9 +231,9 @@ public sealed class UsageCheckCommandTests
 
         // Verify the service was called with correctly parsed resource types
         await _quotaService.Received(1).GetAzureQuotaAsync(
-            Arg.Is<List<string>>(list => 
-                list.Count == 3 && 
-                list.Contains("Microsoft.Web/sites") && 
+            Arg.Is<List<string>>(list =>
+                list.Count == 3 &&
+                list.Contains("Microsoft.Web/sites") &&
                 list.Contains("Microsoft.Storage/storageAccounts") &&
                 list.Contains("Microsoft.Compute/virtualMachines")),
             subscriptionId,

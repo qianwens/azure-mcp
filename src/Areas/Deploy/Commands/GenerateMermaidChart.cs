@@ -197,7 +197,7 @@ public static class GenerateMermaidChart
         { "azureservicebus", "Azure Service Bus" },
         { "azurewebpubsub", "Azure Web PubSub"}
     };
-                                                                        
+
 }
 
 public enum NodeShape
