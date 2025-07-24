@@ -33,32 +33,13 @@ public class DeployCommandTests : CommandTestsBase,
             new()
             {
                 { "workspace-folder", "C:/" },
-                { "project-name", "django" }
+                { "project-name", "django" },
+                { "target-app-service", "ContainerApp" },
+                { "provisioning-tool", "AZD" },
+                { "azd-iac-options", "bicep" }
             });
         // assert
         Assert.StartsWith(result, "Title:");
-    }
-
-    [Fact]
-    [Trait("Category", "Live")]
-    public async Task Should_check_azure_quota()
-    {
-        JsonElement? result = await CallToolAsync(
-            "azmcp-deploy-quota-check",
-            new() {
-                { "subscription", _subscriptionId },
-                { "region", "eastus" },
-                { "resource-types", "Microsoft.App, Microsoft.Storage/storageAccounts" }
-            });
-        // assert
-        var quotas = result.AssertProperty("quotaInfo");
-        Assert.Equal(JsonValueKind.Object, quotas.ValueKind);
-        var appQuotas = quotas.AssertProperty("Microsoft.App");
-        Assert.Equal(JsonValueKind.Array, appQuotas.ValueKind);
-        Assert.NotEmpty(appQuotas.EnumerateArray());
-        var storageQuotas = quotas.AssertProperty("Microsoft.Storage/storageAccounts");
-        Assert.Equal(JsonValueKind.Array, storageQuotas.ValueKind);
-        Assert.NotEmpty(storageQuotas.EnumerateArray());
     }
 
     [Fact]
@@ -161,45 +142,6 @@ public class DeployCommandTests : CommandTestsBase,
         Assert.StartsWith("App logs retrieved:", result);
     }
 
-    [Fact]
-    [Trait("Category", "Live")]
-    public async Task Should_check_azure_regions()
-    {
-        // act
-        var result = await CallToolAsync(
-            "azmcp-deploy-region-check",
-            new()
-            {
-                { "subscription", _subscriptionId },
-                { "resource-types", "Microsoft.Web/sites, Microsoft.Storage/storageAccounts" },
-            });
-
-        // assert
-        var availableRegions = result.AssertProperty("availableRegions");
-        Assert.Equal(JsonValueKind.Array, availableRegions.ValueKind);
-        Assert.NotEmpty(availableRegions.EnumerateArray());
-    }
-
-    [Fact]
-    [Trait("Category", "Live")]
-    public async Task Should_check_regions_with_cognitive_services()
-    {
-        // act
-        var result = await CallToolAsync(
-            "azmcp-deploy-region-check",
-            new()
-            {
-                { "subscription", _subscriptionId },
-                { "resource-types", "Microsoft.CognitiveServices/accounts" },
-                { "cognitive-service-model-name", "gpt-4o" },
-                { "cognitive-service-deployment-sku-name", "Standard" }
-            });
-
-        // assert
-        var availableRegions = result.AssertProperty("availableRegions");
-        Assert.Equal(JsonValueKind.Array, availableRegions.ValueKind);
-        Assert.NotEmpty(availableRegions.EnumerateArray());
-    }
 
     private async Task<string?> CallToolMessageAsync(string command, Dictionary<string, object?> parameters)
     {

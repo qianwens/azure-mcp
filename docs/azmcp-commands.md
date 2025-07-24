@@ -94,10 +94,24 @@ azmcp server start \
 
 ```bash
 # List AI Foundry models
-azmcp foundry models list [--search-for-free-playground <search-for-free-playground>] [--publisher-name <publisher-name>] [--license-name <license-name>] [--model-name <model-name>]
+azmcp foundry models list [--search-for-free-playground <search-for-free-playground>] \
+                          [--publisher-name <publisher-name>] \
+                          [--license-name <license-name>] \
+                          [--model-name <model-name>]
 
 # Deploy an AI Foundry model
-azmcp foundry models deploy --subscription <subscription> --resource-group <resource-group>  --deployment-name <deployment-name> --model-name <model-name> --model-format <model-format> --azure-ai-services-name <azure-ai-services-name> [--model-version <model-version>] [--model-source <model-source>] [--sku-name <sku-name>] [--sku-capacity <sku-capacity>] [--scale-type <scale-type>] [--scale-capacity <scale-capacity>]
+azmcp foundry models deploy --subscription <subscription> \
+                            --resource-group <resource-group> \
+                            --deployment-name <deployment-name> \
+                            --model-name <model-name> \
+                            --model-format <model-format> \
+                            --azure-ai-services-name <azure-ai-services-name> \
+                            [--model-version <model-version>] \
+                            [--model-source <model-source>] \
+                            [--sku-name <sku-name>] \
+                            [--sku-capacity <sku-capacity>] \
+                            [--scale-type <scale-type>] \
+                            [--scale-capacity <scale-capacity>]
 
 # List AI Foundry model deployments
 azmcp foundry models deployments list --endpoint <endpoint>
@@ -327,57 +341,50 @@ azmcp extension azd --command "init --template todo-nodejs-mongo"
 ### Azure Key Vault Operations
 
 ```bash
-# Lists keys in vault
-azmcp keyvault key list --subscription <subscription> \
-                        --vault <vault-name> \
-                        --include-managed <true/false>
+# Gets a certificate in a key vault
+azmcp keyvault certificate get --subscription <subscription> \
+                               --vault <vault-name> \
+                               --name <certificate-name>
 
-# Gets a key in vault
+# Lists certificates in a key vault
+azmcp keyvault certificate list --subscription <subscription> \
+                                --vault <vault-name>
+
+# Creates a certificate in a key vault with the default policy
+azmcp keyvault certificate create --subscription <subscription> \
+                                  --vault <vault-name> \
+                                  --name <certificate-name>
+
+# Gets a key in a key vault
 azmcp keyvault key get --subscription <subscription> \
                        --vault <vault-name> \
                        --key <key-name>
 
-# Create a key in vault
+# Lists keys in a key vault
+azmcp keyvault key list --subscription <subscription> \
+                        --vault <vault-name> \
+                        --include-managed <true/false>
+
+# Creates a key in a key vault
 azmcp keyvault key create --subscription <subscription> \
                           --vault <vault-name> \
                           --key <key-name> \
                           --key-type <key-type>
 
-# Gets a secret in vault
+# Gets a secret in a key vault
 azmcp keyvault secret get --subscription <subscription> \
                           --vault <vault-name> \
                           --name <secret-name>
-```
 
-### Azure Load Testing Operations
-```bash
-# Execute load test command to get all the commands details
-azmcp loadtesting 
+# Lists secrets in a key vault
+azmcp keyvault secret list --subscription <subscription> \
+                           --vault <vault-name>
 
-# Examples:
-# List load test resources 
-azmcp loadtesting testresource list --subscription <subscription> --resource-group <resource-group> --test-resource-name <test-resource-name>
-
-# Create load test resources 
-azmcp loadtesting testresource create --subscription <subscription> --resource-group <resource-group> --test-resource-name <test-resource-name>
-
-# Get load test
-azmcp loadtesting test get --subscription <subscription> --resource-group <resource-group> --test-resource-name <test-resource-name> --test-id <test-id>
-
-# Create load test
-azmcp loadtesting test create --subscription <subscription> --resource-group <resource-group> --test-resource-name <test-resource-name> --test-id <test-id> --display-name <display-name> --description <description> --endpoint <endpoint> --virtual-users <virtual-users> --duration <duration> --ramp-up-time <ramp-up-time>
-
-# Get load test run
-azmcp loadtesting testrun get --subscription <subscription> --resource-group <resource-group> --test-resource-name <test-resource-name> --testrun-id <testrun-id>
-
-# List load test run
-azmcp loadtesting testrun list --subscription <subscription> --resource-group <resource-group> --test-resource-name <test-resource-name> --test-id <test-id>
-
-# Create load test run
-azmcp loadtesting testrun create --subscription <subscription> --resource-group <resource-group> --test-resource-name <test-resource-name> --test-id <test-id> --testrun-id <testrun-id> --display-name <display-name> --description <description> --old-testrun-id <old-testrun-id>
-
-# Update load test run
-azmcp loadtesting testrun update --subscription <subscription> --resource-group <resource-group> --test-resource-name <test-resource-name> --test-id <test-id> --testrun-id <testrun-id> --display-name <display-name> --description <description>
+# Creates a secret in a key vault
+azmcp keyvault secret create --subscription <subscription> \
+                             --vault <vault-name> \
+                             --name <secret-name> \
+                             --value <secret-value
 ```
 
 ### Azure Kubernetes Service (AKS) Operations
@@ -387,11 +394,91 @@ azmcp loadtesting testrun update --subscription <subscription> --resource-group 
 azmcp aks cluster list --subscription <subscription>
 ```
 
+### Azure Load Testing Operations
+
+```bash
+# Create load test
+azmcp loadtesting test create --subscription <subscription> \
+                              --resource-group <resource-group> \
+                              --test-resource-name <test-resource-name> \
+                              --test-id <test-id> \
+                              --display-name <display-name> \
+                              --description <description> \
+                              --endpoint <endpoint> \
+                              --virtual-users <virtual-users> \
+                              --duration <duration> \
+                              --ramp-up-time <ramp-up-time>
+
+# Get load test
+azmcp loadtesting test get --subscription <subscription> \
+                           --resource-group <resource-group> \
+                           --test-resource-name <test-resource-name> \
+                           --test-id <test-id>
+
+# List load test resources 
+azmcp loadtesting testresource list --subscription <subscription> \
+                                    --resource-group <resource-group> \
+                                    --test-resource-name <test-resource-name>
+
+# Create load test resources 
+azmcp loadtesting testresource create --subscription <subscription> \
+                                      --resource-group <resource-group> \
+                                      --test-resource-name <test-resource-name>
+
+# Create load test run
+azmcp loadtesting testrun create --subscription <subscription> \
+                                 --resource-group <resource-group> \
+                                 --test-resource-name <test-resource-name> \
+                                 --test-id <test-id> \
+                                 --testrun-id <testrun-id> \
+                                 --display-name <display-name> \
+                                 --description <description> \
+                                 --old-testrun-id <old-testrun-id>
+
+# Get load test run
+azmcp loadtesting testrun get --subscription <subscription> \
+                              --resource-group <resource-group> \
+                              --test-resource-name <test-resource-name> \
+                              --testrun-id <testrun-id>
+
+# List load test run
+azmcp loadtesting testrun list --subscription <subscription> \
+                               --resource-group <resource-group> \
+                               --test-resource-name <test-resource-name> \
+                               --test-id <test-id>
+
+# Update load test run
+azmcp loadtesting testrun update --subscription <subscription> \
+                                 --resource-group <resource-group> \
+                                 --test-resource-name <test-resource-name> \
+                                 --test-id <test-id> \
+                                 --testrun-id <testrun-id> \
+                                 --display-name <display-name> \
+                                 --description <description>
+```
+
 ### Azure Managed Grafana Operations
 
 ```bash
 # List Azure Managed Grafana
 azmcp grafana list --subscription <subscription>
+```
+
+### Azure Marketplace Operations
+
+```bash
+# Get details about an Azure Marketplace product
+azmcp marketplace product get --subscription <subscription> \
+                              --product-id <product-id> \
+                              [--include-stop-sold-plans <true/false>] \
+                              [--language <language-code>] \
+                              [--market <market-code>] \
+                              [--lookup-offer-in-tenant-level <true/false>] \
+                              [--plan-id <plan-id>] \
+                              [--sku-id <sku-id>] \
+                              [--include-service-instruction-templates <true/false>] \
+                              [--partner-tenant-id <partner-tenant-id>] \
+                              [--pricing-audience <pricing-audience>]
 ```
 
 ### Azure MCP Best Practices
@@ -602,13 +689,22 @@ azmcp sql firewall-rule list --subscription <subscription> \
                                   --server <server-name>
 ```
 
+### Azure SQL Elastic Pool Operations
+
+```bash
+# List all elastic pools in a SQL server
+azmcp sql elastic-pool list --subscription <subscription> \
+                            --resource-group <resource-group> \
+                            --server <server-name>
+```
+
 ### Azure SQL Server Operations
 
 ```bash
 # List Microsoft Entra ID administrators for a SQL server
 azmcp sql server entra-admin list --subscription <subscription> \
-                              --resource-group <resource-group> \
-                              --server <server-name>
+                                  --resource-group <resource-group> \
+                                  --server <server-name>
 ```
 
 ### Azure Storage Operations
@@ -641,6 +737,35 @@ azmcp storage datalake file-system list-paths --subscription <subscription> \
                                               --file-system-name <file-system-name>
 ```
 
+### Azure Workbooks Operations
+
+```bash
+# List Azure Monitor workbooks in a resource group
+azmcp workbooks list --subscription <subscription> \
+                     --resource-group <resource-group> \
+                     [--category <category>] \
+                     [--kind <kind>] \
+                     [--source-id <source-id>]
+
+# Show details of a specific workbook by resource ID
+azmcp workbooks show --workbook-id <workbook-resource-id>
+
+# Create a new workbook
+azmcp workbooks create --subscription <subscription> \
+                       --resource-group <resource-group> \
+                       --display-name <display-name> \
+                       --serialized-content <json-content> \
+                       [--source-id <source-id>]
+
+# Update an existing workbook  
+azmcp workbooks update --workbook-id <workbook-resource-id> \
+                       [--display-name <display-name>] \
+                       [--serialized-content <json-content>]
+
+# Delete a workbook
+azmcp workbooks delete --workbook-id <workbook-resource-id>
+```
+
 ### Azure Subscription Management
 
 ```bash
@@ -655,6 +780,17 @@ azmcp subscription list [--tenant-id <tenant-id>]
 azmcp azureterraformbestpractices get
 ```
 
+### Azure Quick Review CLI Extension Operations
+
+```bash
+# Scan a subscription for recommendations
+azmcp extension azqr --subscription <subscription>
+
+# Scan a subscription and scope to a specific resource group
+azmcp extension azqr --subscription <subscription> \
+                     --resource-group <resource-group-name>
+```
+
 ### Bicep
 
 ```bash
@@ -662,15 +798,15 @@ azmcp azureterraformbestpractices get
 azmcp bicepschema get --resource-type <resource-type> \
 ```
 
-### Deploy
+### Quota
 ```bash
-# Check the Azure quota availability for the resources type
-azmcp deploy quota-check --subscription <subscription> \
+# Check the usage for Azure resources type
+azmcp quota usage-get --subscription <subscription> \
                          --region <region> \
                          --resource-types <resource-types>
 
 # Get the available regions for the resources types
-azmcp deploy available-region-get --subscription <subscription> \
+azmcp quota available-region-get --subscription <subscription> \
                                   --resource-types <resource-types> \
                                   [--cognitive-service-model-name <cognitive-service-model-name>] \
                                   [--cognitive-service-model-version <cognitive-service-model-version>] \

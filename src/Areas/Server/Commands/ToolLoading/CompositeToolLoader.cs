@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol;
+using ModelContextProtocol.Server;
 
 namespace AzureMcp.Areas.Server.Commands.ToolLoading;
 
@@ -12,11 +14,13 @@ namespace AzureMcp.Areas.Server.Commands.ToolLoading;
 /// </summary>
 /// <param name="toolLoaders">The collection of tool loaders to combine.</param>
 /// <param name="logger">Logger for tool loading operations.</param>
-public sealed class CompositeToolLoader(IEnumerable<IToolLoader> toolLoaders, ILogger<CompositeToolLoader> logger) : IToolLoader
+public sealed class CompositeToolLoader(IEnumerable<IToolLoader> toolLoaders, ILogger<CompositeToolLoader> logger) : BaseToolLoader(logger)
 {
-    private readonly ILogger<CompositeToolLoader> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IEnumerable<IToolLoader> _toolLoaders = InitializeToolLoaders(toolLoaders);
     private readonly Dictionary<string, IToolLoader> _toolLoaderMap = new();
+    private readonly SemaphoreSlim _initializationSemaphore = new(1, 1);
+    private bool _isInitialized = false;
+    private List<Tool>? _cachedTools;
 
     /// <summary>
     /// Initializes the list of tool loaders, validating that at least one is provided.
@@ -44,34 +48,38 @@ public sealed class CompositeToolLoader(IEnumerable<IToolLoader> toolLoaders, IL
     /// </summary>
     /// <param name="request">The request context containing metadata and parameters.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A result containing the combined list of all available tools.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when a tool loader returns a null response.</exception>
-    public async ValueTask<ListToolsResult> ListToolsHandler(RequestContext<ListToolsRequestParams> request, CancellationToken cancellationToken)
+    /// <returns>A result containing the combined list of all available tools, or an empty list if initialization fails.</returns>
+    public override async ValueTask<ListToolsResult> ListToolsHandler(RequestContext<ListToolsRequestParams> request, CancellationToken cancellationToken)
     {
-        var allToolsResponse = new ListToolsResult
+        try
         {
-            Tools = new List<Tool>()
-        };
-
-        foreach (var loader in _toolLoaders)
+            await InitializeAsync(request.Server, cancellationToken);
+        }
+        catch (InvalidOperationException ex)
         {
-            var toolsResponse = await loader.ListToolsHandler(request, cancellationToken);
-            if (toolsResponse == null)
-            {
-                throw new InvalidOperationException("Tool loader returned null response.");
-            }
+            _logger.LogError(ex, "Tool loader initialization failed");
 
-            foreach (var tool in toolsResponse.Tools)
+            // Return empty result with error indication
+            return new ListToolsResult
             {
-                allToolsResponse.Tools.Add(tool);
-                _toolLoaderMap[tool.Name] = loader;
-            }
+                Tools = []
+            };
         }
 
-        return allToolsResponse;
+        // Return cached result after initialization
+        return new ListToolsResult
+        {
+            Tools = _cachedTools!
+        };
     }
 
-    public async ValueTask<CallToolResult> CallToolHandler(RequestContext<CallToolRequestParams> request, CancellationToken cancellationToken)
+    /// <summary>
+    /// Calls a tool by its name using the appropriate tool loader.
+    /// </summary>
+    /// <param name="request">The request context containing the tool name and parameters.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A result containing the output of the tool invocation, or an error result if the tool is not found or initialization fails.</returns>
+    public override async ValueTask<CallToolResult> CallToolHandler(RequestContext<CallToolRequestParams> request, CancellationToken cancellationToken)
     {
         if (request.Params == null)
         {
@@ -81,6 +89,27 @@ public sealed class CompositeToolLoader(IEnumerable<IToolLoader> toolLoaders, IL
             };
 
             _logger.LogWarning(content.Text);
+
+            return new CallToolResult
+            {
+                Content = [content],
+                IsError = true,
+            };
+        }
+
+        // Ensure tool loader map is populated before attempting tool lookup
+        try
+        {
+            await InitializeAsync(request.Server, cancellationToken);
+        }
+        catch (InvalidOperationException ex)
+        {
+            var content = new TextContentBlock
+            {
+                Text = $"Failed to initialize tool loaders: {ex.Message}",
+            };
+
+            _logger.LogError(ex, "Tool loader initialization failed");
 
             return new CallToolResult
             {
@@ -106,5 +135,86 @@ public sealed class CompositeToolLoader(IEnumerable<IToolLoader> toolLoaders, IL
         }
 
         return await toolCaller.CallToolHandler(request, cancellationToken);
+    }
+
+    /// <summary>
+    /// Initializes the tool loader map by discovering all tools from child loaders.
+    /// This provides thread-safe initialization using the double-checked locking pattern.
+    /// </summary>
+    /// <param name="server">The server context for creating list tools requests.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private async Task InitializeAsync(IMcpServer server, CancellationToken cancellationToken)
+    {
+        if (_isInitialized)
+        {
+            return;
+        }
+
+        await _initializationSemaphore.WaitAsync(cancellationToken);
+        try
+        {
+            // Double-check pattern: verify we're still not initialized after acquiring the lock
+            if (_isInitialized)
+            {
+                return;
+            }
+
+            // Populate the tool loader map and cache the combined tools
+            var allTools = new List<Tool>();
+
+            // Create a request for listing tools to populate the tool loader map
+            var listToolsRequest = new RequestContext<ListToolsRequestParams>(server)
+            {
+                Params = new ListToolsRequestParams()
+            };
+
+            foreach (var loader in _toolLoaders)
+            {
+                var toolsResponse = await loader.ListToolsHandler(listToolsRequest, cancellationToken);
+                if (toolsResponse == null)
+                {
+                    throw new InvalidOperationException("Tool loader returned null response during initialization.");
+                }
+
+                foreach (var tool in toolsResponse.Tools)
+                {
+                    _toolLoaderMap[tool.Name] = loader;
+                    allTools.Add(tool);
+                }
+            }
+
+            _cachedTools = allTools;
+            _isInitialized = true;
+        }
+        finally
+        {
+            _initializationSemaphore.Release();
+        }
+    }
+
+    /// <summary>
+    /// Disposes all child tool loaders and the initialization semaphore.
+    /// Uses best-effort disposal to ensure all loaders are disposed even if some fail.
+    /// </summary>
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        // Dispose initialization semaphore first
+        _initializationSemaphore?.Dispose();
+
+        // Dispose all child loaders using best-effort approach
+        var childDisposalTasks = _toolLoaders.Select(async loader =>
+        {
+            try
+            {
+                await loader.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to dispose tool loader {LoaderType}", loader.GetType().Name);
+            }
+        });
+
+        await Task.WhenAll(childDisposalTasks);
     }
 }

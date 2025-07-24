@@ -58,8 +58,6 @@ public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : S
 
             context.Activity?.WithSubscriptionTag(options);
 
-            // Parse optional date parameters
-
             var deployService = context.GetService<IDeployService>();
             string result = await deployService.GetAzdResourceLogsAsync(
                 options.WorkspaceFolder!,

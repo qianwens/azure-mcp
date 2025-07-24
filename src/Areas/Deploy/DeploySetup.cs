@@ -4,8 +4,6 @@
 using AzureMcp.Areas.Deploy.Commands;
 using AzureMcp.Areas.Deploy.Commands.InfraCodeRules;
 using AzureMcp.Areas.Deploy.Commands.Plan;
-using AzureMcp.Areas.Deploy.Commands.Quota;
-using AzureMcp.Areas.Deploy.Commands.Region;
 using AzureMcp.Areas.Deploy.Services;
 using AzureMcp.Areas.Extension.Commands;
 using AzureMcp.Commands;
@@ -29,10 +27,6 @@ internal sealed class DeploySetup : IAreaSetup
         deploy.AddCommand("plan-get", new PlanGetCommand(loggerFactory.CreateLogger<PlanGetCommand>()));
 
         deploy.AddCommand("iac-rules-get", new IaCRulesGetCommand(loggerFactory.CreateLogger<IaCRulesGetCommand>()));
-
-        deploy.AddCommand("available-region-get", new RegionCheckCommand(loggerFactory.CreateLogger<RegionCheckCommand>()));
-
-        deploy.AddCommand("quota-check", new QuotaCheckCommand(loggerFactory.CreateLogger<QuotaCheckCommand>()));
 
         deploy.AddCommand("azd-app-log-get", new AzdAppLogGetCommand(loggerFactory.CreateLogger<AzdAppLogGetCommand>()));
 

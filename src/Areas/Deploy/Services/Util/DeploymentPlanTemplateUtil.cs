@@ -45,13 +45,20 @@ public static class DeploymentPlanTemplateUtil
 
         if (provisioningTool.ToLowerInvariant() == "azd")
         {
+            var deployTitle = targetAppService.ToLowerInvariant() == "aks"
+                ? ""
+                : " And Deploy the Application";
+            var checkLog = targetAppService.ToLowerInvariant() == "aks"
+                ? ""
+                : "6. Check the application log with tool `azd-app-log-get` to ensure the services are running.";
             steps.Add($"""
-            1. Provision Azure Infrastructure
-                1. Based on following required Azure resources in plan, get the IaC rules from the tool infra-code-rules-get
+            1. Provision Azure Infrastructure{deployTitle}:
+                1. Based on following required Azure resources in plan, get the IaC rules from the tool `iac-rules-get`
                 2. Generate IaC ({azdIacOptions} files) for required azure resources based on the plan.
-                3. Pre-check: use get_errors tool to check generated Bicep grammar errors. Fix the errors if exist.
-                4. Run the AZD command `azd provision` to provision the resources and confirm each resource is created or already exists.
+                3. Pre-check: use `get_errors` tool to check generated Bicep grammar errors. Fix the errors if exist.
+                4. Run the AZD command `azd up` to provision the resources and confirm each resource is created or already exists.
                 5. Check the deployment output to ensure the resources are provisioned successfully.
+                {checkLog}
             """);
             if (targetAppService.ToLowerInvariant() == "aks")
             {
@@ -64,7 +71,7 @@ public static class DeploymentPlanTemplateUtil
             else
             {
                 steps.Add($$"""
-                3: Summary:
+                2: Summary:
                     1. {{summary}}
                 """);
             }
@@ -106,7 +113,7 @@ public static class DeploymentPlanTemplateUtil
                    : $"Azure Deployment Plan for {projectName} Project";
 
         return $$"""
-{Agent should fill in and polish the markdown template below to generate a deployment plan for the project. Then save it to '.azure/plan.copilotmd' file. Don't add cost estimation!}
+{Agent should fill in and polish the markdown template below to generate a deployment plan for the project. Then save it to '.azure/plan.copilotmd' file. Don't add cost estimation! Don't add extra validation steps unless it is required! Don't change the tool name!}
 
 #Title: {{title}}
 ## **Goal**
@@ -125,7 +132,7 @@ AppName: web
 }
 
 ## **Azure Resources Architecture**
-- **Install the mermaid extension in IDE to view the architecture.**
+> **Install the mermaid extension in IDE to view the architecture.**
 {a mermaid graph of following recommended azure resource architecture. Only keep the most important edges to make structure clear and readable.}
 {
 List how data flows between the services, example:
@@ -167,7 +174,7 @@ If there is a Container App
 - AcrPull role assignment: User managed identity must have **AcrPull** role ("7f951dda-4ed3-4680-a7ca-43fe172d538d") assigned to the container registry.
 
 ## **Execution Step**
-
+> **Below are the steps for Copilot to follow; ask Copilot to update or execute this plan.**
 {{string.Join(Environment.NewLine, steps)}}
 
 """;
