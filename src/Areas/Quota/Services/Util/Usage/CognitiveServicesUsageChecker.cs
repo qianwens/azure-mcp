@@ -6,7 +6,7 @@ namespace AzureMcp.Areas.Quota.Services.Util;
 
 public class CognitiveServicesUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
 {
-    public override async Task<List<UsageInfo>> GetQuotaForLocationAsync(string location)
+    public override async Task<List<UsageInfo>> GetUsageForLocationAsync(string location)
     {
         try
         {

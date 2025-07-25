@@ -37,7 +37,7 @@ public record UsageInfo(
 
 public interface IUsageChecker
 {
-    Task<List<UsageInfo>> GetQuotaForLocationAsync(string location);
+    Task<List<UsageInfo>> GetUsageForLocationAsync(string location);
 }
 
 // Abstract base class for checking Azure quotas
@@ -56,7 +56,7 @@ public abstract class AzureUsageChecker : IUsageChecker
         ResourceClient = new ArmClient(credential, subscriptionId);
     }
 
-    public abstract Task<List<UsageInfo>> GetQuotaForLocationAsync(string location);
+    public abstract Task<List<UsageInfo>> GetUsageForLocationAsync(string location);
 
     protected async Task<JsonDocument?> GetQuotaByUrlAsync(string requestUrl)
     {
@@ -148,7 +148,7 @@ public static class AzureQuotaService
             try
             {
                 var usageChecker = UsageCheckerFactory.CreateUsageChecker(credential, provider, subscriptionId);
-                var quotaInfo = await usageChecker.GetQuotaForLocationAsync(location);
+                var quotaInfo = await usageChecker.GetUsageForLocationAsync(location);
                 Console.WriteLine($"Quota info for provider {provider}: {quotaInfo.Count} items");
 
                 return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<UsageInfo>>(rt, quotaInfo));

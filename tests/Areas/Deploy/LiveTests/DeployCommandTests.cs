@@ -56,7 +56,7 @@ public class DeployCommandTests : CommandTestsBase,
 
         // act
         var result = await CallToolMessageAsync(
-            "azmcp-deploy-infra-code-rules-get",
+            "azmcp-deploy-iac-rules-get",
             new()
             {
                 { "deployment-tool", "azd" },
@@ -73,7 +73,7 @@ public class DeployCommandTests : CommandTestsBase,
     {
         // act
         var result = await CallToolMessageAsync(
-            "azmcp-deploy-infra-code-rules-get",
+            "azmcp-deploy-iac-rules-get",
             new()
             {
                 { "deployment-tool", "azd" },
