@@ -66,12 +66,12 @@ public sealed class IaCRulesGetCommand(ILogger<IaCRulesGetCommand> logger)
                 .Where(rt => !string.IsNullOrWhiteSpace(rt))
                 .ToArray();
 
-            List<string> result = InfraCodeRuleRetriever.GetIaCRules(
+            string iacRules = IaCRulesTemplateUtil.GetIaCRules(
                 options.DeploymentTool,
                 options.IacType,
                 resourceTypes);
 
-            context.Response.Message = string.Join(Environment.NewLine, result);
+            context.Response.Message = iacRules;
         }
         catch (Exception ex)
         {

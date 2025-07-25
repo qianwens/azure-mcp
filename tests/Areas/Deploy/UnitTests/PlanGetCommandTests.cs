@@ -50,7 +50,7 @@ public class PlanGetCommandTests
         Assert.NotNull(result);
         Assert.Equal(200, result.Status);
         Assert.NotNull(result.Message);
-        Assert.Contains("Title: Azure Deployment Plan for django Project", result.Message);
+        Assert.Contains("# Azure Deployment Plan for django Project", result.Message);
         Assert.Contains("Azure Container Apps", result.Message);
     }
 
@@ -73,7 +73,7 @@ public class PlanGetCommandTests
         Assert.NotNull(result);
         Assert.Equal(200, result.Status);
         Assert.NotNull(result.Message);
-        Assert.Contains("Title: Azure Deployment Plan for myapp Project", result.Message);
+        Assert.Contains("# Azure Deployment Plan for myapp Project", result.Message);
         Assert.Contains("Azure Web App Service", result.Message);
     }
 
@@ -96,7 +96,7 @@ public class PlanGetCommandTests
         Assert.NotNull(result);
         Assert.Equal(200, result.Status);
         Assert.NotNull(result.Message);
-        Assert.Contains("Title: Azure Deployment Plan for k8s-app Project", result.Message);
+        Assert.Contains("# Azure Deployment Plan for k8s-app Project", result.Message);
         Assert.Contains("Azure Kubernetes Service", result.Message);
     }
 
@@ -117,7 +117,7 @@ public class PlanGetCommandTests
         Assert.NotNull(result);
         Assert.Equal(200, result.Status);
         Assert.NotNull(result.Message);
-        Assert.Contains("Title: Azure Deployment Plan for default-app Project", result.Message);
+        Assert.Contains("# Azure Deployment Plan for default-app Project", result.Message);
         Assert.Contains("Azure Container Apps", result.Message); // Should default to Container Apps
     }
 }

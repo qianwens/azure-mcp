@@ -118,6 +118,7 @@
     <EmbeddedResource Include="Areas\AzureBestPractices\Resources\azure-functions-codegen-best-practices.txt" />
     <EmbeddedResource Include="Areas\Extension\Resources\azd-best-practices.txt" />
     <EmbeddedResource Include="Areas\Server\Resources\registry.json" />
+    <EmbeddedResource Include="Areas\Deploy\Templates\**\*.md" />
   </ItemGroup>
 
   <!-- Remove Cosmos native files from the build output directory -->
