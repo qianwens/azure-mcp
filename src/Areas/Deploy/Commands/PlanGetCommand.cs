@@ -68,7 +68,7 @@ public sealed class PlanGetCommand(ILogger<PlanGetCommand> logger)
                 return Task.FromResult(context.Response);
             }
 
-            var planTemplate = DeploymentPlanTemplateUtilV2.GetPlanTemplate(options.ProjectName, options.TargetAppService, options.ProvisioningTool, options.AzdIacOptions);
+            var planTemplate = DeploymentPlanTemplateUtil.GetPlanTemplate(options.ProjectName, options.TargetAppService, options.ProvisioningTool, options.AzdIacOptions);
 
             context.Response.Message = planTemplate;
             context.Response.Status = 200;

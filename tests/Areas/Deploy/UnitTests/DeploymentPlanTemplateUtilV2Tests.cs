@@ -19,7 +19,7 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
         string azdIacOptions)
     {
         // Act
-        var result = DeploymentPlanTemplateUtilV2.GetPlanTemplate(
+        var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
             projectName, 
             targetAppService, 
             provisioningTool, 
@@ -55,7 +55,7 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
     public void GetPlanTemplate_EmptyProjectName_UsesDefaultTitle()
     {
         // Act
-        var result = DeploymentPlanTemplateUtilV2.GetPlanTemplate(
+        var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
             "", 
             "ContainerApp", 
             "AZD", 
@@ -73,7 +73,7 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
         var projectName = "MyTestProject";
 
         // Act
-        var result = DeploymentPlanTemplateUtilV2.GetPlanTemplate(
+        var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
             projectName, 
             "ContainerApp", 
             "AZD", 
@@ -94,7 +94,7 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
         string expectedAzureHost)
     {
         // Act
-        var result = DeploymentPlanTemplateUtilV2.GetPlanTemplate(
+        var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
             "TestProject", 
             targetAppService, 
             "AZD", 
@@ -108,7 +108,7 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
     public void GetPlanTemplate_AzdWithoutIacOptions_DefaultsToBicep()
     {
         // Act
-        var result = DeploymentPlanTemplateUtilV2.GetPlanTemplate(
+        var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
             "TestProject", 
             "ContainerApp", 
             "azd", 
@@ -122,7 +122,7 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
     public void GetPlanTemplate_AksTarget_IncludesKubernetesSteps()
     {
         // Act
-        var result = DeploymentPlanTemplateUtilV2.GetPlanTemplate(
+        var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
             "TestProject", 
             "AKS", 
             "AZD", 
@@ -138,7 +138,7 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
     public void GetPlanTemplate_ContainerAppWithAzCli_IncludesDockerSteps()
     {
         // Act
-        var result = DeploymentPlanTemplateUtilV2.GetPlanTemplate(
+        var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
             "TestProject", 
             "ContainerApp", 
             "AzCli", 
