@@ -22,6 +22,6 @@ internal sealed class QuotaSetup : IAreaSetup
         rootGroup.AddSubGroup(quota);
 
         quota.AddCommand("usage-get", new UsageCheckCommand(loggerFactory.CreateLogger<UsageCheckCommand>()));
-        quota.AddCommand("available-region-get", new RegionCheckCommand(loggerFactory.CreateLogger<RegionCheckCommand>()));
+        quota.AddCommand("available-region-list", new RegionCheckCommand(loggerFactory.CreateLogger<RegionCheckCommand>()));
     }
 }

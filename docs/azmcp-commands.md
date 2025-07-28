@@ -806,7 +806,7 @@ azmcp quota usage-get --subscription <subscription> \
                          --resource-types <resource-types>
 
 # Get the available regions for the resources types
-azmcp quota available-region-get --subscription <subscription> \
+azmcp quota available-region-list --subscription <subscription> \
                                   --resource-types <resource-types> \
                                   [--cognitive-service-model-name <cognitive-service-model-name>] \
                                   [--cognitive-service-model-version <cognitive-service-model-version>] \

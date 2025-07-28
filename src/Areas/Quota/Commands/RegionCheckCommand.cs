@@ -21,7 +21,7 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger) : Sub
     private readonly Option<string> _cognitiveServiceModelVersionOption = QuotaOptionDefinitions.RegionCheck.CognitiveServiceModelVersion;
     private readonly Option<string> _cognitiveServiceDeploymentSkuNameOption = QuotaOptionDefinitions.RegionCheck.CognitiveServiceDeploymentSkuName;
 
-    public override string Name => "available-region-get";
+    public override string Name => "available-region-list";
 
     public override string Description =>
         """

@@ -47,7 +47,7 @@ public class QuotaCommandTests : CommandTestsBase,
     {
         // act
         var result = await CallToolAsync(
-            "azmcp-quota-available-region-get",
+            "azmcp-quota-available-region-list",
             new()
             {
                 { "subscription", _subscriptionId },
@@ -66,7 +66,7 @@ public class QuotaCommandTests : CommandTestsBase,
     {
         // act
         var result = await CallToolAsync(
-            "azmcp-quota-available-region-get",
+            "azmcp-quota-available-region-list",
             new()
             {
                 { "subscription", _subscriptionId },

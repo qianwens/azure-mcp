@@ -348,5 +348,5 @@ This file contains prompts used for end-to-end testing to ensure each tool is in
 | azmcp-deploy-architecture-diagram-generate | Generate the azure architecture diagram for this application |
 
 ## Quota
-| azmcp-quota-available-region-get | Show me the available regions for these resource types <resource_types> |
+| azmcp-quota-available-region-list | Show me the available regions for these resource types <resource_types> |
 | azmcp-quota-usage-get | Check usage information for <resource_type> in region <region> |
