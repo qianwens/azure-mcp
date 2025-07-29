@@ -130,7 +130,7 @@ public class IaCRulesGetCommandTests
         Assert.NotNull(result);
         Assert.Equal(200, result.Status);
         Assert.NotNull(result.Message);
-        Assert.Contains("No additional rules for Azure CLI", result.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("If creating AzCli script, the script should stop if any command fails.", result.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
