@@ -13,22 +13,22 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
     [InlineData("", "WebApp", "AzCli", "")]
     [InlineData("MyApp", "AKS", "AZD", "terraform")]
     public void GetPlanTemplate_ValidInputs_ReturnsFormattedTemplate(
-        string projectName, 
-        string targetAppService, 
-        string provisioningTool, 
+        string projectName,
+        string targetAppService,
+        string provisioningTool,
         string azdIacOptions)
     {
         // Act
         var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
-            projectName, 
-            targetAppService, 
-            provisioningTool, 
+            projectName,
+            targetAppService,
+            provisioningTool,
             azdIacOptions);
 
         // Assert
         Assert.NotNull(result);
         Assert.NotEmpty(result);
-        
+
         // Should contain expected sections
         Assert.Contains("## **Goal**", result);
         Assert.Contains("## **Project Information**", result);
@@ -39,7 +39,7 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
         // Should not contain unprocessed placeholders for main content
         Assert.DoesNotContain("{{Title}}", result);
         Assert.DoesNotContain("{{ProvisioningTool}}", result);
-        
+
         // Should contain appropriate provisioning tool
         if (provisioningTool.ToLowerInvariant() == "azd")
         {
@@ -56,9 +56,9 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
     {
         // Act
         var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
-            "", 
-            "ContainerApp", 
-            "AZD", 
+            "",
+            "ContainerApp",
+            "AZD",
             "bicep");
 
         // Assert
@@ -74,9 +74,9 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
 
         // Act
         var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
-            projectName, 
-            "ContainerApp", 
-            "AZD", 
+            projectName,
+            "ContainerApp",
+            "AZD",
             "bicep");
 
         // Assert
@@ -90,14 +90,14 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
     [InlineData("aks", "Azure Kubernetes Service")]
     [InlineData("unknown", "Azure Container Apps")] // Default case
     public void GetPlanTemplate_DifferentTargetServices_MapsToCorrectAzureHost(
-        string targetAppService, 
+        string targetAppService,
         string expectedAzureHost)
     {
         // Act
         var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
-            "TestProject", 
-            targetAppService, 
-            "AZD", 
+            "TestProject",
+            targetAppService,
+            "AZD",
             "bicep");
 
         // Assert
@@ -109,9 +109,9 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
     {
         // Act
         var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
-            "TestProject", 
-            "ContainerApp", 
-            "azd", 
+            "TestProject",
+            "ContainerApp",
+            "azd",
             "");
 
         // Assert
@@ -123,9 +123,9 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
     {
         // Act
         var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
-            "TestProject", 
-            "AKS", 
-            "AZD", 
+            "TestProject",
+            "AKS",
+            "AZD",
             "bicep");
 
         // Assert
@@ -139,9 +139,9 @@ public sealed class DeploymentPlanTemplateUtilV2Tests
     {
         // Act
         var result = DeploymentPlanTemplateUtil.GetPlanTemplate(
-            "TestProject", 
-            "ContainerApp", 
-            "AzCli", 
+            "TestProject",
+            "ContainerApp",
+            "AzCli",
             "");
 
         // Assert

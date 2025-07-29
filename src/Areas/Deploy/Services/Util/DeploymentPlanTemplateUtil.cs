@@ -30,7 +30,7 @@ public static class DeploymentPlanTemplateUtil
 
         DeploymentPlanTemplateParameters parameters = CreateTemplateParameters(projectName, targetAppService, provisioningTool, azdIacOptions);
         var executionSteps = GenerateExecutionSteps(parameters);
-        
+
         parameters.ExecutionSteps = executionSteps;
 
         return TemplateService.ProcessTemplate("Plan/deployment-plan-base", parameters.ToDictionary());
@@ -40,9 +40,9 @@ public static class DeploymentPlanTemplateUtil
     /// Creates template parameters from the provided inputs.
     /// </summary>
     private static DeploymentPlanTemplateParameters CreateTemplateParameters(
-        string projectName, 
-        string targetAppService, 
-        string provisioningTool, 
+        string projectName,
+        string targetAppService,
+        string provisioningTool,
         string? azdIacOptions)
     {
         var azureComputeHost = GetAzureComputeHost(targetAppService);
@@ -102,7 +102,7 @@ public static class DeploymentPlanTemplateUtil
     private static List<string> GenerateAzdSteps(DeploymentPlanTemplateParameters parameters, bool isAks)
     {
         var steps = new List<string>();
-        
+
         var deployTitle = isAks ? "" : " And Deploy the Application";
         var checkLog = isAks ? "" : "6. Check the application log with tool `azd-app-log-get` to ensure the services are running.";
 

@@ -61,13 +61,13 @@ public static class TemplateService
     public static string ProcessTemplateContent(string templateContent, Dictionary<string, string> replacements)
     {
         var result = new StringBuilder(templateContent);
-        
+
         foreach (var (placeholder, value) in replacements)
         {
             var token = $"{{{{{placeholder}}}}}"; // {{placeholder}}
             result.Replace(token, value);
         }
-        
+
         return result.ToString();
     }
 
