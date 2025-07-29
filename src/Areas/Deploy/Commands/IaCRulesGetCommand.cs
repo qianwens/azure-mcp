@@ -75,7 +75,7 @@ public sealed class IaCRulesGetCommand(ILogger<IaCRulesGetCommand> logger)
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred listing accounts.");
+            _logger.LogError(ex, "An exception occurred while retrieving IaC rules.");
             HandleException(context, ex);
         }
         return Task.FromResult(context.Response);
