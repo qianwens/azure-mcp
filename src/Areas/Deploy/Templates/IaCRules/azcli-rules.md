@@ -1,1 +1,1 @@
-- No additional rules for Azure CLI script.
+- If creating AzCli script, the script should stop if any command fails. Fix the error before proceeding.
