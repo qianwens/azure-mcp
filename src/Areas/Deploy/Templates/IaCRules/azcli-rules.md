@@ -1,1 +1,1 @@
-- No additional rules.
+- No additional rules for Azure CLI script.

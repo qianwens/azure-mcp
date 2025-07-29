@@ -85,9 +85,8 @@ public class PlanGetCommandTests
             "--workspace-folder", "C:/k8s-project",
             "--project-name", "k8s-app",
             "--target-app-service", "AKS",
-            "--provisioning-tool", "terraform"
+            "--provisioning-tool", "azcli"
         ]);
-        var context = new CommandContext(_serviceProvider);
 
         // act
         var result = await _command.ExecuteAsync(_context, args);

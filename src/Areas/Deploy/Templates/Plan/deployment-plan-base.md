@@ -1,7 +1,7 @@
 # {{Title}}
 
 ## **Goal**
-Based on the project to provide a plan to deploy the project to Azure using {{ProvisioningTool}}.
+Based on the project to provide a plan to deploy the project to {{AzureComputeHost}} using {{ProvisioningTool}}.
 
 ## **Project Information**
 {

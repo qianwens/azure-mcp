@@ -21,18 +21,21 @@ public static class IaCRulesTemplateUtil
     /// <returns>A formatted IaC rules string.</returns>
     public static string GetIaCRules(string deploymentTool, string iacType, string[] resourceTypes)
     {
+        var parameters = CreateTemplateParameters(deploymentTool, iacType, resourceTypes);
+        var deploymentToolRules = GenerateDeploymentToolRules(parameters);
+        if (deploymentTool.Equals(DeploymentTool.AzCli, StringComparison.OrdinalIgnoreCase))
+        {
+            return TemplateService.LoadTemplate("IaCRules/azcli-rules");
+        }
         // Default values for optional parameters
         if (string.IsNullOrWhiteSpace(iacType))
         {
             iacType = "bicep";
         }
-
-        var parameters = CreateTemplateParameters(deploymentTool, iacType, resourceTypes);
-        var deploymentToolRules = GenerateDeploymentToolRules(parameters);
         var iacTypeRules = GenerateIaCTypeRules(parameters);
         var resourceSpecificRules = GenerateResourceSpecificRules(parameters);
         var finalInstructions = GenerateFinalInstructions(parameters);
-        
+
         parameters.DeploymentToolRules = deploymentToolRules;
         parameters.IacTypeRules = iacTypeRules;
         parameters.ResourceSpecificRules = resourceSpecificRules;
@@ -47,8 +50,8 @@ public static class IaCRulesTemplateUtil
     /// Creates template parameters from the provided inputs.
     /// </summary>
     private static IaCRulesTemplateParameters CreateTemplateParameters(
-        string deploymentTool, 
-        string iacType, 
+        string deploymentTool,
+        string iacType,
         string[] resourceTypes)
     {
         var parameters = new IaCRulesTemplateParameters
@@ -71,14 +74,14 @@ public static class IaCRulesTemplateUtil
     private static void SetIaCTypeSpecificParameters(IaCRulesTemplateParameters parameters)
     {
         parameters.OutputFileName = parameters.IacType == IacType.Bicep ? "main.bicep" : "outputs.tf";
-        parameters.RoleAssignmentResource = parameters.IacType == IacType.Bicep 
-            ? "Microsoft.Authorization/roleAssignments" 
+        parameters.RoleAssignmentResource = parameters.IacType == IacType.Bicep
+            ? "Microsoft.Authorization/roleAssignments"
             : "azurerm_role_assignment";
-        parameters.ImageProperty = parameters.IacType == IacType.Bicep 
-            ? "properties.template.containers.image" 
+        parameters.ImageProperty = parameters.IacType == IacType.Bicep
+            ? "properties.template.containers.image"
             : "azurerm_container_app.template.container.image";
-        parameters.DiagnosticSettingsResource = parameters.IacType == IacType.Bicep 
-            ? "Microsoft.Insights/diagnosticSettings" 
+        parameters.DiagnosticSettingsResource = parameters.IacType == IacType.Bicep
+            ? "Microsoft.Insights/diagnosticSettings"
             : "azurerm_monitor_diagnostic_setting";
 
         // Set CORS configuration based on IaC type
@@ -119,7 +122,7 @@ public static class IaCRulesTemplateUtil
                 { "OutputFileName", parameters.OutputFileName },
                 { "ContainerRegistryOutput", containerRegistryOutput }
             };
-            
+
             return TemplateService.ProcessTemplate("IaCRules/azd-rules", azdReplacements);
         }
         else if (parameters.DeploymentTool.Equals(DeploymentTool.AzCli, StringComparison.OrdinalIgnoreCase))
