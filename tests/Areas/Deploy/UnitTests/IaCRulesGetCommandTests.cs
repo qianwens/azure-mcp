@@ -119,7 +119,7 @@ public class IaCRulesGetCommandTests
         // arrange
         var args = _parser.Parse([
             "--deployment-tool", "AzCli",
-            "--iac-type", "bicep",
+            "--iac-type", "",
             "--resource-types", "aks"
         ]);
 
