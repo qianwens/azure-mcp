@@ -164,7 +164,7 @@ public static class DeployOptionDefinitions
 
         public static readonly Option<string> ResourceTypes = new(
             "--resource-types",
-            "Specifies the Azure resource types to retrieve IaC rules for. It should be comma-separated. Supported values are: 'appservice', 'containerapp', and 'function'. If none of these services are used, this parameter can be left empty.")
+            "Specifies the Azure resource types to retrieve IaC rules for. It should be comma-separated. Supported values are: 'appservice', 'containerapp', 'function', 'aks'. If none of these services are used, this parameter can be left empty.")
         {
             IsRequired = false,
             AllowMultipleArgumentsPerToken = true
