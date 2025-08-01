@@ -65,7 +65,7 @@ public class QuotaCommandTests : CommandTestsBase,
         var containerInstanceQuotas = quotas.AssertProperty("Microsoft.ContainerInstance");
         Assert.Equal(JsonValueKind.Array, containerInstanceQuotas.ValueKind);
         Assert.NotEmpty(containerInstanceQuotas.EnumerateArray());
-        
+
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public class QuotaCommandTests : CommandTestsBase,
             new()
             {
                 { "subscription", _subscriptionId },
-                { "resource-types", "Microsoft.Web/sites, Microsoft.Storage/storageAccounts, microsoft.dbforpostgresql/flexibleservers" },
+                { "resource-types", "Microsoft.Web/sites, Microsoft.Storage/storageAccounts, microsoft.dbforpostgresql/flexibleServers" },
             });
 
         // assert
