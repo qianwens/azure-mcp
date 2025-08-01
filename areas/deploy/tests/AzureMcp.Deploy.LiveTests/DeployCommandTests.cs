@@ -27,7 +27,7 @@ public class DeployCommandTests : CommandTestsBase,
     {
         // act
         var result = await CallToolMessageAsync(
-            "azmcp-deploy-plan-get",
+            "azmcp_deploy_plan-get",
             new()
             {
                 { "workspace-folder", "C:/" },
@@ -37,7 +37,7 @@ public class DeployCommandTests : CommandTestsBase,
                 { "azd-iac-options", "bicep" }
             });
         // assert
-        Assert.StartsWith(result, "Title:");
+        Assert.StartsWith("# Azure Deployment Plan for django Project", result);
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class DeployCommandTests : CommandTestsBase,
 
         // act
         var result = await CallToolMessageAsync(
-            "azmcp-deploy-iac-rules-get",
+            "azmcp_deploy_iac-rules-get",
             new()
             {
                 { "deployment-tool", "azd" },
@@ -61,7 +61,7 @@ public class DeployCommandTests : CommandTestsBase,
                 { "resource-types", "appservice, azurestorage" }
             });
 
-        Assert.Contains("Deployment Tool: azd", result ?? String.Empty, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Deployment Tool azd rules", result ?? String.Empty, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public class DeployCommandTests : CommandTestsBase,
     {
         // act
         var result = await CallToolMessageAsync(
-            "azmcp-deploy-iac-rules-get",
+            "azmcp_deploy_iac-rules-get",
             new()
             {
                 { "deployment-tool", "azd" },
@@ -78,7 +78,7 @@ public class DeployCommandTests : CommandTestsBase,
             });
 
         // assert
-        Assert.Contains("IaC Type: terraform. IaC Type rules:", result ?? String.Empty, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("IaC Type: terraform rules", result ?? String.Empty, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class DeployCommandTests : CommandTestsBase,
     {
         // act
         var result = await CallToolMessageAsync(
-            "azmcp-deploy-pipeline-generate",
+            "azmcp_deploy_cicd-pipeline-guidance-get",
             new()
             {
                 { "subscription", _subscriptionId },
@@ -102,7 +102,7 @@ public class DeployCommandTests : CommandTestsBase,
     {
         // act
         var result = await CallToolMessageAsync(
-            "azmcp-deploy-pipeline-generate",
+            "azmcp_deploy_cicd-pipeline-guidance-get",
             new()
             {
                 { "subscription", _subscriptionId },
@@ -116,24 +116,24 @@ public class DeployCommandTests : CommandTestsBase,
         Assert.StartsWith("Help the user to set up a CI/CD pipeline", result ?? String.Empty);
     }
 
+    // skip as this test need local files
+    // [Fact]
+    // public async Task Should_get_azd_app_logs()
+    // {
+    //     // act
+    //     var result = await CallToolMessageAsync(
+    //         "azmcp_deploy_azd-app-log-get",
+    //         new()
+    //         {
+    //             { "subscription", _subscriptionId },
+    //             { "workspace-folder", "C:/Users/" },
+    //             { "azd-env-name", "dotnet-demo" },
+    //             { "limit", 10 }
+    //         });
 
-    [Fact]
-    public async Task Should_get_azd_app_logs()
-    {
-        // act
-        var result = await CallToolMessageAsync(
-            "azmcp-deploy-azd-app-log-get",
-            new()
-            {
-                { "subscription", _subscriptionId },
-                { "workspace-folder", "C:/Users/" },
-                { "azd-env-name", "dotnet-demo" },
-                { "limit", 10 }
-            });
-
-        // assert
-        Assert.StartsWith("App logs retrieved:", result);
-    }
+    //     // assert
+    //     Assert.StartsWith("App logs retrieved:", result);
+    // }
 
 
     private async Task<string?> CallToolMessageAsync(string command, Dictionary<string, object?> parameters)
