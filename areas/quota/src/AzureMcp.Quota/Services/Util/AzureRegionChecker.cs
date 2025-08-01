@@ -96,17 +96,13 @@ public class CognitiveServicesRegionChecker : AzureRegionChecker
             .Select(location => location.Replace(" ", "").ToLowerInvariant())
             .ToList() ?? new List<string>();
 
-        var availableRegions = new List<string>();
-
-        foreach (var region in regions)
+        var tasks = regions.Select(async region =>
         {
             try
             {
-                var quotas = subscription.GetModels(region);
+                var quotas = subscription.GetModelsAsync(region);
 
-                bool hasMatchingModel = false;
-
-                foreach (CognitiveServicesModel modelElement in quotas)
+                await foreach (CognitiveServicesModel modelElement in quotas)
                 {
                     var nameMatch = string.IsNullOrEmpty(_modelName) ||
                         (modelElement.Model?.Name == _modelName);
@@ -114,29 +110,24 @@ public class CognitiveServicesRegionChecker : AzureRegionChecker
                     var versionMatch = string.IsNullOrEmpty(_apiVersion) ||
                         (modelElement.Model?.Version == _apiVersion);
 
-
                     var skuMatch = string.IsNullOrEmpty(_skuName) ||
                         (modelElement.Model?.Skus?.Any(sku => sku.Name == _skuName) ?? false);
 
                     if (nameMatch && versionMatch && skuMatch)
                     {
-                        hasMatchingModel = true;
-                        break;
+                        return region;
                     }
-                }
-
-                if (hasMatchingModel)
-                {
-                    availableRegions.Add(region);
                 }
             }
             catch (Exception error)
             {
-                throw new Exception($"Error checking cognitive services models for region {region}: {error.Message}");
+                Console.WriteLine($"Error checking cognitive services models for region {region}: {error.Message}");
             }
-        }
+            return null;
+        });
 
-        return availableRegions;
+        var results = await Task.WhenAll(tasks);
+        return results.Where(region => region != null).ToList()!;
     }
 }
 
@@ -156,29 +147,28 @@ public class PostgreSqlRegionChecker(ArmClient armClient, string subscriptionId)
             .Select(location => location.Replace(" ", "").ToLowerInvariant())
             .ToList() ?? new List<string>();
 
-        var availableRegions = new List<string>();
-
-        foreach (var region in regions)
+        var tasks = regions.Select(async region =>
         {
             try
             {
-                Pageable<PostgreSqlFlexibleServerCapabilityProperties> result = subscription.ExecuteLocationBasedCapabilities(region);
-                foreach (var capability in result)
+                AsyncPageable<PostgreSqlFlexibleServerCapabilityProperties> result = subscription.ExecuteLocationBasedCapabilitiesAsync(region);
+                await foreach (var capability in result)
                 {
                     if (capability.SupportedServerEditions?.Any() == true)
                     {
-                        availableRegions.Add(region);
-                        break; // No need to check further capabilities for this region
+                        return region;
                     }
                 }
             }
             catch (Exception error)
             {
-                throw new Exception($"Error checking PostgreSQL capabilities for region {region}: {error.Message}");
+                Console.WriteLine($"Error checking PostgreSQL capabilities for region {region}: {error.Message}");
             }
-        }
+            return null;
+        });
 
-        return availableRegions;
+        var results = await Task.WhenAll(tasks);
+        return results.Where(region => region != null).ToList()!;
     }
 }
 
@@ -214,14 +204,14 @@ public static class AzureRegionService
         string subscriptionId,
         CognitiveServiceProperties? cognitiveServiceProperties = null)
     {
-        var result = new Dictionary<string, List<string>>();
-
-        foreach (var resourceType in resourceTypes)
+        var tasks = resourceTypes.Select(async resourceType =>
         {
             var checker = RegionCheckerFactory.CreateRegionChecker(armClient, subscriptionId, resourceType, cognitiveServiceProperties);
-            result[resourceType] = await checker.GetAvailableRegionsAsync(resourceType);
-        }
+            var regions = await checker.GetAvailableRegionsAsync(resourceType);
+            return new KeyValuePair<string, List<string>>(resourceType, regions);
+        });
 
-        return result;
+        var results = await Task.WhenAll(tasks);
+        return results.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 }
