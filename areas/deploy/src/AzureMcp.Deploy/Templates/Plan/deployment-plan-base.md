@@ -1,5 +1,7 @@
 # {{Title}}
 
+{Agent should fill in and polish the markdown template below to generate a deployment plan for the project. Then save it to '.azure/plan.copilotmd' file. Don't add cost estimation! Don't add extra validation steps unless it is required! Don't change the tool name!}
+
 ## **Goal**
 Based on the project to provide a plan to deploy the project to {{AzureComputeHost}} using {{ProvisioningTool}}.
 
