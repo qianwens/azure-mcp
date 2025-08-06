@@ -49,8 +49,7 @@ Recommended Supporting Services
 - Key Vault(Optional): If there are dependencies such as postgresql/sql/mysql, create a Key Vault to store connection string. If not, the resource should not show.
 If there is a Container App, the following resources are required:
 - Container Registry
-If there is a WebApp(App Service):
-- App Service Site Extension (Microsoft.Web/sites/siteextensions): Required for App Service deployments.
+
 
 Recommended Security Configurations
 If there is a Container App
