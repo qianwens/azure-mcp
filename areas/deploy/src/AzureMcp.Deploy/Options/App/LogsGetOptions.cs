@@ -4,9 +4,9 @@
 using System.Text.Json.Serialization;
 using AzureMcp.Core.Options;
 
-namespace AzureMcp.Deploy.Options;
+namespace AzureMcp.Deploy.Options.App;
 
-public class AzdAppLogOptions : SubscriptionOptions
+public class LogsGetOptions : SubscriptionOptions
 {
     [JsonPropertyName("workspaceFolder")]
     public string WorkspaceFolder { get; set; } = string.Empty;

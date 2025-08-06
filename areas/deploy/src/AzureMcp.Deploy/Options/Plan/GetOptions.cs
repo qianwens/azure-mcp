@@ -3,9 +3,9 @@
 
 using System.Text.Json.Serialization;
 
-namespace AzureMcp.Deploy.Options;
+namespace AzureMcp.Deploy.Options.Plan;
 
-public sealed class PlanGetOptions
+public sealed class GetOptions
 {
     [JsonPropertyName("workspaceFolder")]
     public string WorkspaceFolder { get; set; } = string.Empty;

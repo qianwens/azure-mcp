@@ -4,7 +4,7 @@
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using AzureMcp.Core.Models.Command;
-using AzureMcp.Quota.Commands;
+using AzureMcp.Quota.Commands.Usage;
 using AzureMcp.Quota.Services;
 using AzureMcp.Quota.Services.Util;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,24 +16,24 @@ using Xunit;
 namespace AzureMcp.Tests.Areas.Quota.UnitTests;
 
 [Trait("Area", "Quota")]
-public sealed class UsageCheckCommandTests
+public sealed class CheckCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IQuotaService _quotaService;
-    private readonly ILogger<UsageCheckCommand> _logger;
-    private readonly UsageCheckCommand _command;
+    private readonly ILogger<CheckCommand> _logger;
+    private readonly CheckCommand _command;
     private readonly Parser _parser;
 
-    public UsageCheckCommandTests()
+    public CheckCommandTests()
     {
         _quotaService = Substitute.For<IQuotaService>();
-        _logger = Substitute.For<ILogger<UsageCheckCommand>>();
+        _logger = Substitute.For<ILogger<CheckCommand>>();
 
         var services = new ServiceCollection();
         services.AddSingleton(_quotaService);
         _serviceProvider = services.BuildServiceProvider();
 
-        _command = new UsageCheckCommand(_logger);
+        _command = new CheckCommand(_logger);
         _parser = new Parser(_command.GetCommand());
     }
 
@@ -107,7 +107,7 @@ public sealed class UsageCheckCommandTests
             PropertyNameCaseInsensitive = true
         };
 
-        var response = JsonSerializer.Deserialize<UsageCheckCommand.UsageCheckCommandResult>(json, options);
+        var response = JsonSerializer.Deserialize<CheckCommand.UsageCheckCommandResult>(json, options);
         Assert.NotNull(response);
         Assert.NotNull(response.UsageInfo);
         Assert.Equal(2, response.UsageInfo.Count);

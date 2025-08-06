@@ -6,22 +6,23 @@ using AzureMcp.Core.Commands.Subscription;
 using AzureMcp.Core.Models.Command;
 using AzureMcp.Core.Services.Telemetry;
 using AzureMcp.Quota.Options;
+using AzureMcp.Quota.Options.Region;
 using AzureMcp.Quota.Services;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Quota.Commands;
+namespace AzureMcp.Quota.Commands.Region;
 
-public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger) : SubscriptionCommand<RegionCheckOptions>()
+public sealed class AvailabilityListCommand(ILogger<AvailabilityListCommand> logger) : SubscriptionCommand<AvailabilityListOptions>()
 {
     private const string CommandTitle = "Get available regions for Azure resource types";
-    private readonly ILogger<RegionCheckCommand> _logger = logger;
+    private readonly ILogger<AvailabilityListCommand> _logger = logger;
 
     private readonly Option<string> _resourceTypesOption = QuotaOptionDefinitions.RegionCheck.ResourceTypes;
     private readonly Option<string> _cognitiveServiceModelNameOption = QuotaOptionDefinitions.RegionCheck.CognitiveServiceModelName;
     private readonly Option<string> _cognitiveServiceModelVersionOption = QuotaOptionDefinitions.RegionCheck.CognitiveServiceModelVersion;
     private readonly Option<string> _cognitiveServiceDeploymentSkuNameOption = QuotaOptionDefinitions.RegionCheck.CognitiveServiceDeploymentSkuName;
 
-    public override string Name => "available-region-list";
+    public override string Name => "availability";
 
     public override string Description =>
         """
@@ -40,7 +41,7 @@ public sealed class RegionCheckCommand(ILogger<RegionCheckCommand> logger) : Sub
         command.AddOption(_cognitiveServiceDeploymentSkuNameOption);
     }
 
-    protected override RegionCheckOptions BindOptions(ParseResult parseResult)
+    protected override AvailabilityListOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
         options.ResourceTypes = parseResult.GetValueForOption(_resourceTypesOption) ?? string.Empty;

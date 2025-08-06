@@ -4,16 +4,17 @@
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Core.Commands;
 using AzureMcp.Deploy.Options;
+using AzureMcp.Deploy.Options.Plan;
 using AzureMcp.Deploy.Services.Util;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Deploy.Commands.Plan;
 
-public sealed class PlanGetCommand(ILogger<PlanGetCommand> logger)
+public sealed class GetCommand(ILogger<GetCommand> logger)
     : BaseCommand()
 {
     private const string CommandTitle = "Generate Azure Deployment Plan";
-    private readonly ILogger<PlanGetCommand> _logger = logger;
+    private readonly ILogger<GetCommand> _logger = logger;
 
     private readonly Option<string> _workspaceFolderOption = DeployOptionDefinitions.PlanGet.WorkspaceFolder;
     private readonly Option<string> _projectNameOption = DeployOptionDefinitions.PlanGet.ProjectName;
@@ -21,7 +22,7 @@ public sealed class PlanGetCommand(ILogger<PlanGetCommand> logger)
     private readonly Option<string> _provisioningToolOption = DeployOptionDefinitions.PlanGet.ProvisioningTool;
     private readonly Option<string> _azdIacOptionsOption = DeployOptionDefinitions.PlanGet.AzdIacOptions;
 
-    public override string Name => "plan-get";
+    public override string Name => "get";
 
     public override string Description =>
         """
@@ -41,9 +42,9 @@ public sealed class PlanGetCommand(ILogger<PlanGetCommand> logger)
         command.AddOption(_azdIacOptionsOption);
     }
 
-    private PlanGetOptions BindOptions(ParseResult parseResult)
+    private GetOptions BindOptions(ParseResult parseResult)
     {
-        return new PlanGetOptions
+        return new GetOptions
         {
             WorkspaceFolder = parseResult.GetValueForOption(_workspaceFolderOption) ?? string.Empty,
             ProjectName = parseResult.GetValueForOption(_projectNameOption) ?? string.Empty,

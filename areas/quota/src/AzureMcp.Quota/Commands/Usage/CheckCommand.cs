@@ -6,21 +6,22 @@ using AzureMcp.Core.Commands.Subscription;
 using AzureMcp.Core.Models.Command;
 using AzureMcp.Core.Services.Telemetry;
 using AzureMcp.Quota.Options;
+using AzureMcp.Quota.Options.Usage;
 using AzureMcp.Quota.Services;
 using AzureMcp.Quota.Services.Util;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Quota.Commands;
+namespace AzureMcp.Quota.Commands.Usage;
 
-public class UsageCheckCommand(ILogger<UsageCheckCommand> logger) : SubscriptionCommand<UsageCheckOptions>()
+public class CheckCommand(ILogger<CheckCommand> logger) : SubscriptionCommand<CheckOptions>()
 {
     private const string CommandTitle = "Check Azure resources usage and quota in a region";
-    private readonly ILogger<UsageCheckCommand> _logger = logger;
+    private readonly ILogger<CheckCommand> _logger = logger;
 
     private readonly Option<string> _regionOption = QuotaOptionDefinitions.QuotaCheck.Region;
     private readonly Option<string> _resourceTypesOption = QuotaOptionDefinitions.QuotaCheck.ResourceTypes;
 
-    public override string Name => "usage-get";
+    public override string Name => "check";
 
     public override string Description =>
         """
@@ -37,7 +38,7 @@ public class UsageCheckCommand(ILogger<UsageCheckCommand> logger) : Subscription
         command.AddOption(_resourceTypesOption);
     }
 
-    protected override UsageCheckOptions BindOptions(ParseResult parseResult)
+    protected override CheckOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
         options.Region = parseResult.GetValueForOption(_regionOption) ?? string.Empty;

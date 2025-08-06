@@ -3,7 +3,7 @@
 
 using System.CommandLine.Parsing;
 using AzureMcp.Core.Models.Command;
-using AzureMcp.Deploy.Commands;
+using AzureMcp.Deploy.Commands.App;
 using AzureMcp.Deploy.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,15 +17,15 @@ namespace AzureMcp.Deploy.UnitTests;
 public class AzdAppLogGetCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<AzdAppLogGetCommand> _logger;
+    private readonly ILogger<LogsGetCommand> _logger;
     private readonly IDeployService _deployService;
     private readonly Parser _parser;
     private readonly CommandContext _context;
-    private readonly AzdAppLogGetCommand _command;
+    private readonly LogsGetCommand _command;
 
     public AzdAppLogGetCommandTests()
     {
-        _logger = Substitute.For<ILogger<AzdAppLogGetCommand>>();
+        _logger = Substitute.For<ILogger<LogsGetCommand>>();
         _deployService = Substitute.For<IDeployService>();
 
         var collection = new ServiceCollection();

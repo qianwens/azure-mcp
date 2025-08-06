@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Deploy.Options;
+using AzureMcp.Deploy.Options.Pipeline;
 
 namespace AzureMcp.Deploy.Services.Util;
 
 public static class PipelineGenerationUtil
 {
-    public static string GeneratePipelineGuidelines(PipelineGenerateOptions options)
+    public static string GeneratePipelineGuidelines(GuidanceGetOptions options)
     {
         if (options.UseAZDPipelineConfig)
         {
@@ -21,7 +21,7 @@ public static class PipelineGenerationUtil
 
     private static readonly string AZDPipelinePrompt = "Run \"azd pipeline config\" to help the user create a deployment pipeline.\n";
 
-    private static string AzCliPipelinePrompt(PipelineGenerateOptions options)
+    private static string AzCliPipelinePrompt(GuidanceGetOptions options)
     {
         const string defaultEnvironment = "dev";
         var environmentNamePrompt = !string.IsNullOrEmpty(options.GithubEnvironmentName)

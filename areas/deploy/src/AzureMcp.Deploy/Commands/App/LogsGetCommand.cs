@@ -5,21 +5,22 @@ using AzureMcp.Core.Commands;
 using AzureMcp.Core.Commands.Subscription;
 using AzureMcp.Core.Services.Telemetry;
 using AzureMcp.Deploy.Options;
+using AzureMcp.Deploy.Options.App;
 using AzureMcp.Deploy.Services;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Deploy.Commands;
+namespace AzureMcp.Deploy.Commands.App;
 
-public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : SubscriptionCommand<AzdAppLogOptions>()
+public sealed class LogsGetCommand(ILogger<LogsGetCommand> logger) : SubscriptionCommand<LogsGetOptions>()
 {
     private const string CommandTitle = "Get AZD deployed App Logs";
-    private readonly ILogger<AzdAppLogGetCommand> _logger = logger;
+    private readonly ILogger<LogsGetCommand> _logger = logger;
 
     private readonly Option<string> _workspaceFolderOption = DeployOptionDefinitions.AzdAppLogOptions.WorkspaceFolder;
     private readonly Option<string> _azdEnvNameOption = DeployOptionDefinitions.AzdAppLogOptions.AzdEnvName;
     private readonly Option<int> _limitOption = DeployOptionDefinitions.AzdAppLogOptions.Limit;
 
-    public override string Name => "azd-app-log-get";
+    public override string Name => "logs";
     public override string Title => CommandTitle;
     public override ToolMetadata Metadata => new() { Destructive = false, ReadOnly = true };
 
@@ -36,7 +37,7 @@ public sealed class AzdAppLogGetCommand(ILogger<AzdAppLogGetCommand> logger) : S
         command.AddOption(_limitOption);
     }
 
-    protected override AzdAppLogOptions BindOptions(ParseResult parseResult)
+    protected override LogsGetOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
         options.WorkspaceFolder = parseResult.GetValueForOption(_workspaceFolderOption)!;

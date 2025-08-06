@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using AzureMcp.Core.Models.Command;
 using AzureMcp.Deploy.Commands;
+using AzureMcp.Deploy.Commands.Architecture;
 using AzureMcp.Deploy.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,11 +20,11 @@ namespace AzureMcp.Deploy.UnitTests;
 public class ArchitectureDiagramTests
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<GenerateArchitectureDiagramCommand> _logger;
+    private readonly ILogger<DiagramGenerateCommand> _logger;
 
     public ArchitectureDiagramTests()
     {
-        _logger = Substitute.For<ILogger<GenerateArchitectureDiagramCommand>>();
+        _logger = Substitute.For<ILogger<DiagramGenerateCommand>>();
 
         var collection = new ServiceCollection();
         _serviceProvider = collection.BuildServiceProvider();
@@ -33,7 +34,7 @@ public class ArchitectureDiagramTests
     [Fact]
     public async Task GenerateArchitectureDiagram_ShouldReturnNoServiceDetected()
     {
-        var command = new GenerateArchitectureDiagramCommand(_logger);
+        var command = new DiagramGenerateCommand(_logger);
         var args = command.GetCommand().Parse(["--raw-mcp-tool-input", "{\"projectName\": \"test\",\"services\": []}"]);
         var context = new CommandContext(_serviceProvider);
         var response = await command.ExecuteAsync(context, args);
@@ -45,7 +46,7 @@ public class ArchitectureDiagramTests
     [Fact]
     public async Task GenerateArchitectureDiagram_ShouldReturnEncryptedDiagramUrl()
     {
-        var command = new GenerateArchitectureDiagramCommand(_logger);
+        var command = new DiagramGenerateCommand(_logger);
         var appTopology = new AppTopology()
         {
             WorkspaceFolder = "testWorkspace",

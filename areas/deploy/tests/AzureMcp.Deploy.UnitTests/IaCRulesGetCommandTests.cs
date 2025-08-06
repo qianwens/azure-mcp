@@ -3,7 +3,7 @@
 
 using System.CommandLine.Parsing;
 using AzureMcp.Core.Models.Command;
-using AzureMcp.Deploy.Commands.InfraCodeRules;
+using AzureMcp.Deploy.Commands.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -12,17 +12,17 @@ using Xunit;
 namespace AzureMcp.Deploy.UnitTests;
 
 
-public class IaCRulesGetCommandTests
+public class RulesGetCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<IaCRulesGetCommand> _logger;
+    private readonly ILogger<RulesGetCommand> _logger;
     private readonly Parser _parser;
     private readonly CommandContext _context;
-    private readonly IaCRulesGetCommand _command;
+    private readonly RulesGetCommand _command;
 
-    public IaCRulesGetCommandTests()
+    public RulesGetCommandTests()
     {
-        _logger = Substitute.For<ILogger<IaCRulesGetCommand>>();
+        _logger = Substitute.For<ILogger<RulesGetCommand>>();
 
         var collection = new ServiceCollection();
         _serviceProvider = collection.BuildServiceProvider();

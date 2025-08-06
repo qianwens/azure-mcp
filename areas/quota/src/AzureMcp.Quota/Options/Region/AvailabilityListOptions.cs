@@ -4,9 +4,9 @@
 using System.Text.Json.Serialization;
 using AzureMcp.Core.Options;
 
-namespace AzureMcp.Quota.Options;
+namespace AzureMcp.Quota.Options.Region;
 
-public sealed class RegionCheckOptions : SubscriptionOptions
+public sealed class AvailabilityListOptions : SubscriptionOptions
 {
     [JsonPropertyName("resourceTypes")]
     public string ResourceTypes { get; set; } = string.Empty;

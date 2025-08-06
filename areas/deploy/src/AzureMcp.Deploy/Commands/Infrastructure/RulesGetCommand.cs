@@ -5,22 +5,23 @@ using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Core.Commands;
 using AzureMcp.Deploy.Models;
 using AzureMcp.Deploy.Options;
+using AzureMcp.Deploy.Options.Infrastructure;
 using AzureMcp.Deploy.Services.Util;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Deploy.Commands.InfraCodeRules;
+namespace AzureMcp.Deploy.Commands.Infrastructure;
 
-public sealed class IaCRulesGetCommand(ILogger<IaCRulesGetCommand> logger)
+public sealed class RulesGetCommand(ILogger<RulesGetCommand> logger)
     : BaseCommand()
 {
     private const string CommandTitle = "Get Iac(Infrastructure as Code) Rules";
-    private readonly ILogger<IaCRulesGetCommand> _logger = logger;
+    private readonly ILogger<RulesGetCommand> _logger = logger;
 
     private readonly Option<string> _deploymentToolOption = DeployOptionDefinitions.IaCRules.DeploymentTool;
     private readonly Option<string> _iacTypeOption = DeployOptionDefinitions.IaCRules.IacType;
     private readonly Option<string> _resourceTypesOption = DeployOptionDefinitions.IaCRules.ResourceTypes;
 
-    public override string Name => "iac-rules-get";
+    public override string Name => "rules";
     public override string Title => CommandTitle;
     public override ToolMetadata Metadata => new() { Destructive = false, ReadOnly = true };
 
@@ -37,9 +38,9 @@ public sealed class IaCRulesGetCommand(ILogger<IaCRulesGetCommand> logger)
         command.AddOption(_resourceTypesOption);
     }
 
-    private InfraCodeRulesOptions BindOptions(ParseResult parseResult)
+    private RulesGetOptions BindOptions(ParseResult parseResult)
     {
-        var options = new InfraCodeRulesOptions();
+        var options = new RulesGetOptions();
         options.DeploymentTool = parseResult.GetValueForOption(_deploymentToolOption) ?? string.Empty;
         options.IacType = parseResult.GetValueForOption(_iacTypeOption) ?? string.Empty;
         options.ResourceTypes = parseResult.GetValueForOption(_resourceTypesOption) ?? string.Empty;

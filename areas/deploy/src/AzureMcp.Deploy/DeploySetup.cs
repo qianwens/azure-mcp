@@ -3,8 +3,10 @@
 
 using AzureMcp.Core.Areas;
 using AzureMcp.Core.Commands;
-using AzureMcp.Deploy.Commands;
-using AzureMcp.Deploy.Commands.InfraCodeRules;
+using AzureMcp.Deploy.Commands.App;
+using AzureMcp.Deploy.Commands.Architecture;
+using AzureMcp.Deploy.Commands.Infrastructure;
+using AzureMcp.Deploy.Commands.Pipeline;
 using AzureMcp.Deploy.Commands.Plan;
 using AzureMcp.Deploy.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,21 +24,36 @@ public sealed class DeploySetup : IAreaSetup
     public void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFactory)
     {
         var deploy = new CommandGroup("deploy", "Deploy commands for deploying applications to Azure, including sub commands: "
-            + "- plan-get: generates a deployment plan to construct the infrastructure and deploy the application on Azure. Agent should read its output and generate a deploy plan in '.azure/plan.copilotmd' for execution steps, recommended azure services based on the information agent detected from project. Before calling this tool, please scan this workspace to detect the services to deploy and their dependent services; "
-            + "- iac-rules-get: offers guidelines for creating Bicep/Terraform files to deploy applications on Azure; "
-            + "- azd-app-log-get: fetch logs from log analytics workspace for Container Apps, App Services, function apps that were deployed through azd; "
-            + "- cicd-pipeline-guidance-get: guidance to create a CI/CD pipeline which provision Azure resources and build and deploy applications to Azure; "
-            + "- architecture-diagram-generate: generates an azure service architecture diagram for the application based on the provided app topology; ");
+            + "- plan_get: generates a deployment plan to construct the infrastructure and deploy the application on Azure. Agent should read its output and generate a deploy plan in '.azure/plan.copilotmd' for execution steps, recommended azure services based on the information agent detected from project. Before calling this tool, please scan this workspace to detect the services to deploy and their dependent services; "
+            + "- iac_rules_get: offers guidelines for creating Bicep/Terraform files to deploy applications on Azure; "
+            + "- app_logs_get: fetch logs from log analytics workspace for Container Apps, App Services, function apps that were deployed through azd; "
+            + "- pipeline_guidance_get: guidance to create a CI/CD pipeline which provision Azure resources and build and deploy applications to Azure; "
+            + "- architecture_diagram_generate: generates an azure service architecture diagram for the application based on the provided app topology; ");
         rootGroup.AddSubGroup(deploy);
 
-        deploy.AddCommand("plan-get", new PlanGetCommand(loggerFactory.CreateLogger<PlanGetCommand>()));
+        // Application-specific commands
+        var appGroup = new CommandGroup("app", "Application-specific deployment tools");
+        appGroup.AddCommand("logs_get", new LogsGetCommand(loggerFactory.CreateLogger<LogsGetCommand>()));
+        deploy.AddSubGroup(appGroup);
 
-        deploy.AddCommand("iac-rules-get", new IaCRulesGetCommand(loggerFactory.CreateLogger<IaCRulesGetCommand>()));
+        // Infrastructure as Code commands
+        var infrastructureGroup = new CommandGroup("iac", "Infrastructure as Code operations");
+        infrastructureGroup.AddCommand("rules_get", new RulesGetCommand(loggerFactory.CreateLogger<RulesGetCommand>()));
+        deploy.AddSubGroup(infrastructureGroup);
 
-        deploy.AddCommand("azd-app-log-get", new AzdAppLogGetCommand(loggerFactory.CreateLogger<AzdAppLogGetCommand>()));
+        // CI/CD Pipeline commands
+        var pipelineGroup = new CommandGroup("pipeline", "CI/CD pipeline operations");
+        pipelineGroup.AddCommand("guidance_get", new GuidanceGetCommand(loggerFactory.CreateLogger<GuidanceGetCommand>()));
+        deploy.AddSubGroup(pipelineGroup);
 
-        deploy.AddCommand("cicd-pipeline-guidance-get", new PipelineGenerateCommand(loggerFactory.CreateLogger<PipelineGenerateCommand>()));
+        // Deployment planning commands
+        var planGroup = new CommandGroup("plan", "Deployment planning operations");
+        planGroup.AddCommand("get", new GetCommand(loggerFactory.CreateLogger<GetCommand>()));
+        deploy.AddSubGroup(planGroup);
 
-        deploy.AddCommand("architecture-diagram-generate", new GenerateArchitectureDiagramCommand(loggerFactory.CreateLogger<GenerateArchitectureDiagramCommand>()));
+        // Architecture diagram commands
+        var architectureGroup = new CommandGroup("architecture", "Architecture diagram operations");
+        architectureGroup.AddCommand("diagram_generate", new DiagramGenerateCommand(loggerFactory.CreateLogger<DiagramGenerateCommand>()));
+        deploy.AddSubGroup(architectureGroup);
     }
 }

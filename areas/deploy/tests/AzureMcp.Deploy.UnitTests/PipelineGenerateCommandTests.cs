@@ -3,7 +3,7 @@
 
 using System.CommandLine.Parsing;
 using AzureMcp.Core.Models.Command;
-using AzureMcp.Deploy.Commands;
+using AzureMcp.Deploy.Commands.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -12,17 +12,17 @@ using Xunit;
 namespace AzureMcp.Deploy.UnitTests;
 
 
-public class PipelineGenerateCommandTests
+public class GuidanceGetCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<PipelineGenerateCommand> _logger;
+    private readonly ILogger<GuidanceGetCommand> _logger;
     private readonly Parser _parser;
     private readonly CommandContext _context;
-    private readonly PipelineGenerateCommand _command;
+    private readonly GuidanceGetCommand _command;
 
-    public PipelineGenerateCommandTests()
+    public GuidanceGetCommandTests()
     {
-        _logger = Substitute.For<ILogger<PipelineGenerateCommand>>();
+        _logger = Substitute.For<ILogger<GuidanceGetCommand>>();
 
         var collection = new ServiceCollection();
         _serviceProvider = collection.BuildServiceProvider();

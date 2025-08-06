@@ -5,23 +5,24 @@ using AzureMcp.Core.Commands;
 using AzureMcp.Core.Commands.Subscription;
 using AzureMcp.Core.Services.Telemetry;
 using AzureMcp.Deploy.Options;
+using AzureMcp.Deploy.Options.Pipeline;
 using AzureMcp.Deploy.Services.Util;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Deploy.Commands;
+namespace AzureMcp.Deploy.Commands.Pipeline;
 
-public sealed class PipelineGenerateCommand(ILogger<PipelineGenerateCommand> logger)
-    : SubscriptionCommand<PipelineGenerateOptions>()
+public sealed class GuidanceGetCommand(ILogger<GuidanceGetCommand> logger)
+    : SubscriptionCommand<GuidanceGetOptions>()
 {
     private const string CommandTitle = "Get Azure Deployment CICD Pipeline Guidance";
-    private readonly ILogger<PipelineGenerateCommand> _logger = logger;
+    private readonly ILogger<GuidanceGetCommand> _logger = logger;
 
     private readonly Option<bool> _useAZDPipelineConfigOption = DeployOptionDefinitions.PipelineGenerateOptions.UseAZDPipelineConfig;
     private readonly Option<string> _organizationNameOption = DeployOptionDefinitions.PipelineGenerateOptions.OrganizationName;
     private readonly Option<string> _repositoryNameOption = DeployOptionDefinitions.PipelineGenerateOptions.RepositoryName;
     private readonly Option<string> _githubEnvironmentNameOption = DeployOptionDefinitions.PipelineGenerateOptions.GithubEnvironmentName;
 
-    public override string Name => "cicd-pipeline-guidance-get";
+    public override string Name => "guidance";
 
     public override string Description =>
         """
@@ -40,7 +41,7 @@ public sealed class PipelineGenerateCommand(ILogger<PipelineGenerateCommand> log
         command.AddOption(_githubEnvironmentNameOption);
     }
 
-    protected override PipelineGenerateOptions BindOptions(ParseResult parseResult)
+    protected override GuidanceGetOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
         options.UseAZDPipelineConfig = parseResult.GetValueForOption(_useAZDPipelineConfigOption);

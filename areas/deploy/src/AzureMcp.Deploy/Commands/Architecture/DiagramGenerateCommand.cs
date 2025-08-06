@@ -7,16 +7,17 @@ using System.Text.Json.Nodes;
 using AzureMcp.Core.Commands;
 using AzureMcp.Core.Helpers;
 using AzureMcp.Deploy.Options;
+using AzureMcp.Deploy.Options.Architecture;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Deploy.Commands;
+namespace AzureMcp.Deploy.Commands.Architecture;
 
-public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitectureDiagramCommand> logger) : BaseCommand()
+public sealed class DiagramGenerateCommand(ILogger<DiagramGenerateCommand> logger) : BaseCommand()
 {
     private const string CommandTitle = "Generate Architecture Diagram";
-    private readonly ILogger<GenerateArchitectureDiagramCommand> _logger = logger;
+    private readonly ILogger<DiagramGenerateCommand> _logger = logger;
 
-    public override string Name => "architecture-diagram-generate";
+    public override string Name => "diagram";
 
     private readonly Option<string> _rawMcpToolInputOption = DeployOptionDefinitions.RawMcpToolInput.RawMcpToolInputOption;
 
@@ -35,9 +36,9 @@ public sealed class GenerateArchitectureDiagramCommand(ILogger<GenerateArchitect
         command.AddOption(_rawMcpToolInputOption);
     }
 
-    private RawMcpToolInputOptions BindOptions(ParseResult parseResult)
+    private DiagramGenerateOptions BindOptions(ParseResult parseResult)
     {
-        var options = new RawMcpToolInputOptions();
+        var options = new DiagramGenerateOptions();
         options.RawMcpToolInput = parseResult.GetValueForOption(_rawMcpToolInputOption);
         return options;
     }

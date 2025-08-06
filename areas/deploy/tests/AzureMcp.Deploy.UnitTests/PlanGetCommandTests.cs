@@ -12,17 +12,17 @@ using Xunit;
 namespace AzureMcp.Deploy.UnitTests;
 
 
-public class PlanGetCommandTests
+public class GetCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<PlanGetCommand> _logger;
+    private readonly ILogger<GetCommand> _logger;
     private readonly Parser _parser;
     private readonly CommandContext _context;
-    private readonly PlanGetCommand _command;
+    private readonly GetCommand _command;
 
-    public PlanGetCommandTests()
+    public GetCommandTests()
     {
-        _logger = Substitute.For<ILogger<PlanGetCommand>>();
+        _logger = Substitute.For<ILogger<GetCommand>>();
 
         var collection = new ServiceCollection();
         _serviceProvider = collection.BuildServiceProvider();

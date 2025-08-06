@@ -4,7 +4,7 @@
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using AzureMcp.Core.Models.Command;
-using AzureMcp.Quota.Commands;
+using AzureMcp.Quota.Commands.Region;
 using AzureMcp.Quota.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,24 +15,24 @@ using Xunit;
 namespace AzureMcp.Tests.Areas.Quota.UnitTests;
 
 [Trait("Area", "Quota")]
-public sealed class RegionCheckCommandTests
+public sealed class AvailabilityListCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IQuotaService _quotaService;
-    private readonly ILogger<RegionCheckCommand> _logger;
-    private readonly RegionCheckCommand _command;
+    private readonly ILogger<AvailabilityListCommand> _logger;
+    private readonly AvailabilityListCommand _command;
     private readonly Parser _parser;
 
-    public RegionCheckCommandTests()
+    public AvailabilityListCommandTests()
     {
         _quotaService = Substitute.For<IQuotaService>();
-        _logger = Substitute.For<ILogger<RegionCheckCommand>>();
+        _logger = Substitute.For<ILogger<AvailabilityListCommand>>();
 
         var services = new ServiceCollection();
         services.AddSingleton(_quotaService);
         _serviceProvider = services.BuildServiceProvider();
 
-        _command = new RegionCheckCommand(_logger);
+        _command = new AvailabilityListCommand(_logger);
         _parser = new Parser(_command.GetCommand());
     }
 
@@ -97,7 +97,7 @@ public sealed class RegionCheckCommandTests
             PropertyNameCaseInsensitive = true
         };
 
-        var response = JsonSerializer.Deserialize<RegionCheckCommand.RegionCheckCommandResult>(json, options);
+        var response = JsonSerializer.Deserialize<AvailabilityListCommand.RegionCheckCommandResult>(json, options);
         Assert.NotNull(response);
         Assert.NotNull(response.AvailableRegions);
         Assert.Equal(5, response.AvailableRegions.Count);
@@ -171,7 +171,7 @@ public sealed class RegionCheckCommandTests
             PropertyNameCaseInsensitive = true
         };
 
-        var response = JsonSerializer.Deserialize<RegionCheckCommand.RegionCheckCommandResult>(json, options);
+        var response = JsonSerializer.Deserialize<AvailabilityListCommand.RegionCheckCommandResult>(json, options);
         Assert.NotNull(response);
         Assert.NotNull(response.AvailableRegions);
         Assert.Equal(3, response.AvailableRegions.Count);
