@@ -11,7 +11,6 @@ namespace AzureMcp.Deploy.Services;
 public class DeployService() : BaseAzureService, IDeployService
 {
 
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
     public async Task<string> GetAzdResourceLogsAsync(
          string workspaceFolder,
          string azdEnvName,

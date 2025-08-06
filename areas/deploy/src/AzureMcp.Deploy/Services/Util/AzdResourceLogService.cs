@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Azure.Core;
-using YamlDotNet.Serialization;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
 namespace Areas.Deploy.Services.Util;
 
@@ -8,7 +9,6 @@ public static class AzdResourceLogService
 {
     private const string AzureYamlFileName = "azure.yaml";
 
-    [RequiresDynamicCode("Uses YamlDotNet for deserialization.")]
     public static async Task<string> GetAzdResourceLogsAsync(
         TokenCredential credential,
         string workspaceFolder,
@@ -62,7 +62,6 @@ public static class AzdResourceLogService
         return "No logs found.";
     }
 
-    [RequiresDynamicCode("Calls YamlDotNet.Serialization.DeserializerBuilder.DeserializerBuilder()")]
     private static Dictionary<string, Service> GetServicesFromAzureYaml(string workspaceFolder)
     {
         var azureYamlPath = Path.Combine(workspaceFolder, AzureYamlFileName);
@@ -73,34 +72,124 @@ public static class AzdResourceLogService
         }
 
         var yamlContent = File.ReadAllText(azureYamlPath);
-        var deserializer = new DeserializerBuilder().Build();
-        var azureYaml = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
+        
+        // Use AOT-safe manual YAML parsing
+        using var stringReader = new StringReader(yamlContent);
+        var parser = new YamlDotNet.Core.Parser(stringReader);
+        
+        return ParseAzureYamlServices(parser);
+    }
 
-        if (!azureYaml.TryGetValue("services", out var servicesObj))
+    private static Dictionary<string, Service> ParseAzureYamlServices(YamlDotNet.Core.Parser parser)
+    {
+        var result = new Dictionary<string, Service>();
+        
+        // Skip StreamStart
+        parser.Consume<StreamStart>();
+        
+        // Skip DocumentStart
+        parser.Consume<DocumentStart>();
+        
+        // Start reading the root mapping
+        parser.Consume<MappingStart>();
+        
+        while (parser.Accept<MappingEnd>(out _) == false)
+        {
+            // Read key
+            var key = parser.Consume<Scalar>().Value;
+            
+            if (key == "services")
+            {
+                // Found services section
+                parser.Consume<MappingStart>();
+                
+                while (parser.Accept<MappingEnd>(out _) == false)
+                {
+                    // Service name
+                    var serviceName = parser.Consume<Scalar>().Value;
+                    
+                    // Service properties
+                    parser.Consume<MappingStart>();
+                    
+                    string? host = null;
+                    string? project = null;
+                    string? language = null;
+                    
+                    while (parser.Accept<MappingEnd>(out _) == false)
+                    {
+                        var propertyKey = parser.Consume<Scalar>().Value;
+                        var propertyValue = parser.Consume<Scalar>().Value;
+                        
+                        switch (propertyKey)
+                        {
+                            case "host":
+                                host = propertyValue;
+                                break;
+                            case "project":
+                                project = propertyValue;
+                                break;
+                            case "language":
+                                language = propertyValue;
+                                break;
+                        }
+                    }
+                    
+                    // Consume the MappingEnd for this service
+                    parser.Consume<MappingEnd>();
+                    
+                    result[serviceName] = new Service(
+                        Host: host,
+                        Project: project,
+                        Language: language
+                    );
+                }
+                
+                // Consume the MappingEnd for services
+                parser.Consume<MappingEnd>();
+            }
+            else
+            {
+                // Skip other top-level properties
+                SkipValue(parser);
+            }
+        }
+        
+        if (result.Count == 0)
         {
             throw new InvalidOperationException("No services section found in azure.yaml");
         }
-
-        var servicesDict = (Dictionary<object, object>)servicesObj;
-        var result = new Dictionary<string, Service>();
-
-        foreach (var (key, value) in servicesDict)
-        {
-            var serviceName = key.ToString()!;
-            var serviceDict = (Dictionary<object, object>)value;
-
-            var service = new Service(
-                Host: serviceDict.TryGetValue("host", out var host) ? host?.ToString() : null,
-                Project: serviceDict.TryGetValue("project", out var project) ? project?.ToString() : null,
-                Language: serviceDict.TryGetValue("language", out var language) ? language?.ToString() : null
-            );
-
-            result[serviceName] = service;
-        }
-
+        
         return result;
     }
+
+    private static void SkipValue(YamlDotNet.Core.Parser parser)
+    {
+        if (parser.Accept<Scalar>(out _))
+        {
+            parser.Consume<Scalar>();
+        }
+        else if (parser.Accept<MappingStart>(out _))
+        {
+            parser.Consume<MappingStart>();
+            while (!parser.Accept<MappingEnd>(out _))
+            {
+                SkipValue(parser); // Skip key
+                SkipValue(parser); // Skip value
+            }
+            parser.Consume<MappingEnd>();
+        }
+        else if (parser.Accept<SequenceStart>(out _))
+        {
+            parser.Consume<SequenceStart>();
+            while (!parser.Accept<SequenceEnd>(out _))
+            {
+                SkipValue(parser);
+            }
+            parser.Consume<SequenceEnd>();
+        }
+    }
 }
+
 public record Service(
     string? Host = null,
     string? Project = null,
