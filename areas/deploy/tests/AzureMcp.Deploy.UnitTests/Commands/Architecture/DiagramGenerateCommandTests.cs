@@ -14,15 +14,15 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
-namespace AzureMcp.Deploy.UnitTests;
+namespace AzureMcp.Deploy.UnitTests.Commands.Architecture;
 
 
-public class ArchitectureDiagramTests
+public class DiagramGenerateCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<DiagramGenerateCommand> _logger;
 
-    public ArchitectureDiagramTests()
+    public DiagramGenerateCommandTests()
     {
         _logger = Substitute.For<ILogger<DiagramGenerateCommand>>();
 

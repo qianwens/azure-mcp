@@ -13,7 +13,7 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Xunit;
 
-namespace AzureMcp.Tests.Areas.Quota.UnitTests;
+namespace AzureMcp.Quota.UnitTests.Commands.Usage;
 
 [Trait("Area", "Quota")]
 public sealed class CheckCommandTests

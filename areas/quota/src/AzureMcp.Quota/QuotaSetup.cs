@@ -30,7 +30,9 @@ public sealed class QuotaSetup : IAreaSetup
 
         // Region availability operations
         var regionGroup = new CommandGroup("region", "Region availability operations");
-        regionGroup.AddCommand("availability_list", new AvailabilityListCommand(loggerFactory.CreateLogger<AvailabilityListCommand>()));
+        var availabilityGroup = new CommandGroup("availability", "Region availability information");
+        availabilityGroup.AddCommand("list", new AvailabilityListCommand(loggerFactory.CreateLogger<AvailabilityListCommand>()));
+        regionGroup.AddSubGroup(availabilityGroup);
         quota.AddSubGroup(regionGroup);
     }
 }

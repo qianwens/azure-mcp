@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
-namespace AzureMcp.Deploy.UnitTests;
+namespace AzureMcp.Deploy.UnitTests.Commands.Pipeline;
 
 
 public class GuidanceGetCommandTests

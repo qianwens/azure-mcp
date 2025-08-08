@@ -11,10 +11,10 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Xunit;
 
-namespace AzureMcp.Deploy.UnitTests;
+namespace AzureMcp.Deploy.UnitTests.Commands.App;
 
 
-public class AzdAppLogGetCommandTests
+public class LogsGetCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<LogsGetCommand> _logger;
@@ -23,7 +23,7 @@ public class AzdAppLogGetCommandTests
     private readonly CommandContext _context;
     private readonly LogsGetCommand _command;
 
-    public AzdAppLogGetCommandTests()
+    public LogsGetCommandTests()
     {
         _logger = Substitute.For<ILogger<LogsGetCommand>>();
         _deployService = Substitute.For<IDeployService>();

@@ -33,17 +33,23 @@ public sealed class DeploySetup : IAreaSetup
 
         // Application-specific commands
         var appGroup = new CommandGroup("app", "Application-specific deployment tools");
-        appGroup.AddCommand("logs_get", new LogsGetCommand(loggerFactory.CreateLogger<LogsGetCommand>()));
+        var logsGroup = new CommandGroup("logs", "Application logs management");
+        logsGroup.AddCommand("get", new LogsGetCommand(loggerFactory.CreateLogger<LogsGetCommand>()));
+        appGroup.AddSubGroup(logsGroup);
         deploy.AddSubGroup(appGroup);
 
         // Infrastructure as Code commands
-        var infrastructureGroup = new CommandGroup("iac", "Infrastructure as Code operations");
-        infrastructureGroup.AddCommand("rules_get", new RulesGetCommand(loggerFactory.CreateLogger<RulesGetCommand>()));
-        deploy.AddSubGroup(infrastructureGroup);
+        var iacGroup = new CommandGroup("iac", "Infrastructure as Code operations");
+        var rulesGroup = new CommandGroup("rules", "Infrastructure as Code rules and guidelines");
+        rulesGroup.AddCommand("get", new RulesGetCommand(loggerFactory.CreateLogger<RulesGetCommand>()));
+        iacGroup.AddSubGroup(rulesGroup);
+        deploy.AddSubGroup(iacGroup);
 
         // CI/CD Pipeline commands
         var pipelineGroup = new CommandGroup("pipeline", "CI/CD pipeline operations");
-        pipelineGroup.AddCommand("guidance_get", new GuidanceGetCommand(loggerFactory.CreateLogger<GuidanceGetCommand>()));
+        var guidanceGroup = new CommandGroup("guidance", "CI/CD pipeline guidance");
+        guidanceGroup.AddCommand("get", new GuidanceGetCommand(loggerFactory.CreateLogger<GuidanceGetCommand>()));
+        pipelineGroup.AddSubGroup(guidanceGroup);
         deploy.AddSubGroup(pipelineGroup);
 
         // Deployment planning commands
@@ -53,7 +59,9 @@ public sealed class DeploySetup : IAreaSetup
 
         // Architecture diagram commands
         var architectureGroup = new CommandGroup("architecture", "Architecture diagram operations");
-        architectureGroup.AddCommand("diagram_generate", new DiagramGenerateCommand(loggerFactory.CreateLogger<DiagramGenerateCommand>()));
+        var diagramGroup = new CommandGroup("diagram", "Architecture diagram generation");
+        diagramGroup.AddCommand("generate", new DiagramGenerateCommand(loggerFactory.CreateLogger<DiagramGenerateCommand>()));
+        architectureGroup.AddSubGroup(diagramGroup);
         deploy.AddSubGroup(architectureGroup);
     }
 }
