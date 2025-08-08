@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Templates\**\*.md" />
+    <EmbeddedResource Include="Schemas\*.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\core\src\AzureMcp.Core\AzureMcp.Core.csproj" />

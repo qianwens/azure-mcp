@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Buffers;
+using System.Text;
 using System.Text.Json.Nodes;
 using AzureMcp.Core.Helpers;
 
@@ -84,13 +86,18 @@ public static class CommandExtensions
         }
         else
         {
-            var jsonObject = new JsonObject();
-            foreach (var (key, value) in arguments)
+            var buffer = new ArrayBufferWriter<byte>();
+            using (var jsonWriter = new Utf8JsonWriter(buffer))
             {
-                jsonObject[key] = JsonNode.Parse(value.GetRawText());
+                jsonWriter.WriteStartObject();
+                foreach (var argument in arguments)
+                {
+                    jsonWriter.WritePropertyName(argument.Key);
+                    argument.Value.WriteTo(jsonWriter);
+                }
+                jsonWriter.WriteEndObject();
             }
-            var jsonString = jsonObject.ToJsonString();
-            args.Add(jsonString);
+            args.Add(Encoding.UTF8.GetString(buffer.WrittenSpan));
         }
 
         return command.Parse(args.ToArray());

@@ -72,54 +72,54 @@ public static class AzdResourceLogService
         }
 
         var yamlContent = File.ReadAllText(azureYamlPath);
-        
+
         // Use AOT-safe manual YAML parsing
         using var stringReader = new StringReader(yamlContent);
         var parser = new YamlDotNet.Core.Parser(stringReader);
-        
+
         return ParseAzureYamlServices(parser);
     }
 
     private static Dictionary<string, Service> ParseAzureYamlServices(YamlDotNet.Core.Parser parser)
     {
         var result = new Dictionary<string, Service>();
-        
+
         // Skip StreamStart
         parser.Consume<StreamStart>();
-        
+
         // Skip DocumentStart
         parser.Consume<DocumentStart>();
-        
+
         // Start reading the root mapping
         parser.Consume<MappingStart>();
-        
+
         while (parser.Accept<MappingEnd>(out _) == false)
         {
             // Read key
             var key = parser.Consume<Scalar>().Value;
-            
+
             if (key == "services")
             {
                 // Found services section
                 parser.Consume<MappingStart>();
-                
+
                 while (parser.Accept<MappingEnd>(out _) == false)
                 {
                     // Service name
                     var serviceName = parser.Consume<Scalar>().Value;
-                    
+
                     // Service properties
                     parser.Consume<MappingStart>();
-                    
+
                     string? host = null;
                     string? project = null;
                     string? language = null;
-                    
+
                     while (parser.Accept<MappingEnd>(out _) == false)
                     {
                         var propertyKey = parser.Consume<Scalar>().Value;
                         var propertyValue = parser.Consume<Scalar>().Value;
-                        
+
                         switch (propertyKey)
                         {
                             case "host":
@@ -133,17 +133,17 @@ public static class AzdResourceLogService
                                 break;
                         }
                     }
-                    
+
                     // Consume the MappingEnd for this service
                     parser.Consume<MappingEnd>();
-                    
+
                     result[serviceName] = new Service(
                         Host: host,
                         Project: project,
                         Language: language
                     );
                 }
-                
+
                 // Consume the MappingEnd for services
                 parser.Consume<MappingEnd>();
             }
@@ -153,12 +153,12 @@ public static class AzdResourceLogService
                 SkipValue(parser);
             }
         }
-        
+
         if (result.Count == 0)
         {
             throw new InvalidOperationException("No services section found in azure.yaml");
         }
-        
+
         return result;
     }
 

@@ -24,6 +24,7 @@ public sealed class DiagramGenerateCommand(ILogger<DiagramGenerateCommand> logge
     public override string Description =>
         "Generates an azure service architecture diagram for the application based on the provided app topology."
         + "Call this tool when the user need recommend or design the azure architecture of their application."
+        + "Do not call this tool when the user need detailed design of the azure architecture, such as the network topology, security design, etc."
         + "Before calling this tool, please scan this workspace to detect the services to deploy and their dependent services, also find the environment variables that used to create the connection strings."
         + "If it's a .NET Aspire application, check aspireManifest.json file if there is. Try your best to fulfill the input schema with your analyze result.";
 
