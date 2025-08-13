@@ -44,7 +44,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [LogsGetCommand.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/App/LogsGetCommand.cs)
        - [DiagramGenerateCommand.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/Architecture/DiagramGenerateCommand.cs)
    - Justification (if waived): _<add rationale>_
-5. [ ] HTTP usage pattern
+5. [x] HTTP usage pattern
    - `AzureUsageChecker` keeps a static `HttpClient` (OK) but bypasses dependency injection & resiliency policies.
    - Action: Introduce `IHttpClientFactory` (named client) + Polly (if repo standard) OR justify keeping static client; wrap responses with meaningful exceptions.
     - Linked Files:
