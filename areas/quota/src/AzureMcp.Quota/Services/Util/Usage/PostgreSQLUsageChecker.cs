@@ -12,7 +12,7 @@ public class PostgreSQLUsageChecker(TokenCredential credential, string subscript
     {
         try
         {
-            var requestUrl = $"https://management.azure.com/subscriptions/{SubscriptionId}/providers/Microsoft.DBforPostgreSQL/locations/{location}/resourceType/flexibleServers/usages?api-version=2023-06-01-preview";
+            var requestUrl = $"{managementEndpoint}/subscriptions/{SubscriptionId}/providers/Microsoft.DBforPostgreSQL/locations/{location}/resourceType/flexibleServers/usages?api-version=2023-06-01-preview";
             using var rawResponse = await GetQuotaByUrlAsync(requestUrl);
 
             if (rawResponse?.RootElement.TryGetProperty("value", out var valueElement) != true)

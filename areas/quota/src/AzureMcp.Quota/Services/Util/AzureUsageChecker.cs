@@ -52,6 +52,7 @@ public abstract class AzureUsageChecker : IUsageChecker
     protected readonly TokenCredential Credential;
     protected readonly ILogger Logger;
     private static readonly HttpClient HttpClient = new();
+    protected const string managementEndpoint = "https://management.azure.com";
 
     protected AzureUsageChecker(TokenCredential credential, string subscriptionId, ILogger logger)
     {
@@ -63,24 +64,24 @@ public abstract class AzureUsageChecker : IUsageChecker
 
     public abstract Task<List<UsageInfo>> GetUsageForLocationAsync(string location);
 
-    protected async Task<JsonDocument?> GetQuotaByUrlAsync(string requestUrl)
+    protected async Task<JsonDocument?> GetQuotaByUrlAsync(string requestUrl, CancellationToken cancellationToken = default)
     {
         try
         {
-            var token = await Credential.GetTokenAsync(new TokenRequestContext(["https://management.azure.com/.default"]), CancellationToken.None);
+            var token = await Credential.GetTokenAsync(new TokenRequestContext([$"{managementEndpoint}/.default"]), cancellationToken);
 
             using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = await HttpClient.SendAsync(request);
+            var response = await HttpClient.SendAsync(request, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
                 throw new HttpRequestException($"HTTP error! status: {response.StatusCode}");
             }
 
-            var content = await response.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
             return JsonDocument.Parse(content);
         }
         catch (Exception error)
@@ -89,6 +90,7 @@ public abstract class AzureUsageChecker : IUsageChecker
             return null;
         }
     }
+
 }
 
 // Factory function to create usage checkers
