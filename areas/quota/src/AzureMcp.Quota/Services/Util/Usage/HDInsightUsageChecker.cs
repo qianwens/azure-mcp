@@ -4,10 +4,11 @@
 using Azure.Core;
 using Azure.ResourceManager.HDInsight;
 using Azure.ResourceManager.HDInsight.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Quota.Services.Util;
 
-public class HDInsightUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
+public class HDInsightUsageChecker(TokenCredential credential, string subscriptionId, ILogger<HDInsightUsageChecker> logger) : AzureUsageChecker(credential, subscriptionId, logger)
 {
     public override async Task<List<UsageInfo>> GetUsageForLocationAsync(string location)
     {

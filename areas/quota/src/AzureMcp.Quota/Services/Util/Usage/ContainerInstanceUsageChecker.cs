@@ -4,10 +4,11 @@
 using Azure.Core;
 using Azure.ResourceManager.ContainerInstance;
 using Azure.ResourceManager.ContainerInstance.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Quota.Services.Util;
 
-public class ContainerInstanceUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
+public class ContainerInstanceUsageChecker(TokenCredential credential, string subscriptionId, ILogger<ContainerInstanceUsageChecker> logger) : AzureUsageChecker(credential, subscriptionId, logger)
 {
     public override async Task<List<UsageInfo>> GetUsageForLocationAsync(string location)
     {

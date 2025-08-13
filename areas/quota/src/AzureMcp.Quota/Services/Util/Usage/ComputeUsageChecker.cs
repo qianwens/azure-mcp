@@ -5,10 +5,11 @@ using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Compute;
 using Azure.ResourceManager.Compute.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Quota.Services.Util;
 
-public class ComputeUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
+public class ComputeUsageChecker(TokenCredential credential, string subscriptionId, ILogger<ComputeUsageChecker> logger) : AzureUsageChecker(credential, subscriptionId, logger)
 {
     public override async Task<List<UsageInfo>> GetUsageForLocationAsync(string location)
     {

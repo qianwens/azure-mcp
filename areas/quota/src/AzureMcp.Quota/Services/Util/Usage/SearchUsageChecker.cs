@@ -4,10 +4,11 @@
 using Azure.Core;
 using Azure.ResourceManager.Search;
 using Azure.ResourceManager.Search.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Quota.Services.Util;
 
-public class SearchUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
+public class SearchUsageChecker(TokenCredential credential, string subscriptionId, ILogger<SearchUsageChecker> logger) : AzureUsageChecker(credential, subscriptionId, logger)
 {
     public override async Task<List<UsageInfo>> GetUsageForLocationAsync(string location)
     {

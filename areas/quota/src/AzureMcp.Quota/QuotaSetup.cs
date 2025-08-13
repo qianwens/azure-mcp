@@ -15,7 +15,8 @@ public sealed class QuotaSetup : IAreaSetup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddTransient<IQuotaService, QuotaService>();
+        services.AddTransient<IQuotaService>(serviceProvider =>
+            new QuotaService(serviceProvider.GetService<ILoggerFactory>()));
     }
 
     public void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFactory)

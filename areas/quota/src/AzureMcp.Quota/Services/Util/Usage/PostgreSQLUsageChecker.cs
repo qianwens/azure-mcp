@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 
 using Azure.Core;
+using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Quota.Services.Util;
 
-public class PostgreSQLUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
+public class PostgreSQLUsageChecker(TokenCredential credential, string subscriptionId, ILogger<PostgreSQLUsageChecker> logger) : AzureUsageChecker(credential, subscriptionId, logger)
 {
     public override async Task<List<UsageInfo>> GetUsageForLocationAsync(string location)
     {

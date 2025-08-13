@@ -6,6 +6,7 @@ using System.Text.Json;
 using Azure.Core;
 using Azure.ResourceManager;
 using AzureMcp.Core.Services.Azure.Authentication;
+using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Quota.Services.Util;
 
@@ -48,15 +49,16 @@ public abstract class AzureUsageChecker : IUsageChecker
 {
     protected readonly string SubscriptionId;
     protected readonly ArmClient ResourceClient;
-
     protected readonly TokenCredential Credential;
+    protected readonly ILogger Logger;
     private static readonly HttpClient HttpClient = new();
 
-    protected AzureUsageChecker(TokenCredential credential, string subscriptionId)
+    protected AzureUsageChecker(TokenCredential credential, string subscriptionId, ILogger logger)
     {
         SubscriptionId = subscriptionId;
         Credential = credential ?? throw new ArgumentNullException(nameof(credential));
         ResourceClient = new ArmClient(credential, subscriptionId);
+        Logger = logger;
     }
 
     public abstract Task<List<UsageInfo>> GetUsageForLocationAsync(string location);
@@ -83,7 +85,7 @@ public abstract class AzureUsageChecker : IUsageChecker
         }
         catch (Exception error)
         {
-            Console.WriteLine($"Error fetching quotas directly: {error.Message}");
+            Logger.LogWarning("Error fetching quotas directly: {Error}", error.Message);
             return null;
         }
     }
@@ -106,7 +108,7 @@ public static class UsageCheckerFactory
         { "Microsoft.ContainerInstance", ResourceProvider.ContainerInstance }
     };
 
-    public static IUsageChecker CreateUsageChecker(TokenCredential credential, string provider, string subscriptionId)
+    public static IUsageChecker CreateUsageChecker(TokenCredential credential, string provider, string subscriptionId, ILoggerFactory loggerFactory)
     {
         if (!ProviderMapping.TryGetValue(provider, out var resourceProvider))
         {
@@ -115,16 +117,16 @@ public static class UsageCheckerFactory
 
         return resourceProvider switch
         {
-            ResourceProvider.Compute => new ComputeUsageChecker(credential, subscriptionId),
-            ResourceProvider.CognitiveServices => new CognitiveServicesUsageChecker(credential, subscriptionId),
-            ResourceProvider.Storage => new StorageUsageChecker(credential, subscriptionId),
-            ResourceProvider.ContainerApp => new ContainerAppUsageChecker(credential, subscriptionId),
-            ResourceProvider.Network => new NetworkUsageChecker(credential, subscriptionId),
-            ResourceProvider.MachineLearning => new MachineLearningUsageChecker(credential, subscriptionId),
-            ResourceProvider.PostgreSQL => new PostgreSQLUsageChecker(credential, subscriptionId),
-            ResourceProvider.HDInsight => new HDInsightUsageChecker(credential, subscriptionId),
-            ResourceProvider.Search => new SearchUsageChecker(credential, subscriptionId),
-            ResourceProvider.ContainerInstance => new ContainerInstanceUsageChecker(credential, subscriptionId),
+            ResourceProvider.Compute => new ComputeUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<ComputeUsageChecker>()),
+            ResourceProvider.CognitiveServices => new CognitiveServicesUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<CognitiveServicesUsageChecker>()),
+            ResourceProvider.Storage => new StorageUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<StorageUsageChecker>()),
+            ResourceProvider.ContainerApp => new ContainerAppUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<ContainerAppUsageChecker>()),
+            ResourceProvider.Network => new NetworkUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<NetworkUsageChecker>()),
+            ResourceProvider.MachineLearning => new MachineLearningUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<MachineLearningUsageChecker>()),
+            ResourceProvider.PostgreSQL => new PostgreSQLUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<PostgreSQLUsageChecker>()),
+            ResourceProvider.HDInsight => new HDInsightUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<HDInsightUsageChecker>()),
+            ResourceProvider.Search => new SearchUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<SearchUsageChecker>()),
+            ResourceProvider.ContainerInstance => new ContainerInstanceUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<ContainerInstanceUsageChecker>()),
             _ => throw new ArgumentException($"No implementation for provider: {provider}")
         };
     }
@@ -137,12 +139,15 @@ public static class AzureQuotaService
         TokenCredential credential,
         List<string> resourceTypes,
         string subscriptionId,
-        string location)
+        string location,
+        ILoggerFactory loggerFactory)
     {
         // Group resource types by provider to avoid duplicate processing
         var providerToResourceTypes = resourceTypes
             .GroupBy(rt => rt.Split('/')[0])
             .ToDictionary(g => g.Key, g => g.ToList());
+
+        var logger = loggerFactory.CreateLogger(typeof(AzureQuotaService));
 
         // Use Select to create tasks and await them all
         var quotaTasks = providerToResourceTypes.Select(async kvp =>
@@ -150,9 +155,9 @@ public static class AzureQuotaService
             var (provider, resourceTypesForProvider) = (kvp.Key, kvp.Value);
             try
             {
-                var usageChecker = UsageCheckerFactory.CreateUsageChecker(credential, provider, subscriptionId);
+                var usageChecker = UsageCheckerFactory.CreateUsageChecker(credential, provider, subscriptionId, loggerFactory);
                 var quotaInfo = await usageChecker.GetUsageForLocationAsync(location);
-                Console.WriteLine($"Quota info for provider {provider}: {quotaInfo.Count} items");
+                logger.LogDebug("Retrieved quota info for provider {Provider}: {ItemCount} items", provider, quotaInfo.Count);
 
                 return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<UsageInfo>>(rt, quotaInfo));
             }
@@ -164,7 +169,7 @@ public static class AzureQuotaService
             }
             catch (Exception error)
             {
-                Console.WriteLine($"Error fetching quota for provider {provider}: {error.Message}");
+                logger.LogWarning("Error fetching quota for provider {Provider}: {Error}", provider, error.Message);
                 return resourceTypesForProvider.Select(rt => new KeyValuePair<string, List<UsageInfo>>(rt, new List<UsageInfo>()
                 {
                     new UsageInfo(rt, 0, 0, Description: error.Message)

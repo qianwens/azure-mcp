@@ -5,10 +5,11 @@ using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Storage;
 using Azure.ResourceManager.Storage.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Quota.Services.Util;
 
-public class StorageUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
+public class StorageUsageChecker(TokenCredential credential, string subscriptionId, ILogger<StorageUsageChecker> logger) : AzureUsageChecker(credential, subscriptionId, logger)
 {
     public override async Task<List<UsageInfo>> GetUsageForLocationAsync(string location)
     {
