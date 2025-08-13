@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Net.Http.Headers;
 using Azure.Core;
 using Microsoft.Extensions.Logging;
 
@@ -8,6 +9,9 @@ namespace AzureMcp.Quota.Services.Util;
 
 public class PostgreSQLUsageChecker(TokenCredential credential, string subscriptionId, ILogger<PostgreSQLUsageChecker> logger) : AzureUsageChecker(credential, subscriptionId, logger)
 {
+
+    private static readonly HttpClient HttpClient = new();
+
     public override async Task<List<UsageInfo>> GetUsageForLocationAsync(string location)
     {
         try
@@ -56,6 +60,33 @@ public class PostgreSQLUsageChecker(TokenCredential credential, string subscript
         catch (Exception error)
         {
             throw new Exception($"Error fetching PostgreSQL quotas: {error.Message}");
+        }
+    }
+
+    protected async Task<JsonDocument?> GetQuotaByUrlAsync(string requestUrl, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var token = await Credential.GetTokenAsync(new TokenRequestContext([$"{managementEndpoint}/.default"]), cancellationToken);
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await HttpClient.SendAsync(request, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException($"HTTP error! status: {response.StatusCode}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            return JsonDocument.Parse(content);
+        }
+        catch (Exception error)
+        {
+            Logger.LogWarning("Error fetching quotas directly: {Error}", error.Message);
+            return null;
         }
     }
 }
