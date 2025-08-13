@@ -5,7 +5,7 @@ Status snapshot (2025-08-12): PR introduces Deploy & Quota command areas. Core f
 Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have.  Use label `PR/626-followup` plus `area/deploy` or `area/quota` and `priority/P{n}` when creating issues.
 
 ## P0 (Pre‑merge)
-1. [ ] Logging & Console output (quota)
+1. [x] Logging & Console output (quota)
    - Files: `areas/quota/src/AzureMcp.Quota/Services/Util/AzureRegionChecker.cs`, `AzureUsageChecker.cs`
    - Replace `Console.WriteLine` with injected `ILogger<T>`; ensure structured messages; remove noisy init logs.
     - Linked Files:
@@ -13,7 +13,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
        - [PostgreSQLUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/Usage/PostgreSQLUsageChecker.cs)
    - Justification (if waived): _<add rationale>_
-2. [ ] Hard-coded endpoints & scopes
+2. [-] Hard-coded endpoints & scopes
    - `PostgreSQLUsageChecker`: direct `https://management.azure.com/...` URL.
    - `AzureUsageChecker.GetQuotaByUrlAsync` uses hard-coded scope `https://management.azure.com/.default` & raw REST.
    - Action: Prefer ARM SDK where available; otherwise derive base endpoint from `ArmEnvironment` (sovereign-ready) and pass `CancellationToken`.
@@ -21,7 +21,8 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [PostgreSQLUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/Usage/PostgreSQLUsageChecker.cs)
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
    - Justification (if waived): _<add rationale>_
-3. [ ] CancellationToken plumbing
+      We confirm that the API has no SDK support and we have to call arm endpoint directly. About the code suggestion, what's `ArmEnvironment`, I can't find any code about `ArmEnvironment`. And we find the `azure-mcp/areas/monitor/src/AzureMcp.Monitor/Services/MonitorHealthModelService.cs` use the same endpoint to access Azure management plan API.
+3. [-] CancellationToken plumbing
    - Commands & services (region/usage checks, app logs, diagram generation) do not accept / propagate a `CancellationToken`.
    - Add CT to public async methods and pass from command execution context.
     - Linked Files (examples):
@@ -32,7 +33,8 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [AzureRegionChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureRegionChecker.cs)
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
    - Justification (if waived): _<add rationale>_
-4. [ ] Error handling consistency
+      Code suggestion about `pass from command execution context`, I can't find any CancellationToken in 'command execution context'. Please be specific where we can use it. If not, do you need us to update framework to add the CT in 'command execution context'?
+4. [x] Error handling consistency
    - Avoid `throw new Exception("Error fetching ...: " + error.Message)` which drops stack info; use `throw new InvalidOperationException("...", error)` or rethrow original.
    - Standardize user-facing error text (concise + action guidance).
     - Linked Files (audit for patterns):
@@ -225,13 +227,14 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
    The following gaps were identified when comparing PR #626 implementation to the command authoring guidance in `docs/new-command.md`.
 
    ### P0 (Pre‑merge)
-   12. [ ] Command naming pattern audit
+   12. [-] Command naming pattern audit
          - Ensure every command class follows `{Resource}{SubResource?}{Operation}Command` (e.g., `PlanGetCommand`, `InfrastructureRulesGetCommand`, `PipelineGuidanceGetCommand`, `ArchitectureDiagramGenerateCommand`, `AppLogsGetCommand`, `UsageCheckCommand`, `RegionAvailabilityListCommand`).
          - If current classes use shortened forms (e.g., `GetCommand`, `RulesGetCommand`, `GuidanceGetCommand`, `DiagramGenerateCommand`, `LogsGetCommand`) without the primary resource prefix, evaluate renaming for consistency OR document an explicit exception rationale.
          - Linked Files:
             - [Deploy Commands](../areas/deploy/src/AzureMcp.Deploy/Commands/)
             - [Quota Commands](../areas/quota/src/AzureMcp.Quota/Commands/)
       - Justification (if waived): _<add rationale>_
+      Class name follow the suggestion in https://github.com/qianwens/azure-mcp/commit/0215c924be0471fa2d6d08aee74e5f890c75c8ef.
    13. [ ] Service interface coverage
          - Each logical capability should have a service interface + implementation rather than embedding logic directly in command classes (plan, rules, pipeline guidance, diagram generation, app logs, quota usage, region availability). Verify a corresponding `I*Service` exists; add missing ones.
          - Linked Files:
