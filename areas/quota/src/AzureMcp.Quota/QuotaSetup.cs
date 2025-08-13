@@ -17,7 +17,6 @@ public sealed class QuotaSetup : IAreaSetup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        // Register HttpClient services first
         services.AddHttpClientServices();
 
         services.AddTransient<IQuotaService>(serviceProvider =>
@@ -29,12 +28,10 @@ public sealed class QuotaSetup : IAreaSetup
         var quota = new CommandGroup("quota", "Quota commands for Azure resource quota checking and usage analysis");
         rootGroup.AddSubGroup(quota);
 
-        // Resource usage and quota operations
         var usageGroup = new CommandGroup("usage", "Resource usage and quota operations");
         usageGroup.AddCommand("check", new CheckCommand(loggerFactory.CreateLogger<CheckCommand>()));
         quota.AddSubGroup(usageGroup);
 
-        // Region availability operations
         var regionGroup = new CommandGroup("region", "Region availability operations");
         var availabilityGroup = new CommandGroup("availability", "Region availability information");
         availabilityGroup.AddCommand("list", new AvailabilityListCommand(loggerFactory.CreateLogger<AvailabilityListCommand>()));
