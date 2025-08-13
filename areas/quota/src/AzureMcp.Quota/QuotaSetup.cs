@@ -19,7 +19,7 @@ public sealed class QuotaSetup : IAreaSetup
     {
         // Register HttpClient services first
         services.AddHttpClientServices();
-        
+
         services.AddTransient<IQuotaService>(serviceProvider =>
             new QuotaService(serviceProvider.GetService<ILoggerFactory>(), serviceProvider.GetRequiredService<IHttpClientService>()));
     }
