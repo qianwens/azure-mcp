@@ -33,7 +33,7 @@ public class ComputeUsageChecker(TokenCredential credential, string subscription
         }
         catch (Exception error)
         {
-            throw new Exception($"Error fetching compute quotas: {error.Message}");
+            throw new InvalidOperationException("Failed to fetch Compute quotas. Please check your subscription permissions and service availability.", error);
         }
     }
 }

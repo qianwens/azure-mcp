@@ -31,7 +31,7 @@ public class HDInsightUsageChecker(TokenCredential credential, string subscripti
         }
         catch (Exception error)
         {
-            throw new Exception($"Error fetching HDInsight quotas: {error.Message}");
+            throw new InvalidOperationException("Failed to fetch HDInsight quotas. Please check your subscription permissions and service availability.", error);
         }
     }
 }

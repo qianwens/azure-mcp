@@ -32,7 +32,7 @@ public class ContainerInstanceUsageChecker(TokenCredential credential, string su
         }
         catch (Exception error)
         {
-            throw new Exception($"Error fetching Container Instance quotas: {error.Message}");
+            throw new InvalidOperationException("Failed to fetch Container Instance quotas. Please check your subscription permissions and service availability.", error);
         }
     }
 }

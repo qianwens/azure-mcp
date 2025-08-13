@@ -59,7 +59,7 @@ public class PostgreSQLUsageChecker(TokenCredential credential, string subscript
         }
         catch (Exception error)
         {
-            throw new Exception($"Error fetching PostgreSQL quotas: {error.Message}");
+            throw new InvalidOperationException("Failed to fetch PostgreSQL quotas. Please check your subscription permissions and network connectivity.", error);
         }
     }
 

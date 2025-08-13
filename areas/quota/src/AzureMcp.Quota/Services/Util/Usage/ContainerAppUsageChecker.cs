@@ -32,7 +32,7 @@ public class ContainerAppUsageChecker(TokenCredential credential, string subscri
         }
         catch (Exception error)
         {
-            throw new Exception($"Error fetching Container Apps quotas: {error.Message}");
+            throw new InvalidOperationException("Failed to fetch Container Apps quotas. Please check your subscription permissions and service availability.", error);
         }
     }
 }

@@ -33,7 +33,7 @@ public class StorageUsageChecker(TokenCredential credential, string subscription
         }
         catch (Exception error)
         {
-            throw new Exception($"Error fetching storage quotas: {error.Message}");
+            throw new InvalidOperationException("Failed to fetch Storage quotas. Please check your subscription permissions and service availability.", error);
         }
     }
 }

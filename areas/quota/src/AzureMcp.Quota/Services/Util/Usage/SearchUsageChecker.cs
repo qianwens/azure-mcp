@@ -32,7 +32,7 @@ public class SearchUsageChecker(TokenCredential credential, string subscriptionI
         }
         catch (Exception error)
         {
-            throw new Exception($"Error fetching Search quotas: {error.Message}");
+            throw new InvalidOperationException("Failed to fetch Search quotas. Please check your subscription permissions and service availability.", error);
         }
     }
 }

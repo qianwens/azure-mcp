@@ -66,7 +66,7 @@ public class DefaultRegionChecker(ArmClient armClient, string subscriptionId, IL
         }
         catch (Exception error)
         {
-            throw new Exception($"Error fetching regions for resource type {resourceType}: {error.Message}");
+            throw new InvalidOperationException($"Failed to fetch available regions for resource type '{resourceType}'. Please verify the resource type name and your subscription permissions.", error);
         }
     }
 }

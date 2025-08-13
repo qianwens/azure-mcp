@@ -33,7 +33,7 @@ public class CognitiveServicesUsageChecker(TokenCredential credential, string su
         }
         catch (Exception error)
         {
-            throw new Exception($"Error fetching cognitive services quotas: {error.Message}");
+            throw new InvalidOperationException("Failed to fetch Cognitive Services quotas. Please check your subscription permissions and service availability.", error);
         }
     }
 }

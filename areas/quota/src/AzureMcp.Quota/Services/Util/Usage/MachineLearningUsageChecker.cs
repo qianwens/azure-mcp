@@ -31,7 +31,7 @@ public class MachineLearningUsageChecker(TokenCredential credential, string subs
         }
         catch (Exception error)
         {
-            throw new Exception($"Error fetching Machine Learning Services quotas: {error.Message}");
+            throw new InvalidOperationException("Failed to fetch Machine Learning quotas. Please check your subscription permissions and service availability.", error);
         }
     }
 }
