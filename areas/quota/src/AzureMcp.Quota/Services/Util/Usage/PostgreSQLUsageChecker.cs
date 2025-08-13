@@ -2,15 +2,16 @@
 // Licensed under the MIT License.
 
 using System.Net.Http.Headers;
+using System.Text.Json;
 using Azure.Core;
+using AzureMcp.Core.Services.Http;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Quota.Services.Util;
 
-public class PostgreSQLUsageChecker(TokenCredential credential, string subscriptionId, ILogger<PostgreSQLUsageChecker> logger) : AzureUsageChecker(credential, subscriptionId, logger)
+public class PostgreSQLUsageChecker(TokenCredential credential, string subscriptionId, ILogger<PostgreSQLUsageChecker> logger, IHttpClientService httpClientService) : AzureUsageChecker(credential, subscriptionId, logger)
 {
-
-    private static readonly HttpClient HttpClient = new();
+    private readonly IHttpClientService _httpClientService = httpClientService;
 
     public override async Task<List<UsageInfo>> GetUsageForLocationAsync(string location)
     {
@@ -73,7 +74,7 @@ public class PostgreSQLUsageChecker(TokenCredential credential, string subscript
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            var response = await _httpClientService.DefaultClient.SendAsync(request, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {

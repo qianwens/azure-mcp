@@ -6,6 +6,7 @@ using System.Text.Json;
 using Azure.Core;
 using Azure.ResourceManager;
 using AzureMcp.Core.Services.Azure.Authentication;
+using AzureMcp.Core.Services.Http;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Quota.Services.Util;
@@ -82,7 +83,7 @@ public static class UsageCheckerFactory
         { "Microsoft.ContainerInstance", ResourceProvider.ContainerInstance }
     };
 
-    public static IUsageChecker CreateUsageChecker(TokenCredential credential, string provider, string subscriptionId, ILoggerFactory loggerFactory)
+    public static IUsageChecker CreateUsageChecker(TokenCredential credential, string provider, string subscriptionId, ILoggerFactory loggerFactory, IHttpClientService httpClientService)
     {
         if (!ProviderMapping.TryGetValue(provider, out var resourceProvider))
         {
@@ -97,7 +98,7 @@ public static class UsageCheckerFactory
             ResourceProvider.ContainerApp => new ContainerAppUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<ContainerAppUsageChecker>()),
             ResourceProvider.Network => new NetworkUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<NetworkUsageChecker>()),
             ResourceProvider.MachineLearning => new MachineLearningUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<MachineLearningUsageChecker>()),
-            ResourceProvider.PostgreSQL => new PostgreSQLUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<PostgreSQLUsageChecker>()),
+            ResourceProvider.PostgreSQL => new PostgreSQLUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<PostgreSQLUsageChecker>(), httpClientService),
             ResourceProvider.HDInsight => new HDInsightUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<HDInsightUsageChecker>()),
             ResourceProvider.Search => new SearchUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<SearchUsageChecker>()),
             ResourceProvider.ContainerInstance => new ContainerInstanceUsageChecker(credential, subscriptionId, loggerFactory.CreateLogger<ContainerInstanceUsageChecker>()),
@@ -114,7 +115,8 @@ public static class AzureQuotaService
         List<string> resourceTypes,
         string subscriptionId,
         string location,
-        ILoggerFactory loggerFactory)
+        ILoggerFactory loggerFactory,
+        IHttpClientService httpClientService)
     {
         // Group resource types by provider to avoid duplicate processing
         var providerToResourceTypes = resourceTypes
@@ -129,7 +131,7 @@ public static class AzureQuotaService
             var (provider, resourceTypesForProvider) = (kvp.Key, kvp.Value);
             try
             {
-                var usageChecker = UsageCheckerFactory.CreateUsageChecker(credential, provider, subscriptionId, loggerFactory);
+                var usageChecker = UsageCheckerFactory.CreateUsageChecker(credential, provider, subscriptionId, loggerFactory, httpClientService);
                 var quotaInfo = await usageChecker.GetUsageForLocationAsync(location);
                 logger.LogDebug("Retrieved quota info for provider {Provider}: {ItemCount} items", provider, quotaInfo.Count);
 

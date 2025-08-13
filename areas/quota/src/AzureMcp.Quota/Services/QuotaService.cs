@@ -4,14 +4,17 @@
 using Azure.Core;
 using Azure.ResourceManager;
 using AzureMcp.Core.Services.Azure;
+using AzureMcp.Core.Services.Http;
 using AzureMcp.Quota.Models;
 using AzureMcp.Quota.Services.Util;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Quota.Services;
 
-public class QuotaService(ILoggerFactory? loggerFactory = null) : BaseAzureService(loggerFactory: loggerFactory), IQuotaService
+public class QuotaService(ILoggerFactory? loggerFactory = null, IHttpClientService? httpClientService = null) : BaseAzureService(loggerFactory: loggerFactory), IQuotaService
 {
+    private readonly IHttpClientService _httpClientService = httpClientService ?? throw new ArgumentNullException(nameof(httpClientService));
+
     public async Task<Dictionary<string, List<UsageInfo>>> GetAzureQuotaAsync(
         List<string> resourceTypes,
         string subscriptionId,
@@ -23,7 +26,8 @@ public class QuotaService(ILoggerFactory? loggerFactory = null) : BaseAzureServi
             resourceTypes,
             subscriptionId,
             location,
-            LoggerFactory
+            LoggerFactory,
+            _httpClientService
             );
         return quotaByResourceTypes;
     }

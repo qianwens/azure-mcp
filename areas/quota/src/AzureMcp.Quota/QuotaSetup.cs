@@ -3,6 +3,8 @@
 
 using AzureMcp.Core.Areas;
 using AzureMcp.Core.Commands;
+using AzureMcp.Core.Extensions;
+using AzureMcp.Core.Services.Http;
 using AzureMcp.Quota.Commands.Region;
 using AzureMcp.Quota.Commands.Usage;
 using AzureMcp.Quota.Services;
@@ -15,8 +17,11 @@ public sealed class QuotaSetup : IAreaSetup
 {
     public void ConfigureServices(IServiceCollection services)
     {
+        // Register HttpClient services first
+        services.AddHttpClientServices();
+        
         services.AddTransient<IQuotaService>(serviceProvider =>
-            new QuotaService(serviceProvider.GetService<ILoggerFactory>()));
+            new QuotaService(serviceProvider.GetService<ILoggerFactory>(), serviceProvider.GetRequiredService<IHttpClientService>()));
     }
 
     public void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFactory)
