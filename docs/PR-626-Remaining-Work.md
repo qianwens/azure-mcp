@@ -75,6 +75,8 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [Deploy csproj](../areas/deploy/src/AzureMcp.Deploy/AzureMcp.Deploy.csproj)
        - [Quota csproj](../areas/quota/src/AzureMcp.Quota/AzureMcp.Quota.csproj)
    - Justification (if waived): _<add rationale>_
+   Run the script. The result show no AOT issue with "deploy/quota" areas.
+   ![alt text](image.png)
 9. [-] Test gaps (minimum additions)
    - Diagram: invalid JSON, empty service list, over-sized payload (return clear message).
    - Quota: empty / whitespace `resource-types`, mixed casing, unsupported provider => returns “No Limit” entry.
