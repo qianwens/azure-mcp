@@ -21,7 +21,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [PostgreSQLUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/Usage/PostgreSQLUsageChecker.cs)
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
    - Justification (if waived): _<add rationale>_
-      We confirm that the API has no SDK support and we have to call arm endpoint directly. About the code suggestion, what's `ArmEnvironment`, I can't find any code about `ArmEnvironment`. And we find the `azure-mcp/areas/monitor/src/AzureMcp.Monitor/Services/MonitorHealthModelService.cs` use the same endpoint to access Azure management plan API.
+      We confirm that the API has no SDK support and we have to call arm endpoint directly. About the code suggestion, can't find any code about `ArmEnvironment`. And we find the `azure-mcp/areas/monitor/src/AzureMcp.Monitor/Services/MonitorHealthModelService.cs` use the same endpoint to access Azure management plan API.
 3. [-] CancellationToken plumbing
    - Commands & services (region/usage checks, app logs, diagram generation) do not accept / propagate a `CancellationToken`.
    - Add CT to public async methods and pass from command execution context.
@@ -33,7 +33,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [AzureRegionChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureRegionChecker.cs)
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
    - Justification (if waived): _<add rationale>_
-      Code suggestion about `pass from command execution context`, I can't find any CancellationToken in 'command execution context'. Please be specific where we can use it. If not, do you need us to update framework to add the CT in 'command execution context'?
+      Code suggestion about `pass from command execution context`, can't find any CancellationToken in 'command execution context'. It will need to update core/framework to add the CT in 'command execution context', and it's out of the scope of current PR.
 4. [x] Error handling consistency
    - Avoid `throw new Exception("Error fetching ...: " + error.Message)` which drops stack info; use `throw new InvalidOperationException("...", error)` or rethrow original.
    - Standardize user-facing error text (concise + action guidance).
@@ -111,6 +111,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [LogsGetCommand.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/App/LogsGetCommand.cs)
        - [Services folder](../areas/deploy/src/AzureMcp.Deploy/Services/)
    - Justification (if waived): _<add rationale>_
+   No azd logs command now.
 2. [ ] Extension service reuse
    - Evaluate delegating AZD / AZ related operations via existing extension services (`IAzdService`, `IAzService`) to avoid duplication & ease future azd MCP server integration.
     - Linked Files:
@@ -118,18 +119,21 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [Extension AzCommand.cs](../areas/extension/src/AzureMcp.Extension/Commands/AzCommand.cs)
        - [Deploy Services folder](../areas/deploy/src/AzureMcp.Deploy/Services/)
    - Justification (if waived): _<add rationale>_
+      No reuse/conflict with existing IAzdService/IAzService. The Deploy service works as a workflow which guide users to use azd/az command.
 3. [ ] Improve quota provider extensibility
    - Replace switch/enum mapping with pluggable strategy registration; add test demonstrating adding new provider without core code change.
     - Linked Files:
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
        - [Usage provider classes](../areas/quota/src/AzureMcp.Quota/Services/Util/Usage/)
    - Justification (if waived): _<add rationale>_
+   Current switch mode provide enough extensibility and adding new provider will not impact existing provider logic.
 4. [ ] Unified cancellation & timeout strategy
    - Standardize default timeouts (e.g., 30s) with graceful fallback message; document in command help.
     - Linked Files:
        - [Command files (deploy)](../areas/deploy/src/AzureMcp.Deploy/Commands/)
        - [Command files (quota)](../areas/quota/src/AzureMcp.Quota/Commands/)
    - Justification (if waived): _<add rationale>_
+   It require core framework supports.
 5. [ ] Structured output contracts doc
    - Document JSON contract (property names, nullability) for: usage check, region availability, app logs, plan, diagram (mermaid wrapper), IaC rules.
     - Linked Files (producers):
@@ -270,13 +274,13 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
       - Justification (if waived): _<add rationale>_
 
    ### P1 (Post‑merge)
-   11. [ ] Live test infrastructure
+   11. [x] Live test infrastructure
          - Add / validate `test-resources.bicep` & optional `test-resources-post.ps1` for Deploy & Quota areas if live (integration) tests depend on Azure resources (diagram/plan may not; quota usage & region availability likely do). If intentionally omitted, document rationale.
          - Linked Files:
             - [Quota tests root](../areas/quota/tests/)
             - [Deploy tests root](../areas/deploy/tests/)
       - Justification (if waived): _<add rationale>_
-   12. [ ] Naming consistency in test classes
+   12. [x] Naming consistency in test classes
          - Ensure test class names mirror final command class names exactly (e.g., `PlanGetCommandTests`). Rename where mismatched.
          - Linked Files:
             - [Deploy tests](../areas/deploy/tests/)
