@@ -68,14 +68,14 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [DiagramGenerateCommand.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/Architecture/DiagramGenerateCommand.cs)
        - [GetCommand.cs (Plan)](../areas/deploy/src/AzureMcp.Deploy/Commands/Plan/GetCommand.cs)
    - Justification (if waived): _<add rationale>_
-8. [ ] AOT / trimming validation
+8. [x] AOT / trimming validation
    - Run `./eng/scripts/Analyze-AOT-Compact.ps1`; capture results in PR discussion. Address warnings (linker descriptor if needed for YamlDotNet or reflection on embedded resources).
     - Linked Files / Scripts:
        - [Analyze-AOT-Compact.ps1](../eng/scripts/Analyze-AOT-Compact.ps1)
        - [Deploy csproj](../areas/deploy/src/AzureMcp.Deploy/AzureMcp.Deploy.csproj)
        - [Quota csproj](../areas/quota/src/AzureMcp.Quota/AzureMcp.Quota.csproj)
    - Justification (if waived): _<add rationale>_
-9. [ ] Test gaps (minimum additions)
+9. [-] Test gaps (minimum additions)
    - Diagram: invalid JSON, empty service list, over-sized payload (return clear message).
    - Quota: empty / whitespace `resource-types`, mixed casing, unsupported provider => returns “No Limit” entry.
    - Usage checker: network failure path returns descriptive `UsageInfo.Description`.
@@ -84,6 +84,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [Quota tests folder](../areas/quota/tests/)
        - [DiagramGenerateCommandTests.cs] (add if missing under deploy tests)
    - Justification (if waived): _<add rationale>_
+   Diagram test is waiting for changes/confirmation
 10. [ ] Security & sovereignty
     - Ensure no region / subscription IDs are written to logs at Information or above without user intent.
     - Confirm no USGov / China cloud breakage due to hard-coded public cloud URLs (see item 2).
