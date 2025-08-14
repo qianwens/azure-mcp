@@ -410,7 +410,7 @@ public sealed class CheckCommandTests
         Assert.NotNull(response);
         Assert.NotNull(response.UsageInfo);
         Assert.True(response.UsageInfo.ContainsKey("Microsoft.UnsupportedProvider/resourceType"));
-        
+
         var usageInfo = response.UsageInfo["Microsoft.UnsupportedProvider/resourceType"];
         Assert.Single(usageInfo);
         Assert.Equal("No Limit", usageInfo[0].Description);
@@ -547,7 +547,7 @@ public sealed class CheckCommandTests
         Assert.NotNull(response);
         Assert.NotNull(response.UsageInfo);
         Assert.True(response.UsageInfo.ContainsKey("Microsoft.Storage/storageAccounts"));
-        
+
         var usageInfo = response.UsageInfo["Microsoft.Storage/storageAccounts"];
         Assert.Single(usageInfo);
         Assert.Equal("Network failure occurred while retrieving quota information", usageInfo[0].Description);

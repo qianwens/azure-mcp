@@ -236,30 +236,31 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
             - [Quota Commands](../areas/quota/src/AzureMcp.Quota/Commands/)
       - Justification (if waived): _<add rationale>_
       Class name follow the suggestion in https://github.com/qianwens/azure-mcp/commit/0215c924be0471fa2d6d08aee74e5f890c75c8ef.
-   13. [ ] Service interface coverage
+   13. [x] Service interface coverage
          - Each logical capability should have a service interface + implementation rather than embedding logic directly in command classes (plan, rules, pipeline guidance, diagram generation, app logs, quota usage, region availability). Verify a corresponding `I*Service` exists; add missing ones.
          - Linked Files:
             - [Deploy Services](../areas/deploy/src/AzureMcp.Deploy/Services/)
             - [Quota Services](../areas/quota/src/AzureMcp.Quota/Services/)
       - Justification (if waived): _<add rationale>_
-   14. [ ] OptionDefinitions reuse & duplication check
+   14. [x] OptionDefinitions reuse & duplication check
          - Confirm no redefinition of global/area options in per-command options; ensure only incremental properties added. Validate subscription parameter consistently named `subscription` (never `subscriptionId`).
          - Linked Files:
             - [Deploy Options](../areas/deploy/src/AzureMcp.Deploy/Options/)
             - [Quota Options](../areas/quota/src/AzureMcp.Quota/Options/)
       - Justification (if waived): _<add rationale>_
-   15. [ ] Area registration ordering
+   15. [x] Area registration ordering
          - Verify new areas (Deploy, Quota) appear in alphabetical order in `Program.cs` area registration array.
          - Linked Files:
             - [Program.cs](../core/src/AzureMcp.Cli/Program.cs)
       - Justification (if waived): _<add rationale>_
-   16. [ ] Unit test completeness per command
+      Sort the registration array. But it cause existing files also be sorted.
+   16. [x] Unit test completeness per command
          - Ensure every command has a corresponding `*CommandTests` class (naming aligns with command naming pattern) covering validation & success paths.
          - Linked Files:
             - [Deploy Unit Tests](../areas/deploy/tests/)
             - [Quota Unit Tests](../areas/quota/tests/)
       - Justification (if waived): _<add rationale>_
-   17. [ ] Error handling override usage
+   17. [x] Error handling override usage
          - For commands with domain-specific errors, override `GetErrorMessage` / `GetStatusCode` per guidance rather than relying solely on base behavior; add missing overrides where user-actionable mapping adds value.
          - Linked Files:
             - [Deploy Commands](../areas/deploy/src/AzureMcp.Deploy/Commands/)
